@@ -1,15 +1,15 @@
 import AuthLayout from "../../../shared/layouts/AuthLayout";
 import AuthCard from "../../../shared/components/ui/AuthCard";
-import RegisterForm from "../components/registerform";
+import VerifyOtpForm from "../components/verifyotpform";
 
-export default function SignupPage() {
+export default function VerifyOtpPage() {
     return (
         <AuthLayout>
             <AuthCard
-                title="Create Account"
-                subtitle="Join Zarkhaiz Pakistan"
+                title="Verify Your Email"
+                subtitle="Enter the 6-digit code sent to your inbox"
             >
-                <RegisterForm />
+                <VerifyOtpForm />
             </AuthCard>
         </AuthLayout>
     );

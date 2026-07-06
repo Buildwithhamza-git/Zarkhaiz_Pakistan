@@ -21,7 +21,7 @@ const signupservice = async (signupData) => {
         city,
         province,
         role,
-        storename,
+        storeName,
         postalCode } = signupData
 
     const emailExist = await findUserByEmail(email)
@@ -60,18 +60,18 @@ const signupservice = async (signupData) => {
     }
 
     if (role === "seller") {
-        userData.storeName = storename;
+        userData.storeName = storeName;
     }
 
     const user = await createUser(userData);
 
-    const emailsend = await sendEmail(email, otp)
+    const emailsend = await sendEmail(email, otp);
 
     if (!emailsend) {
-        throw new Error("Email Sending Failed to", email)
+        console.warn(`Email sending failed for ${email}, but signup record was created.`);
     }
 
-    return user
+    return user;
 
 }
 

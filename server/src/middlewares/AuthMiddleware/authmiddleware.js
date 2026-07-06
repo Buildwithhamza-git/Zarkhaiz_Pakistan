@@ -1,10 +1,28 @@
 const { success } = require("zod")
 const { signupSchema, loginSchema, forgotPasswordSchema, verifyOtpSchema, resendOtpSchema, resetPasswordSchema } = require("../../validation/authvalidation")
 
+const normalizeSignupBody = (body) => {
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+        return body;
+    }
+
+    const normalizedBody = { ...body };
+
+    if (normalizedBody.storename && !normalizedBody.storeName) {
+        normalizedBody.storeName = normalizedBody.storename;
+    }
+
+    if (normalizedBody.storeName && !normalizedBody.storename) {
+        normalizedBody.storename = normalizedBody.storeName;
+    }
+
+    return normalizedBody;
+};
+
 const ValidateSignup = async (req, res, next) => {
     try {
-
-        const validateData = await signupSchema.safeParseAsync(req.body)
+        const normalizedBody = normalizeSignupBody(req.body);
+        const validateData = await signupSchema.safeParseAsync(normalizedBody)
 
         if (!validateData.success) {
             console.log(validateData.error.message)

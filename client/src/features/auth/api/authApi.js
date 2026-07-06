@@ -7,7 +7,7 @@ const normalizeError = (error) => {
         return {
             message: serverData.message || "Request failed",
             field: serverData.field || null,
-            errors: serverData.errors || null,
+            errors: serverData.errors || serverData.error || null,
             status: error?.response?.status || null,
             data: serverData,
         };
@@ -33,13 +33,23 @@ export const signupApi = async (data) => {
 };
 
 export const verifyOtpApi = async (data) => {
-    const response = await api.post("/verify-otp", data);
-    return response.data;
+    try {
+        const response = await api.post("/verify-otp", data);
+        return response.data;
+    } catch (error) {
+        const normalizedError = normalizeError(error);
+        throw normalizedError;
+    }
 };
 
 export const resendOtpApi = async (data) => {
-    const response = await api.post("/resend-otp", data);
-    return response.data;
+    try {
+        const response = await api.post("/resend-otp", data);
+        return response.data;
+    } catch (error) {
+        const normalizedError = normalizeError(error);
+        throw normalizedError;
+    }
 };
 
 export const loginApi = async (data) => {

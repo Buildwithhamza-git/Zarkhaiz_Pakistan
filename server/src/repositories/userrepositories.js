@@ -1,7 +1,7 @@
 const {User} =require("../models/user")
 
 const findUserByEmail = async(email)=>{
-    return await User.findOne({email})
+    return await User.findOne({email}).select('+otp')
 }
 
 const findUserByPhone = async (phone) => {

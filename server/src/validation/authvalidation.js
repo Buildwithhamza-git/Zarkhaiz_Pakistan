@@ -5,20 +5,20 @@ const signupSchema = z
     firstname: z
       .string()
       .trim()
-      .min(3, "First name must be at least 3 characters")
-      .max(15, "First name cannot exceed 15 characters"),
+      .min(2, "First name must be at least 2 characters")
+      .max(50, "First name cannot exceed 50 characters"),
 
     lastname: z
       .string()
       .trim()
-      .min(3, "Last name must be at least 3 characters")
-      .max(15, "Last name cannot exceed 15 characters"),
+      .min(2, "Last name must be at least 2 characters")
+      .max(50, "Last name cannot exceed 50 characters"),
 
     username: z
       .string()
       .trim()
       .min(3, "Username must be at least 3 characters")
-      .max(15, "Username cannot exceed 15 characters")
+      .max(30, "Username cannot exceed 30 characters")
       .regex(
         /^[a-zA-Z0-9_]+$/,
         "Username can only contain letters, numbers and underscores"
@@ -38,10 +38,7 @@ const signupSchema = z
     password: z
       .string()
       .min(8, "Password must be at least 8 characters")
-      .max(20, "Password cannot exceed 20 characters")
-      .regex(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
-        { message: "Password must contain at least one letter, one number, and one special character" }
-      ),
+      .max(100, "Password cannot exceed 100 characters"),
 
     confirmPassword: z
       .string({ required_error: "Confirm Password is required" })
@@ -50,13 +47,13 @@ const signupSchema = z
     phone: z
       .string()
       .trim()
-      .regex(/^(\+92|0)3[0-9]{9}$/, "Enter a valid Pakistani phone number"),
+      .min(11, "Enter a valid phone number"),
 
 
     address: z
       .string()
       .trim()
-      .min(5, "Address is required"),
+      .min(3, "Address is required"),
 
     city: z
       .string()

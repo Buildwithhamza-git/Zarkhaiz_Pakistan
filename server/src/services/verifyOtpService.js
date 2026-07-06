@@ -3,7 +3,8 @@ const {sendEmail} = require("../services/emailservice")
 const { OtpExpiry, generateOtp } = require("../utils/otpHelper")
 
 const verifyOtpService = async(verifyData)=>{
-    const {email, Otp} = verifyData
+    const {email, otp: otpValue, Otp} = verifyData
+    const otpCode = otpValue ?? Otp
 
     const user = await findUserByEmail(email)
     if(!user){
@@ -13,10 +14,10 @@ const verifyOtpService = async(verifyData)=>{
     if(user.isVerified){
         throw new Error ("Account is Already Verified") 
     }
-    if(user.Otp !==Otp){
+    if(user.otp !== otpCode){
         throw new Error ("Invalid Otp")
     }
-    if(new Date() > user.OtpExpire){
+    if(new Date() > user.otpExpire){
         throw new Error ("the Otp has Expired")
     }
 

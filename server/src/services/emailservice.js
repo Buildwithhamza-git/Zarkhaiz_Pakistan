@@ -11,6 +11,11 @@ const transport  = nodemailer.createTransport({
 
 const sendEmail = async(email,otp)=>{
     try{
+        if (!process.env.USER_EMAIL || !process.env.EMAIL_PASSWORD) {
+            console.warn("Email credentials missing. Skipping actual email delivery for local testing.");
+            return true;
+        }
+
         await transport.sendMail({
             from: process.env.USER_EMAIL,
             to: email,

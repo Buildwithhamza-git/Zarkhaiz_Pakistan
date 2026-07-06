@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { forwardRef, useState } from "react";
 import { Eye, EyeOff, Lock } from "lucide-react";
 
-const PasswordInput = ({
+const PasswordInput = forwardRef(({
   label = "Password",
   name,
   value,
@@ -14,7 +14,7 @@ const PasswordInput = ({
   autoComplete = "current-password",
   className = "",
   ...props
-}) => {
+}, ref) => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -29,6 +29,7 @@ const PasswordInput = ({
         </span>
 
         <input
+          ref={ref}
           id={name}
           name={name}
           type={showPassword ? "text" : "password"}
@@ -90,6 +91,8 @@ const PasswordInput = ({
       )}
     </div>
   );
-};
+});
+
+PasswordInput.displayName = "PasswordInput";
 
 export default PasswordInput;

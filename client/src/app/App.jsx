@@ -1,11 +1,11 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import SignupPage from "../features/auth/pages/signup";
+import VerifyOtpPage from "../features/auth/pages/verifyotp";
 
 export default function App() {
     return (
         <Routes>
-
             <Route
                 path="/"
                 element={<Navigate to="/signup" replace />}
@@ -16,6 +16,10 @@ export default function App() {
                 element={<SignupPage />}
             />
 
+            <Route
+                path="/verify-otp"
+                element={<VerifyOtpPage />}
+            />
         </Routes>
     );
 }
