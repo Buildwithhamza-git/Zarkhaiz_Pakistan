@@ -77,7 +77,9 @@ const loginController = async (req, res) => {
             user: {
                 id: user.User._id,
                 email: user.User.email,
-                role: user.User.role
+                role: user.User.role,
+                firstname: user.User.firstname,
+                lastname: user.User.lastname
             }
         })
 
