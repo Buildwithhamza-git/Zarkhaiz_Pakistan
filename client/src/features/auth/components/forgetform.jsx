@@ -1,42 +1,107 @@
+import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import Button from "../../../shared/components/ui/Button";
 import Input from "../../../shared/components/ui/Input";
 import FormField from "../../../shared/components/ui/FormField";
 
-export default function ForgotForm() {
+import useAuth from "../hooks/useAuth";
+import { forgotPasswordSchema } from "../validations/authValidation";
+
+export default function ForgotPasswordForm() {
+
+    const navigate = useNavigate();
+
+    const { forgotPassword, loading } = useAuth();
 
     const {
         register,
         handleSubmit,
+        setError,
         formState: { errors },
-    } = useForm();
+    } = useForm({
+        resolver: zodResolver(forgotPasswordSchema),
+    });
 
-    const onSubmit = (data) => {
-        console.log(data);
+    const onSubmit = async (data) => {
+        try {
+
+            await forgotPassword(data);
+
+            navigate("/reset-password", {
+                state: {
+                    email: data.email,
+                },
+            });
+
+        } catch (error) {
+
+            const response = error.response?.data;
+
+            if (response?.errors) {
+
+                response.errors.forEach((err) => {
+
+                    setError(err.field, {
+                        type: "server",
+                        message: err.message,
+                    });
+
+                });
+
+                return;
+            }
+
+            setError("email", {
+                type: "server",
+                message: response?.message || "Something went wrong",
+            });
+        }
     };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
+
+        <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-6"
+        >
 
             <FormField
                 label="Email Address"
                 required
                 error={errors.email?.message}
             >
+
                 <Input
                     type="email"
-                    placeholder="Email Address"
+                    placeholder="Enter your registered email"
                     {...register("email")}
                 />
+
             </FormField>
 
             <Button
-                className="w-full"
                 type="submit"
+                className="w-full h-12"
+                disabled={loading}
             >
-                Send OTP
+                {loading ? "Sending OTP..." : "Send OTP"}
             </Button>
+
+            <button
+                type="button"
+                onClick={() => navigate("/login")}
+                className="
+                    w-full
+                    text-center
+                    text-green-700
+                    font-medium
+                    hover:underline
+                "
+            >
+                Back to Login
+            </button>
 
         </form>
     );

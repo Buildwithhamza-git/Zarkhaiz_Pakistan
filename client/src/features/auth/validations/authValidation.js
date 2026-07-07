@@ -48,3 +48,8 @@ export const resetPasswordSchema = z
             message: "Passwords do not match",
         }
     );
+
+
+export const forgotPasswordSchema = z.object({
+    email: z.string().email("Enter a valid email address")
+})
