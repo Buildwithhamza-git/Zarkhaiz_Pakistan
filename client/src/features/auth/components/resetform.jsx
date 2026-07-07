@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,11 +15,19 @@ export default function ResetPasswordForm() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const email = location.state?.email || "";
+    const email = location.state?.email;
+    console.log("Location State:", location.state);
+    console.log("Email:", email);
 
-    const { resetPassword, loading } = useAuth();
+    const {
+    resetPassword,
+    resendOtp,
+    loading,
+} = useAuth();
 
     const [otp, setOtp] = useState("");
+    const [timer, setTimer] = useState(180);
+    const [canResend, setCanResend] = useState(false);
 
     const {
         register,
@@ -30,14 +38,41 @@ export default function ResetPasswordForm() {
         resolver: zodResolver(resetPasswordSchema),
     });
 
+    useEffect(() => {
+    if (timer <= 0) {
+        setCanResend(true);
+        return;
+    }
+
+    const interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+}, [timer]);
+
+const handleResendOTP = async () => {
+    try {
+        await resendOtp({
+            email,
+        });
+
+        setTimer(180);
+        setCanResend(false);
+
+    } catch (error) {
+        console.log(error);
+    }
+};
     const onSubmit = async (data) => {
         try {
             await resetPassword({
-    email:data.email,
-    otp,
-    newPassword: data.password,
-    confirmNewPassword: data.confirmPassword,
-});
+                email,
+                otp,
+                newPassword: data.password,
+                confirmNewPassword: data.confirmPassword,
+            });
+
 
             navigate("/login");
         } catch (error) {
@@ -99,6 +134,37 @@ export default function ResetPasswordForm() {
                 )}
 
             </div>
+            <div className="text-center">
+
+    {!canResend ? (
+
+        <p className="text-gray-600">
+
+            Resend OTP in{" "}
+
+            <span className="font-semibold text-green-700">
+
+                {String(Math.floor(timer / 60)).padStart(2, "0")}:
+
+                {String(timer % 60).padStart(2, "0")}
+
+            </span>
+
+        </p>
+
+    ) : (
+
+        <button
+            type="button"
+            onClick={handleResendOTP}
+            className="text-green-700 font-semibold hover:underline"
+        >
+            Resend OTP
+        </button>
+
+    )}
+
+</div>
 
             <FormField
                 label="New Password"

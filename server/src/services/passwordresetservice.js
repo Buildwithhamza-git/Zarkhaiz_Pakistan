@@ -13,8 +13,8 @@ const forgotPasswordService = async (forgotData) => {
     const { otp, OtpExpiry } = otpcombine ;
 
     await updateUserByEmail(email, {
-        Otp: otp,
-        OtpExpire: OtpExpiry,
+        otp: otp,
+        otpExpire: OtpExpiry,
     });
 
     const emailSend = await sendEmail(email, otp);
