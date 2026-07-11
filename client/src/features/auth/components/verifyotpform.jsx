@@ -17,7 +17,7 @@ const otpSchema = z.object({
 });
 
 const OTP_LENGTH = 6;
-const RESEND_COOLDOWN_SECONDS = 180;
+const RESEND_COOLDOWN_SECONDS = 60;
 
 export default function VerifyOtpForm() {
     const navigate = useNavigate();

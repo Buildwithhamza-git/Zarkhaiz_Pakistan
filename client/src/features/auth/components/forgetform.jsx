@@ -10,10 +10,12 @@ import useAuth from "../hooks/useAuth";
 import { forgotPasswordSchema } from "../validations/authValidation";
 
 export default function ForgotPasswordForm() {
-
     const navigate = useNavigate();
 
-    const { forgotPassword, loading } = useAuth();
+    const {
+        forgotPassword,
+        forgotLoading,
+    } = useAuth();
 
     const {
         register,
@@ -26,28 +28,20 @@ export default function ForgotPasswordForm() {
 
     const onSubmit = async (data) => {
         try {
-
             await forgotPassword(data);
 
-            navigate("/reset-password", {
+            navigate("/verify-reset-otp", {
                 state: {
                     email: data.email,
                 },
             });
-
         } catch (error) {
-
-            const response = error.response?.data;
-
-            if (response?.errors) {
-
-                response.errors.forEach((err) => {
-
+            if (error?.errors) {
+                error.errors.forEach((err) => {
                     setError(err.field, {
                         type: "server",
                         message: err.message,
                     });
-
                 });
 
                 return;
@@ -55,38 +49,35 @@ export default function ForgotPasswordForm() {
 
             setError("email", {
                 type: "server",
-                message: response?.message || "Something went wrong",
+                message:
+                    error?.message || "Something went wrong",
             });
         }
     };
 
     return (
-
         <form
             onSubmit={handleSubmit(onSubmit)}
             className="space-y-6"
         >
-
             <FormField
                 label="Email Address"
                 required
                 error={errors.email?.message}
             >
-
                 <Input
                     type="email"
                     placeholder="Enter your registered email"
                     {...register("email")}
                 />
-
             </FormField>
 
             <Button
                 type="submit"
                 className="w-full h-12"
-                disabled={loading}
+                disabled={forgotLoading}
             >
-                {loading ? "Sending OTP..." : "Send OTP"}
+                {forgotLoading ? "Sending OTP..." : "Send OTP"}
             </Button>
 
             <button
@@ -102,7 +93,6 @@ export default function ForgotPasswordForm() {
             >
                 Back to Login
             </button>
-
         </form>
     );
 }

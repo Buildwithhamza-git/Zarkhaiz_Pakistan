@@ -14,7 +14,6 @@ import useAuthContext from "../../../hooks/useAuth";
 export default function LoginForm() {
     const navigate = useNavigate();
 
-    // Backend API Login
     const { login: loginApi, loading } = useAuth();
 
     // Auth Context Login
@@ -31,56 +30,30 @@ export default function LoginForm() {
 
     const onSubmit = async (data) => {
         try {
-            // Call Backend Login API
             const result = await loginApi(data);
-
-            /*
-                Expected Backend Response
-
-                {
-                    success: true,
-                    token: "...",
-                    user: {...}
-                }
-
-                OR
-
-                {
-                    success: true,
-                    payload:{
-                        token:"...",
-                        user:{...}
-                    }
-                }
-            */
 
             const token = result.payload?.token || result.token;
             const user = result.payload?.user || result.user;
 
-            // Save User & Token in Context + LocalStorage
             login(user, token);
-
-            // Redirect
             navigate("/dashboard");
         } catch (error) {
-            const response = error.response?.data;
-
-            if (response?.errors) {
-                response.errors.forEach((err) => {
-                    setError(err.field, {
-                        type: "server",
-                        message: err.message,
-                    });
-                });
-
-                return;
-            }
-
-            setError("email", {
+    if (error.errors) {
+        error.errors.forEach((err) => {
+            setError(err.field, {
                 type: "server",
-                message: response?.message || "Login Failed",
+                message: err.message,
             });
-        }
+        });
+
+        return;
+    }
+
+    setError(error.field || "email", {
+        type: "server",
+        message: error.message,
+    });
+}
     };
 
     return (

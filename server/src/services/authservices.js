@@ -3,6 +3,7 @@ const { createOtp } = require("../services/otpservice")
 const { hashPassword, comparePassword } = require("../utils/passwordhelper")
 const { sendEmail } = require("../services/emailservice")
 const { generateToken } = require("../utils/jwtToken")
+const {normalizeEmail} = require("../utils/emailhelper")
 
 const createSignupError = (message, field) => {
     const error = new Error(message);
@@ -11,20 +12,10 @@ const createSignupError = (message, field) => {
 };
 
 const signupservice = async (signupData) => {
-    const { firstname,
-        lastname,
-        username,
-        email,
-        password,
-        phone,
-        address,
-        city,
-        province,
-        role,
-        storeName,
-        postalCode } = signupData
+    const { firstname,lastname,username,email,password,phone } = signupData
+    const normalemail = normalizeEmail(email)
 
-    const emailExist = await findUserByEmail(email)
+    const emailExist = await findUserByEmail(normalemail)
 
     if (emailExist) {
         throw createSignupError("The Email Already Registered", "email")
@@ -44,31 +35,25 @@ const signupservice = async (signupData) => {
     const hashedPassword = await hashPassword(password)
 
     const userData = {
-        firstname,
-        lastname,
-        username,
-        role,
-        email,
-        address,
-        city,
-        province,
-        password: hashedPassword,
-        phone,
-        otp: otp,
-        otpExpire: OtpExpiry,
-        isVerified: false,
-    }
-
-    if (role === "seller") {
-        userData.storeName = storeName;
-    }
+    firstname,
+    lastname,
+    username,
+    email:normalemail,
+    password: hashedPassword,
+    phone,
+    role: "user",
+    sellerStatus: "none",
+    otp,
+    otpExpire: OtpExpiry,
+    isVerified: false,
+};
 
     const user = await createUser(userData);
 
-    const emailsend = await sendEmail(email, otp);
+    const emailsend = await sendEmail(normalemail, otp);
 
     if (!emailsend) {
-        console.warn(`Email sending failed for ${email}, but signup record was created.`);
+        console.warn(`Email sending failed for ${normalemail}, but signup record was created.`);
     }
 
     return user;
@@ -77,7 +62,8 @@ const signupservice = async (signupData) => {
 
 const loginservice = async (logindata) => {
     const { email, password } = logindata;
-    const User = await findUserByEmail(email)
+    const normalemail = normalizeEmail(email)
+    const User = await findUserByEmail(normalemail)
     if (!User) {
         throw new Error("The Email Doesnot Registered")
     }

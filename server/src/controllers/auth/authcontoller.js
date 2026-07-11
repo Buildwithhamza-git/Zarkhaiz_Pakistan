@@ -1,6 +1,6 @@
 const { email, success } = require('zod')
 const { signupservice, loginservice } = require('../../services/authservices')
-const { forgotPasswordService , resetPasswordService} = require('../../services/passwordresetservice')
+const { forgotPasswordService , resetPasswordService,verifyResetOtpService } = require('../../services/passwordresetservice')
 const {verifyOtpService, resendOtpService} = require("../../services/verifyOtpService")
 const {generateToken} = require("../../utils/jwtToken")
 
@@ -48,6 +48,21 @@ const VerifyOtpController=async (req, res) => {
         });
 }}
 
+const verifyResetOtpController = async(req, res)=>{
+    try{
+        const user = await verifyResetOtpService(req.sanitizedBody)
+
+        return res.status(200).json({
+            success:true,
+            message: "Otp verified"
+        })
+    }catch(err){
+         return res.status(400).json({
+            success: false,
+            message: err.message,
+        });
+    }
+}
 
 const resendOtpController = async (req, res) => {
     try {
@@ -86,7 +101,8 @@ const loginController = async (req, res) => {
     } catch (err) {
         return res.status(400).json({
             success: false,
-            message: err.message
+            message: err.message,
+            field: "password"
         })
     }
 }
@@ -122,4 +138,4 @@ const resetPasswordController = async (req, res) => {
 };
 
 
-module.exports = { SignupController, VerifyOtpController, resendOtpController,resetPasswordController, loginController, forgotPasswordController }
+module.exports = { SignupController, VerifyOtpController,verifyResetOtpController, resendOtpController,resetPasswordController, loginController, forgotPasswordController }

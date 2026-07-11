@@ -4,6 +4,7 @@ import {
     resendOtpApi,
     loginApi,
     forgotPasswordApi,
+    verifyResetOtpApi,
     resetPasswordApi,
 } from "../api/authApi";
 
@@ -25,6 +26,10 @@ export const loginService = async (data) => {
 
 export const forgotPasswordService = async (data) => {
     return await forgotPasswordApi(data);
+};
+
+export const verifyResetOtpService = async (data) => {
+    return await verifyResetOtpApi(data);
 };
 
 export const resetPasswordService = async (data) => {

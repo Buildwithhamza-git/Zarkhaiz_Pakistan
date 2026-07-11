@@ -13,12 +13,14 @@ import useAuth from "../hooks/useAuth";
 export default function RegisterForm() {
     const navigate = useNavigate();
 
-    const { signup, loading } = useAuth();
+    const {
+        signup,
+        signupLoading,
+    } = useAuth();
 
     const {
         register,
         handleSubmit,
-        watch,
         setError,
         clearErrors,
         setFocus,
@@ -32,27 +34,26 @@ export default function RegisterForm() {
         },
     });
 
-    const role = watch("role");
-
     const onSubmit = async (data) => {
         try {
             clearErrors();
 
-            if (data.role !== "seller") {
-                delete data.storeName;
+            const payload = { ...data };
+
+            if (payload.role !== "seller") {
+                delete payload.storeName;
             }
 
-            const result = await signup(data);
+            const result = await signup(payload);
+
             navigate("/verify-otp", {
+                replace: true,
                 state: {
-                    email: result.email,
+                    email: result.email ?? payload.email,
                     userId: result.userId,
                 },
             });
         } catch (error) {
-            const field = error?.field;
-            const message = error?.message || "Signup failed. Please try again.";
-
             if (error?.errors) {
                 error.errors.forEach((err) => {
                     setError(err.field, {
@@ -60,23 +61,31 @@ export default function RegisterForm() {
                         message: err.message,
                     });
                 });
-                setFocus(field || "email");
+
+                if (error.field) {
+                    setFocus(error.field);
+                }
+
                 return;
             }
 
-            if (field) {
-                setError(field, {
+            if (error?.field) {
+                setError(error.field, {
                     type: "server",
-                    message,
+                    message: error.message,
                 });
-                setFocus(field);
+
+                setFocus(error.field);
                 return;
             }
 
             setError("email", {
                 type: "server",
-                message,
+                message:
+                    error?.message ||
+                    "Signup failed. Please try again.",
             });
+
             setFocus("email");
         }
     };
@@ -138,37 +147,21 @@ export default function RegisterForm() {
                 </FormField>
             </div>
 
-            {/* Email & Role */}
+            {/* Email */}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <FormField
-                    label="Email"
-                    required
-                    error={errors.email?.message}
-                >
-                    <Input
-                        type="email"
-                        placeholder="Email Address"
-                        {...register("email")}
-                    />
-                </FormField>
+            <FormField
+                label="Email Address"
+                required
+                error={errors.email?.message}
+            >
+                <Input
+                    type="email"
+                    placeholder="Enter your email"
+                    {...register("email")}
+                />
+            </FormField>
 
-                <FormField
-                    label="Role"
-                    required
-                    error={errors.role?.message}
-                >
-                    <select
-                        {...register("role")}
-                        className="w-full h-12 rounded-xl border border-gray-300 px-4 bg-white outline-none focus:border-green-600 focus:ring-2 focus:ring-green-300"
-                    >
-                        <option value="farmer">Farmer</option>
-                        <option value="seller">Seller</option>
-                    </select>
-                </FormField>
-            </div>
-
-            {/* Password & Confirm Password */}
+            {/* Password */}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <FormField
@@ -177,7 +170,7 @@ export default function RegisterForm() {
                     error={errors.password?.message}
                 >
                     <PasswordInput
-                        placeholder="Password"
+                        placeholder="Enter Password"
                         {...register("password")}
                     />
                 </FormField>
@@ -194,107 +187,14 @@ export default function RegisterForm() {
                 </FormField>
             </div>
 
-            {/* Address */}
-
-            <FormField
-                label="Address"
-                required
-                error={errors.address?.message}
-            >
-                <textarea
-                    rows={3}
-                    placeholder="House No, Street, Area"
-                    className="w-full rounded-xl border border-gray-300 px-4 py-3 resize-none outline-none focus:ring-2 focus:ring-green-300 focus:border-green-600"
-                    {...register("address")}
-                />
-            </FormField>
-
-            {/* City & Province */}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <FormField
-                    label="City"
-                    required
-                    error={errors.city?.message}
-                >
-                    <Input
-                        placeholder="City"
-                        {...register("city")}
-                    />
-                </FormField>
-
-                <FormField
-                    label="Province"
-                    required
-                    error={errors.province?.message}
-                >
-                    <select
-                        {...register("province")}
-                        className="w-full h-12 rounded-xl border border-gray-300 px-4 bg-white outline-none focus:ring-2 focus:ring-green-300 focus:border-green-600"
-                    >
-                        <option value="">Select Province</option>
-                        <option value="Punjab">Punjab</option>
-                        <option value="Sindh">Sindh</option>
-                        <option value="Khyber Pakhtunkhwa">
-                            Khyber Pakhtunkhwa
-                        </option>
-                        <option value="Balochistan">Balochistan</option>
-                        <option value="Gilgit-Baltistan">
-                            Gilgit-Baltistan
-                        </option>
-                        <option value="Azad Jammu & Kashmir">
-                            Azad Jammu & Kashmir
-                        </option>
-                        <option value="Islamabad Capital Territory">
-                            Islamabad Capital Territory
-                        </option>
-                    </select>
-                </FormField>
-            </div>
-
-            {/* Postal Code & Store Name */}
-
-            {role === "seller" ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <FormField
-                        label="Postal Code"
-                        error={errors.postalCode?.message}
-                    >
-                        <Input
-                            placeholder="38000"
-                            {...register("postalCode")}
-                        />
-                    </FormField>
-
-                    <FormField
-                        label="Store Name"
-                        required
-                        error={errors.storeName?.message}
-                    >
-                        <Input
-                            placeholder="Green Agri Store"
-                            {...register("storeName")}
-                        />
-                    </FormField>
-                </div>
-            ) : (
-                <FormField
-                    label="Postal Code"
-                    error={errors.postalCode?.message}
-                >
-                    <Input
-                        placeholder="38000"
-                        {...register("postalCode")}
-                    />
-                </FormField>
-            )}
-
             <Button
                 type="submit"
                 className="w-full h-14 text-lg font-semibold"
-                disabled={loading}
+                disabled={signupLoading}
             >
-                {loading ? "Creating Account..." : "Create Account"}
+                {signupLoading
+                    ? "Creating Account..."
+                    : "Create Account"}
             </Button>
 
             <p className="text-center text-gray-600">

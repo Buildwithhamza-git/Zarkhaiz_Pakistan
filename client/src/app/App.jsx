@@ -7,12 +7,14 @@ import HomePage from "../features/Home/pages/Homepage";
 import DashboardPage from "../features/Dashboard/pages/Dashboardpage";
 import ResetPasswordPage from "../features/auth/pages/resetpage";
 import ForgotPasswordPage from "../features/auth/pages/forgetpage";
+import VerifyResetOtpPage from "../features/auth/pages/verifyresetotppage";
 
 export default function App() {
     return (
         <Routes>
 
         <Route path="/" element={<HomePage/>}  />
+        <Route path="/verify-reset-otp" element={<VerifyResetOtpPage />}/>
 
         <Route path="/reset-password" element={<ResetPasswordPage />} />
 

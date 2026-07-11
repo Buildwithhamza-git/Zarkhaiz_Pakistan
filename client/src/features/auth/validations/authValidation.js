@@ -1,35 +1,85 @@
 import { z } from "zod";
 
-export const signupSchema = z.object({
-    firstname: z.string().min(2, "First name is required"),
-    lastname: z.string().min(2, "Last name is required"),
-    username: z.string().min(3, "Username is required"),
-    email: z.string().email("Invalid email"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string().min(8, "Confirm Password is required"),
-    phone: z.string().min(11, "Invalid phone number"),
-    address: z.string().min(3, "Address is required"),
-    city: z.string().min(2, "City is required"),
-    province: z.string().min(2, "Province is required"),
-    postalCode: z.string().optional(),
-    role: z.enum(["farmer", "seller"]),
-    storeName: z.string().optional(),
-})
-.refine(
-    (data) => data.password === data.confirmPassword,
-    {
-        message: "Passwords do not match",
-        path: ["confirmPassword"],
-    }
-)
+export const signupSchema = z
+    .object({
+        firstname: z
+            .string()
+            .trim()
+            .min(3, "First name must be at least 2 characters")
+            .max(20, "First name cannot exceed 20 characters")
+            .regex(/^[A-Za-z\s]+$/,"First name can only contain letters"),
+
+        lastname: z
+            .string()
+            .trim()
+            .min(3, "Last name must be at least 3 characters")
+            .max(20, "Last name cannot exceed 20 characters")
+            .regex(/^[A-Za-z\s]+$/,"Last name can only contain letters"),
+
+        username: z
+            .string()
+            .trim()
+            .min(3, "Username must be at least 3 characters")
+            .max(20, "Username cannot exceed 20 characters")
+            .regex(/^[a-zA-Z0-9_]+$/,"Username can only contain letters, numbers and underscore"),
+
+        email: z
+            .string()
+            .trim()
+            .toLowerCase()
+            .email("Please enter a valid email address")
+            .refine((email) => {
+                const localPart = email.split("@")[0];
+                return !localPart.includes("+");
+            }, {
+                message: "Email aliases using '+' are not allowed",
+            }),
+
+        phone: z
+            .string()
+            .trim()
+            .regex(/^03[0-9]{9}$/,"Enter a valid phone number"),
+
+        password: z
+            .string()
+            .min(8, "Password must be at least 8 characters")
+            .max(20, "Password cannot exceed 20 characters")
+            .regex(/[A-Z]/,"Password must contain at least one uppercase letter")
+            .regex(/[a-z]/,"Password must contain at least one lowercase letter")
+            .regex(/[0-9]/,"Password must contain at least one number")
+            .regex(/[!@#$%^&*(),.?":{}|<>]/,"Password must contain at least one special character"),
+
+        confirmPassword: z
+            .string()
+            .min(1, "Confirm password is required"),
+    })
+    .refine(
+        (data) => data.password === data.confirmPassword,
+        { message: "Passwords do not match",path: ["confirmPassword"],}
+    );
 
 export const loginSchema = z.object({
-    email: z
-        .email("Please enter a valid email address"),
+   email: z
+            .string()
+            .trim()
+            .toLowerCase()
+            .email("Please enter a valid email address")
+            .refine((email) => {
+                const localPart = email.split("@")[0];
+                return !localPart.includes("+");
+            }, {
+                message: "Email aliases using '+' are not allowed",
+            }),
+            
 
     password: z
         .string()
-        .min(8, "Password must be at least 8 characters"),
+            .min(8, "Password must be at least 8 characters")
+            .max(20, "Password cannot exceed 20 characters")
+            .regex(/[A-Z]/,"Password must contain at least one uppercase letter")
+            .regex(/[a-z]/,"Password must contain at least one lowercase letter")
+            .regex(/[0-9]/,"Password must contain at least one number")
+            .regex(/[!@#$%^&*(),.?":{}|<>]/,"Password must contain at least one special character"),
 });
 
 
@@ -37,7 +87,12 @@ export const resetPasswordSchema = z
     .object({
         password: z
             .string()
-            .min(8, "Password must be at least 8 characters"),
+            .min(8, "Password must be at least 8 characters")
+            .max(20, "Password cannot exceed 20 characters")
+            .regex(/[A-Z]/,"Password must contain at least one uppercase letter")
+            .regex(/[a-z]/,"Password must contain at least one lowercase letter")
+            .regex(/[0-9]/,"Password must contain at least one number")
+            .regex(/[!@#$%^&*(),.?":{}|<>]/,"Password must contain at least one special character"),
 
         confirmPassword: z.string(),
     })
@@ -51,5 +106,15 @@ export const resetPasswordSchema = z
 
 
 export const forgotPasswordSchema = z.object({
-    email: z.string().email("Enter a valid email address")
+    email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .email("Please enter a valid email address")
+    .refine((email) => {
+        const localPart = email.split("@")[0];
+        return !localPart.includes("+");
+    }, {
+        message: "Email aliases using '+' are not allowed",
+    }),
 })

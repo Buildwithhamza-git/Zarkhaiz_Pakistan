@@ -1,54 +1,93 @@
 const {createOtp} = require("../services/otpservice")
 const {findUserByEmail, updateUserByEmail} = require("../repositories/userrepositories")
-const {sendEmail} = require("../services/emailservice")
-const {hashPassword} = require("../utils/passwordhelper")
+const {sendResetPasswordEmail} = require("../services/emailservice")
+const {hashPassword, comparePassword} = require("../utils/passwordhelper")
+const {normalizeEmail} = require("../utils/emailhelper")
 
 const forgotPasswordService = async (forgotData) => {
     const { email } = forgotData;
-    const user = await findUserByEmail(email);
+    const normalemail = normalizeEmail(email)
+    const user = await findUserByEmail(normalemail);
     if (!user) {
         throw new Error("Email is not registered");
     }
     const otpcombine = createOtp()
     const { otp, OtpExpiry } = otpcombine ;
 
-    await updateUserByEmail(email, {
+    await updateUserByEmail(normalemail, {
         otp: otp,
         otpExpire: OtpExpiry,
     });
 
-    const emailSend = await sendEmail(email, otp);
+    const emailSend = await sendResetPasswordEmail(normalemail, otp);
     if (!emailSend) {
-        throw new Error("Email sending failed to " + email);
+        throw new Error("Email sending failed to " + normalemail);
     }
 
-    return { email };
+    return { normalemail };
 };
 
-const resetPasswordService = async (resetData) => {
-    const { email, otp, newPassword } = resetData;
+
+const verifyResetOtpService = async (otpDetail) => {
+    const { email, otp } = otpDetail;
 
     const user = await findUserByEmail(email);
+
     if (!user) {
         throw new Error("Email is not registered");
+    }
+
+    if (!user.otp || !user.otpExpire) {
+        throw new Error("No OTP found. Please request a new OTP.");
+    }
+
+    if (new Date() > user.otpExpiry) {
+        throw new Error("OTP has expired");
     }
 
     if (user.otp !== otp) {
         throw new Error("Invalid OTP");
     }
 
-    if (new Date() > user.otpExpire) {
-        throw new Error("OTP has expired");
+    user.isResetOtpVerified = true;
+
+    await user.save();
+    return {
+        success: true,
+        message: "OTP verified successfully.",
+    };
+};
+
+
+const resetPasswordService = async (resetData) => {
+    const { email,  password } = resetData;
+    console.log(password);
+
+    const user = await findUserByEmail(email);
+    if (!user) {
+        throw new Error("Email is not registered");
     }
 
-    const hashedPassword = await hashPassword(newPassword);
+     if (!user.isResetOtpVerified) {
+        throw new Error("Please verify your OTP first.");
+    }
+    
+    const isSamePassword = await comparePassword(password,user.password);
+    if (isSamePassword) {
+        throw new Error("New password cannot be the same as your previous password.");
+    }
+
+    const hashedPassword = await hashPassword(password);
 
     const updatedUser = await updateUserByEmail(email, {
         password: hashedPassword,
         otp: null,
         otpExpire: null,
+        isResetOtpVerified: false
+        
     });
 
     return updatedUser;
 };
-module.exports ={forgotPasswordService, forgotPasswordService, resetPasswordService}
+
+module.exports ={forgotPasswordService,resetPasswordService, verifyResetOtpService}

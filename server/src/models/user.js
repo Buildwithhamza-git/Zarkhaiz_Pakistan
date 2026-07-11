@@ -1,7 +1,8 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
-const SignupSchema = new mongoose.Schema({
-     firstname: {
+const UserSchema = new mongoose.Schema(
+  {
+    firstname: {
       type: String,
       required: true,
       trim: true,
@@ -49,41 +50,22 @@ const SignupSchema = new mongoose.Schema({
       index: true,
     },
 
-    address: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-
-    city: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-
-    province: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-
-
-    postalCode: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-
     role: {
       type: String,
-      enum: ["farmer", "seller", "admin"],
-      default: "farmer",
+      enum: ["user", "seller", "admin"],
+      default: "user",
       index: true,
     },
 
-    storeName: {
+    sellerStatus: {
       type: String,
-      trim: true,
+      enum: ["none", "pending", "approved", "rejected"],
+      default: "none",
+      index: true,
+    },
+
+    profileImage: {
+      type: String,
       default: "",
     },
 
@@ -99,11 +81,19 @@ const SignupSchema = new mongoose.Schema({
 
     otpExpire: {
       type: Date,
+      default: null,
+    },
+
+    isResetOtpVerified: {
+    type: Boolean,
+    default: false,
     },
   },
   {
     timestamps: true,
   }
-)
-const User = mongoose.model("User", SignupSchema);
-module.exports = {User}
+);
+
+const User = mongoose.model("User", UserSchema);
+
+module.exports = { User };

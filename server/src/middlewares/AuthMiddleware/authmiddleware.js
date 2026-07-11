@@ -1,28 +1,10 @@
 const { success } = require("zod")
-const { signupSchema, loginSchema, forgotPasswordSchema, verifyOtpSchema, resendOtpSchema, resetPasswordSchema } = require("../../validation/authvalidation")
+const { signupSchema, loginSchema, forgotPasswordSchema, verifyOtpSchema, resendOtpSchema,validateResetOtpSchema, resetPasswordSchema } = require("../../validation/authvalidation")
 
-const normalizeSignupBody = (body) => {
-    if (!body || typeof body !== "object" || Array.isArray(body)) {
-        return body;
-    }
-
-    const normalizedBody = { ...body };
-
-    if (normalizedBody.storename && !normalizedBody.storeName) {
-        normalizedBody.storeName = normalizedBody.storename;
-    }
-
-    if (normalizedBody.storeName && !normalizedBody.storename) {
-        normalizedBody.storename = normalizedBody.storeName;
-    }
-
-    return normalizedBody;
-};
 
 const ValidateSignup = async (req, res, next) => {
     try {
-        const normalizedBody = normalizeSignupBody(req.body);
-        const validateData = await signupSchema.safeParseAsync(normalizedBody)
+        const validateData = await signupSchema.safeParseAsync(req.body)
 
         if (!validateData.success) {
             console.log(validateData.error.message)
@@ -89,7 +71,6 @@ const validateResendOtp = async (req, res, next) => {
         req.sanitizedBody = validateData.data;
         return next();
     } catch (err) {
-
         console.log(err)
         return res.status(500).json({
             success: false,
@@ -125,6 +106,31 @@ const validateLogin = async (req, res, next) => {
 }
 
 
+const validateresetotp= async (req,res,next)=> {
+    try{
+        console.log("server");
+        const resetotp =await validateResetOtpSchema.safeParseAsync(req.body)
+
+        if (!resetotp.success) {
+            const Errors = resetotp.error.issues.map((v) => {
+                return { path: v.path[0], message: v.message }
+            })
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Otp ",
+                error: Errors
+            })
+        }
+
+        req.sanitizedBody = resetotp.data
+        next()
+    }catch (err) {
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Issue"
+        })
+    }
+}
 
 const validateForgotPassword = async (req, res, next) => {
     try {
@@ -165,4 +171,4 @@ const validateResetPassword = async (req, res, next) => {
         return res.status(500).json({ success: false, message: "internal server issue" });
     }
 };
-module.exports = { ValidateSignup, validateLogin, validateVerifyOtp, validateResetPassword, validateResendOtp, validateForgotPassword }
+module.exports = { ValidateSignup, validateLogin, validateVerifyOtp, validateResetPassword, validateresetotp,validateResendOtp, validateForgotPassword }

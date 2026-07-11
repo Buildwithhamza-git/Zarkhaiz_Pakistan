@@ -27,8 +27,7 @@ export const signupApi = async (data) => {
         const response = await api.post("/signup", data);
         return response.data;
     } catch (error) {
-        const normalizedError = normalizeError(error);
-        throw normalizedError;
+        throw normalizeError(error);
     }
 };
 
@@ -37,8 +36,7 @@ export const verifyOtpApi = async (data) => {
         const response = await api.post("/verify-otp", data);
         return response.data;
     } catch (error) {
-        const normalizedError = normalizeError(error);
-        throw normalizedError;
+        throw normalizeError(error);
     }
 };
 
@@ -47,22 +45,43 @@ export const resendOtpApi = async (data) => {
         const response = await api.post("/resend-otp", data);
         return response.data;
     } catch (error) {
-        const normalizedError = normalizeError(error);
-        throw normalizedError;
+        throw normalizeError(error);
     }
 };
 
 export const loginApi = async (data) => {
-    const response = await api.post("/login", data);
-    return response.data;
+    try {
+        const response = await api.post("/login", data);
+        return response.data;
+    } catch (error) {
+        throw normalizeError(error);
+    }
 };
 
 export const forgotPasswordApi = async (data) => {
-    const response = await api.post("/forgot-password", data);
-    return response.data;
+    try {
+        const response = await api.post("/forgot-password", data);
+        return response.data;
+    } catch (error) {
+        throw normalizeError(error);
+    }
+};
+
+export const verifyResetOtpApi = async (data) => {
+    try {
+        const response = await api.post("/verify-reset-otp", data);
+        console.log(response.data)
+        return response.data;
+    } catch (error) {
+        throw normalizeError(error);
+    }
 };
 
 export const resetPasswordApi = async (data) => {
-    const response = await api.post("/reset-password", data);
-    return response.data;
+    try {
+        const response = await api.post("/reset-password", data);
+        return response.data;
+    } catch (error) {
+        throw normalizeError(error);
+    }
 };

@@ -7,8 +7,8 @@ export default function AuthCard({
     return (
         <div
             className={`
-                w-full
-                rounded-3xl
+                w-3xl
+                rounded-4xl
                 border
                 border-green-100
                 bg-white/95

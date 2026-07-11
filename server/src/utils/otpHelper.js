@@ -4,9 +4,10 @@ const generateOtp = () => {
 }
 
 
-const OtpExpiry =  ()=>{
-    const now = new Date()
-    return new Date (now.getTime() + 3 *60000)
-}
+const OtpExpiry = () => {
+    const now = new Date();
+    return new Date(now.getTime() + 1 * 60000);
+};
+
 
 module.exports= { generateOtp, OtpExpiry}

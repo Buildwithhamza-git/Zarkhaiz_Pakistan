@@ -6,81 +6,97 @@ import {
     resendOtpService,
     loginService,
     forgotPasswordService,
+    verifyResetOtpService,
     resetPasswordService,
 } from "../services/authService";
 
 export default function useAuth() {
-    const [loading, setLoading] = useState(false);
+    const [signupLoading, setSignupLoading] = useState(false);
+    const [verifyLoading, setVerifyLoading] = useState(false);
+    const [resendLoading, setResendLoading] = useState(false);
+    const [loginLoading, setLoginLoading] = useState(false);
+    const [forgotLoading, setForgotLoading] = useState(false);
+    const [verifyResetLoading, setVerifyResetLoading] = useState(false);
+    const [resetLoading, setResetLoading] = useState(false);
 
     const signup = async (data) => {
-    setLoading(true);
-
-    try {
-        const response = await signupService(data);
-
-        return response; 
-    } finally {
-        setLoading(false);
-    }
-};
+        setSignupLoading(true);
+        try {
+            return await signupService(data);
+        } finally {
+            setSignupLoading(false);
+        }
+    };
 
     const verifyOtp = async (data) => {
-        setLoading(true);
-
+        setVerifyLoading(true);
         try {
             return await verifyOtpService(data);
         } finally {
-            setLoading(false);
+            setVerifyLoading(false);
         }
     };
 
     const resendOtp = async (data) => {
-        setLoading(true);
-
+        setResendLoading(true);
         try {
             return await resendOtpService(data);
         } finally {
-            setLoading(false);
+            setResendLoading(false);
         }
     };
 
     const login = async (data) => {
-        setLoading(true);
-
+        setLoginLoading(true);
         try {
             return await loginService(data);
         } finally {
-            setLoading(false);
+            setLoginLoading(false);
         }
     };
 
     const forgotPassword = async (data) => {
-        setLoading(true);
-
+        setForgotLoading(true);
         try {
             return await forgotPasswordService(data);
         } finally {
-            setLoading(false);
+            setForgotLoading(false);
+        }
+    };
+
+    const verifyResetOtp = async (data) => {
+        setVerifyResetLoading(true);
+        try {
+            return await verifyResetOtpService(data);
+        } finally {
+            setVerifyResetLoading(false);
         }
     };
 
     const resetPassword = async (data) => {
-        setLoading(true);
-
+        setResetLoading(true);
         try {
             return await resetPasswordService(data);
         } finally {
-            setLoading(false);
+            setResetLoading(false);
         }
     };
 
     return {
-        loading,
         signup,
         verifyOtp,
         resendOtp,
         login,
         forgotPassword,
+        verifyResetOtp,
         resetPassword,
+
+        signupLoading,
+        verifyLoading,
+        resendLoading,
+        loginLoading,
+        forgotLoading,
+        verifyResetLoading,
+        resetLoading,
     };
 }

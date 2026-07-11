@@ -17,7 +17,8 @@ const findUserByUsername = async (username)=>{
 }
 
 const updateUserByEmail = async (email, updates)=>{
-    return await User.findOneAndUpdate({email}, updates, {new:true})
+    return await User.findOneAndUpdate({email}, updates, {returnDocument: "after",
+            runValidators: true,})
 }
 module.exports= {findUserByEmail, findUserByPhone, createUser, findUserByUsername, updateUserByEmail}
 

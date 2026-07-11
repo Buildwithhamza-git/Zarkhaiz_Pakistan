@@ -3,88 +3,62 @@ const { z } = require("zod");
 const signupSchema = z
   .object({
     firstname: z
-      .string()
+      .string({required_error: "First name is required"})
       .trim()
       .min(2, "First name must be at least 2 characters")
-      .max(50, "First name cannot exceed 50 characters"),
+      .max(20, "First name cannot exceed 20 characters")
+      .regex(/^[A-Za-z\s]+$/,"First name can only contain letters"),
 
     lastname: z
-      .string()
+      .string({required_error: "Last name is required"})
       .trim()
-      .min(2, "Last name must be at least 2 characters")
-      .max(50, "Last name cannot exceed 50 characters"),
+      .min(3, "Last name must be at least 3 characters")
+      .max(20, "Last name cannot exceed 20 characters")
+      .regex(/^[A-Za-z\s]+$/,"Last name can only contain letters"),
 
     username: z
-      .string()
+      .string({required_error: "Username is required"})
       .trim()
       .min(3, "Username must be at least 3 characters")
-      .max(30, "Username cannot exceed 30 characters")
-      .regex(
-        /^[a-zA-Z0-9_]+$/,
-        "Username can only contain letters, numbers and underscores"
-      ),
+      .max(20, "Username cannot exceed 20 characters")
+      .regex(/^[a-zA-Z0-9_]+$/,"Username can only contain letters, numbers and underscores"),
 
     email: z
-      .string()
+      .string({required_error: "Email is required",})
       .trim()
+      .toLowerCase()
       .email("Please enter a valid email address")
-      .toLowerCase(),
-
-    storeName: z
-      .string()
-      .trim()
-      .optional(),
-
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .max(100, "Password cannot exceed 100 characters"),
-
-    confirmPassword: z
-      .string({ required_error: "Confirm Password is required" })
-      .trim(),
+      .refine((email) => {
+                const localPart = email.split("@")[0];
+                return !localPart.includes("+");
+            }, {
+                message: "Email aliases using '+' are not allowed",
+            }),
 
     phone: z
-      .string()
+      .string({required_error: "Phone number is required"})
       .trim()
-      .min(11, "Enter a valid phone number"),
+      .regex(/^03[0-9]{9}$/,"Enter a valid phone number"),
 
+    password: z
+      .string({required_error: "Password is required",})
+      .min(8, "Password must be at least 8 characters")
+      .max(20, "Password cannot exceed 20 characters")
+      .regex(/[A-Z]/,"Password must contain at least one uppercase letter")
+      .regex(/[a-z]/,"Password must contain at least one lowercase letter")
+      .regex(/[0-9]/,"Password must contain at least one number")
+      .regex(/[!@#$%^&*(),.?":{}|<>]/,"Password must contain at least one special character"),
 
-    address: z
-      .string()
-      .trim()
-      .min(3, "Address is required"),
-
-    city: z
-      .string()
-      .trim()
-      .min(2, "City is required"),
-
-    province: z
-      .string()
-      .trim()
-      .min(2, "Province is required"),
-
-    postalCode: z
-      .string()
-      .trim()
-      .optional(),
-
-    role: z.enum(["farmer", "seller", "admin"]).default("farmer"),
+    confirmPassword: z
+      .string({required_error: "Confirm password is required",})
+      .trim(),
   })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Confrim Password Must Match Password",
-    path: ["confirmPassword"]
-  })
-  .superRefine((data, ctx) => {
-    if (data.role === "seller" && (!data.storeName || data.storeName.trim() === "")) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Store name is required for sellers",
-        path: ["storeName"],
-      });
-    }
-  });
+
+  .refine(
+    (data) => data.password === data.confirmPassword,
+    {message: "Passwords do not match",path: ["confirmPassword"],}
+  );
+
 
 
   const verifyOtpSchema = z.object({
@@ -107,6 +81,12 @@ const resendOtpSchema=z.object({
         .trim()
         .toLowerCase()
         .email("Invalid Email Format")
+        .refine((email) => {
+                const localPart = email.split("@")[0];
+                return !localPart.includes("+");
+            }, {
+                message: "Email aliases using '+' are not allowed",
+            }),
 })
 
 
@@ -114,7 +94,13 @@ const loginSchema = z.object({
   email: z
     .string()
     .trim()
-    .email("Invalid Email Format"),
+    .email("Invalid Email Format")
+    .refine((email) => {
+                const localPart = email.split("@")[0];
+                return !localPart.includes("+");
+            }, {
+                message: "Email aliases using '+' are not allowed",
+            }),
 
   password: z
     .string()
@@ -131,38 +117,42 @@ const forgotPasswordSchema = z.object({
         .email("Invalid email format"),
 });
 
-const resetPasswordSchema = z
-    .object({
+const validateResetOtpSchema = z.object({
+    email: z
+        .string({ required_error: "Email is required" })
+        .trim()
+        .email("Please enter a valid email address")
+        .toLowerCase(),
+
+    otp: z
+        .string({ required_error: "OTP is required" })
+        .trim()
+        .length(6, "OTP must be exactly 6 digits")
+        .regex(/^\d{6}$/, "OTP must contain only numbers"),
+});
+
+
+const resetPasswordSchema = z.object({
         email: z
-            .string({ required_error: "Email is required" })
+            .string()
             .trim()
-            .toLowerCase()
-            .email("Invalid email format"),
+            .email("Invalid Email"),
 
-        otp: z
-            .string({ required_error: "OTP is required" })
-            .trim()
-            .length(6, "OTP must be exactly 6 digits")
-            .regex(/^[0-9]+$/, "OTP must contain only digits"),
-
-        newPassword: z
-            .string({ required_error: "New password is required" })
-            .trim()
-            .min(8, "Password must be at least 8 characters long")
-            .max(20, "Password cannot exceed 20 characters")
+        password: z
+            .string()
+            .min(8)
+            .max(20)
             .regex(
-                /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
-                "Password must contain at least one letter, one number, and one special character"
+                /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/,
+                "Password must contain uppercase, lowercase, number and special character"
             ),
 
-        confirmNewPassword: z
-            .string({ required_error: "Confirm password is required" })
-            .trim(),
+        confirmPassword: z.string(),
     })
-    .refine((data) => data.newPassword === data.confirmNewPassword, {
+    .refine((data) => data.password === data.confirmPassword, {
+        path: ["confirmPassword"],
         message: "Passwords do not match",
-        path: ["confirmNewPassword"],
     });
 
 
-module.exports = { signupSchema, loginSchema, verifyOtpSchema , forgotPasswordSchema , resendOtpSchema, resetPasswordSchema };
+module.exports = { signupSchema, loginSchema, verifyOtpSchema , forgotPasswordSchema ,validateResetOtpSchema, resendOtpSchema, resetPasswordSchema };
