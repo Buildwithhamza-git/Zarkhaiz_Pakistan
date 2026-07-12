@@ -36,7 +36,7 @@ export default function LoginForm() {
             const user = result.payload?.user || result.user;
 
             login(user, token);
-            navigate("/dashboard");
+            navigate("/");
         } catch (error) {
     if (error.errors) {
         error.errors.forEach((err) => {

@@ -24,7 +24,7 @@ const normalizeError = (error) => {
 
 export const signupApi = async (data) => {
     try {
-        const response = await api.post("/signup", data);
+        const response = await api.post("/auth/signup", data);
         return response.data;
     } catch (error) {
         throw normalizeError(error);
@@ -33,7 +33,7 @@ export const signupApi = async (data) => {
 
 export const verifyOtpApi = async (data) => {
     try {
-        const response = await api.post("/verify-otp", data);
+        const response = await api.post("/auth/verify-otp", data);
         return response.data;
     } catch (error) {
         throw normalizeError(error);
@@ -42,7 +42,7 @@ export const verifyOtpApi = async (data) => {
 
 export const resendOtpApi = async (data) => {
     try {
-        const response = await api.post("/resend-otp", data);
+        const response = await api.post("/auth/resend-otp", data);
         return response.data;
     } catch (error) {
         throw normalizeError(error);
@@ -51,7 +51,7 @@ export const resendOtpApi = async (data) => {
 
 export const loginApi = async (data) => {
     try {
-        const response = await api.post("/login", data);
+        const response = await api.post("/auth/login", data);
         return response.data;
     } catch (error) {
         throw normalizeError(error);
@@ -60,7 +60,7 @@ export const loginApi = async (data) => {
 
 export const forgotPasswordApi = async (data) => {
     try {
-        const response = await api.post("/forgot-password", data);
+        const response = await api.post("/auth/forgot-password", data);
         return response.data;
     } catch (error) {
         throw normalizeError(error);
@@ -69,7 +69,7 @@ export const forgotPasswordApi = async (data) => {
 
 export const verifyResetOtpApi = async (data) => {
     try {
-        const response = await api.post("/verify-reset-otp", data);
+        const response = await api.post("/auth/verify-reset-otp", data);
         console.log(response.data)
         return response.data;
     } catch (error) {
@@ -79,7 +79,7 @@ export const verifyResetOtpApi = async (data) => {
 
 export const resetPasswordApi = async (data) => {
     try {
-        const response = await api.post("/reset-password", data);
+        const response = await api.post("/auth/reset-password", data);
         return response.data;
     } catch (error) {
         throw normalizeError(error);
