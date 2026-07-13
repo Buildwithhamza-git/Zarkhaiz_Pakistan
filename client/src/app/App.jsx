@@ -7,6 +7,7 @@ import HomePage from "../features/Home/pages/Homepage";
 import ResetPasswordPage from "../features/auth/pages/resetpage";
 import ForgotPasswordPage from "../features/auth/pages/forgetpage";
 import VerifyResetOtpPage from "../features/auth/pages/verifyresetotppage";
+import BecomeSellerPage from "../features/seller/pages/becomesellerpage";
 
 
 export default function App() {
@@ -26,7 +27,7 @@ export default function App() {
 
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-        
+        <Route path="/become-seller" element={<BecomeSellerPage/>} />
 
         </Routes>
     );
