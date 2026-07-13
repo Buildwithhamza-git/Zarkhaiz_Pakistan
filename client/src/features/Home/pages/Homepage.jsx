@@ -10,6 +10,7 @@ import Stats from "../components/Hero/Herostat";
 // import AIFeatures from "../components/AIFeatures";
 // import Testimonials from "../components/Testimonials";
 // import Footer from "../components/Footer";
+import FeaturedProductSection from "../components/products/featuredproductsection";
 
 
 
@@ -19,6 +20,7 @@ export default function HomePage() {
             <Navbar />
             <main className="pb-28">
                 <Hero />
+                <FeaturedProductSection />
             </main>
 
 
