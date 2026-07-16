@@ -1,6 +1,5 @@
 import Logo from "./logo";
 import NavLinks from "./navlinks";
-import SearchBar from "./searchbar";
 import CartButton from "./cartButton";
 import NotificationButton from "./NotificationButton";
 import UserMenu from "./UserMenu";
@@ -19,15 +18,13 @@ export default function Navbar() {
 
                 <div className="flex items-center justify-between h-20">
 
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-50">
 
                         <Logo />
 
                         <NavLinks />
 
                     </div>
-
-                    <SearchBar />
 
                     <div className="flex items-center gap-5">
 

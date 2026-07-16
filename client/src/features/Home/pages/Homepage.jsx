@@ -1,15 +1,6 @@
 import Navbar from "../components/Navbar/Navbar";
 import Hero from "../components/Hero/Hero";
 import Stats from "../components/Hero/Herostat";
-// import Categories from "../components/Categories";
-// import FeaturedProducts from "../components/FeaturedProducts";
-// import PromoBanner from "../components/PromoBanner";
-// import AgricultureSupplies from "../components/AgricultureSupplies";
-// import WhyChooseUs from "../components/WhyChooseUs";
-// import HowItWorks from "../components/HowItWorks";
-// import AIFeatures from "../components/AIFeatures";
-// import Testimonials from "../components/Testimonials";
-// import Footer from "../components/Footer";
 import FeaturedProductSection from "../components/products/featuredproductsection";
 
 
