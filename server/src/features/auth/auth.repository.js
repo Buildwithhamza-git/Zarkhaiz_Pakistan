@@ -20,5 +20,21 @@ const updateUserByEmail = async (email, updates)=>{
     return await User.findOneAndUpdate({email}, updates, {returnDocument: "after",
             runValidators: true,})
 }
-module.exports= {findUserByEmail, findUserByPhone, createUser, findUserByUsername, updateUserByEmail}
+
+
+const findUserById = async (id) => {
+    return await User.findById(id);
+};
+
+const updateUserById = async (id, updates) => {
+    return await User.findByIdAndUpdate(
+        id,
+        updates,
+        {
+            new: true,
+            runValidators: true,
+        }
+    );
+};
+module.exports= {findUserByEmail, findUserByPhone, createUser, findUserByUsername, updateUserByEmail, findUserById, updateUserById}
 

@@ -52,7 +52,7 @@ const UserSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["user", "seller", "admin"],
+      enum: ["user", "admin"],
       default: "user",
       index: true,
     },
@@ -85,8 +85,13 @@ const UserSchema = new mongoose.Schema(
     },
 
     isResetOtpVerified: {
-    type: Boolean,
-    default: false,
+      type: Boolean,
+      default: false,
+    },
+    refreshToken: {
+      type: String,
+      default: "",
+      select: false,
     },
   },
   {

@@ -16,7 +16,7 @@ const validateRequest = (schema) => {
                     message: "Invalid Inputs",
                     errors,});
             }
-            req.sanitizedBody = result.data;
+            req.body = result.data;
 
             next();
 

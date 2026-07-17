@@ -176,6 +176,9 @@ const verifyOtpService = async(verifyData)=>{
     if(user.isVerified){
         throw new Error ("Account is Already Verified") 
     }
+    if(!user.isVerified){
+        throw new Error ("Please verify your email before logging in.")
+    }
     if(user.otp !== otpCode){
         throw new Error ("Invalid Otp")
     }
