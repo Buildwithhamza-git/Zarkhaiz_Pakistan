@@ -1,14 +1,12 @@
+import { useAuthContext } from "../../../../context/authContext";
+import CartButton from "./cartButton";
 import Logo from "./logo";
 import NavLinks from "./navlinks";
-import CartButton from "./cartButton";
 import NotificationButton from "./NotificationButton";
 import UserMenu from "./UserMenu";
-import { useAuthContext } from "../../../../context/AuthContext";
-
 
 export default function Navbar() {
-
-    const { user } = useAuthContext();
+  const { user } = useAuthContext();
 
     return (
 
@@ -18,7 +16,7 @@ export default function Navbar() {
 
                 <div className="flex items-center justify-between h-20">
 
-                    <div className="flex items-center gap-10 lg:gap-16">
+                    <div className="flex items-center gap-50">
 
                         <Logo />
 
@@ -26,21 +24,13 @@ export default function Navbar() {
 
                     </div>
 
-                    <div className="flex items-center gap-5">
-
-                        {user && <CartButton />}
-
-                        {user && <NotificationButton />}
-
-                        <UserMenu />
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </header>
-
-    );
+          <div className="flex shrink-0 items-center gap-3 sm:gap-5">
+            {user && <CartButton />}
+            {user && <NotificationButton />}
+            <UserMenu />
+          </div>
+        </div>
+      </div>
+    </header>
+  );
 }

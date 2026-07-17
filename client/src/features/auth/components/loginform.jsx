@@ -2,9 +2,9 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import Button from "../../../shared/components/ui/Button";
-import Input from "../../../shared/components/ui/Input";
-import PasswordInput from "../../../shared/components/ui/PasswordInput";
+import Button from "../../../shared/components/ui/button";
+import Input from "../../../shared/components/ui/input";
+import PasswordInput from "../../../shared/components/ui/passwordinput";
 import FormField from "../../../shared/components/ui/Formfield";
 
 import { loginSchema } from "../validations/authValidation";

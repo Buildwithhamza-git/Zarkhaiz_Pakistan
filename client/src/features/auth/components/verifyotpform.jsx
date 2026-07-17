@@ -4,8 +4,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-import Button from "../../../shared/components/ui/Button";
-import FormField from "../../../shared/components/ui/FormField";
+import Button from "../../../shared/components/ui/button";
+import FormField from "../../../shared/components/ui/Formfield";
 import useAuth from "../hooks/useAuth";
 
 const otpSchema = z.object({

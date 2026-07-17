@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ChevronDown, User, LogOut, Package, Settings, Store } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuthContext } from "../../../../context/AuthContext";
+import { useAuthContext } from "../../../../context/authContext";
 
 export default function UserMenu() {
 

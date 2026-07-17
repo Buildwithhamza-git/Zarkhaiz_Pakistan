@@ -1,4 +1,4 @@
-import Button from "../../../../shared/components/ui/Button";
+import Button from "../../../../shared/components/ui/button";
 import { CheckCircle } from "lucide-react";
 
 export default function ReviewSubmit({
