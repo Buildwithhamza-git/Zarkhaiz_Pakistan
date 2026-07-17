@@ -1,30 +1,27 @@
 import Navbar from "../components/Navbar/Navbar";
 import Hero from "../components/Hero/Hero";
-import Stats from "../components/Hero/Herostat";
+import CategorySection from "../components/category/categorySection";
 import FeaturedProductSection from "../components/products/featuredproductsection";
-
-
+import WhyChooseZarkhaiz from "../components/WhyChooseZarkhaiz/WhyChooseZarkhaiz";
+import HowItWorks from "../components/HowItWorks/HowItWorks";
+import FAQ from "../components/FAQ/FAQ";
+import Footer from "../components/Footer/Footer";
 
 export default function HomePage() {
     return (
         <div className="min-h-screen bg-[#F8FAF7]">
             <Navbar />
-            <main className="pb-28">
+
+            <main className="pb-12  bg-white">
                 <Hero />
+                <CategorySection />
                 <FeaturedProductSection />
+                <WhyChooseZarkhaiz />
+                <HowItWorks />
+                <FAQ/>
             </main>
 
-
-
-            {/* <main className="max-w-7xl mx-auto px-6 py-20">
-                <h1 className="text-5xl font-bold text-green-800">
-                    Welcome to Zarkhaiz Pakistan
-                </h1>
-
-                <p className="mt-4 text-xl text-gray-600">
-                    Hero Section Coming Next...
-                </p>
-            </main> */}
+            <Footer />
         </div>
     );
 }
