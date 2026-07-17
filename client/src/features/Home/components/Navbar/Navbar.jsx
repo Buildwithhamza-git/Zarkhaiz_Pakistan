@@ -18,7 +18,7 @@ export default function Navbar() {
 
                 <div className="flex items-center justify-between h-20">
 
-                    <div className="flex items-center gap-50">
+                    <div className="flex items-center gap-10 lg:gap-16">
 
                         <Logo />
 

@@ -17,7 +17,8 @@ export default function FeaturedProductSection() {
     useEffect(() => {
         let isMounted = true;
 
-        const fetchFeaturedCrops = async () => {
+        const 
+        fetchFeaturedCrops = async () => {
             try {
                 setLoading(true);
                 setError("");
