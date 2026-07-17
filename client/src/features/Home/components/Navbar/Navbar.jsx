@@ -1,46 +1,29 @@
+import { useAuthContext } from "../../../../context/authContext";
+import CartButton from "./cartButton";
 import Logo from "./logo";
 import NavLinks from "./navlinks";
-import CartButton from "./cartButton";
 import NotificationButton from "./NotificationButton";
 import UserMenu from "./UserMenu";
-import { useAuthContext } from "../../../../context/AuthContext";
-
 
 export default function Navbar() {
+  const { user } = useAuthContext();
 
-    const { user } = useAuthContext();
+  return (
+    <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/95 shadow-sm backdrop-blur">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-20 items-center justify-between gap-6">
+          <div className="flex min-w-0 items-center gap-10 xl:gap-20">
+            <Logo />
+            <NavLinks />
+          </div>
 
-    return (
-
-        <header className="sticky top-0 z-50 bg-white shadow-sm">
-
-            <div className="max-w-7xl mx-auto px-6">
-
-                <div className="flex items-center justify-between h-20">
-
-                    <div className="flex items-center gap-50">
-
-                        <Logo />
-
-                        <NavLinks />
-
-                    </div>
-
-                    <div className="flex items-center gap-5">
-
-                        {user && <CartButton />}
-
-                        {user && <NotificationButton />}
-
-                        <UserMenu />
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </header>
-
-    );
+          <div className="flex shrink-0 items-center gap-3 sm:gap-5">
+            {user && <CartButton />}
+            {user && <NotificationButton />}
+            <UserMenu />
+          </div>
+        </div>
+      </div>
+    </header>
+  );
 }

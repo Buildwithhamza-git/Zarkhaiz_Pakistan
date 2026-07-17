@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import SellerStepper from "./SellerStepper";
+import SellerStepper from "./sellerstepper";
 import StoreInformation from "./storeinfo";
 import BusinessInformation from "./BusinessInformation";
 import BankInformation from "./BankInformation";

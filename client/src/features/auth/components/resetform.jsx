@@ -3,9 +3,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import Button from "../../../shared/components/ui/Button";
-import PasswordInput from "../../../shared/components/ui/PasswordInput";
-import FormField from "../../../shared/components/ui/FormField";
+import Button from "../../../shared/components/ui/button";
+import PasswordInput from "../../../shared/components/ui/passwordinput";
+import FormField from "../../../shared/components/ui/Formfield";
 
 import useAuth from "../hooks/useAuth";
 import { resetPasswordSchema } from "../validations/authValidation";

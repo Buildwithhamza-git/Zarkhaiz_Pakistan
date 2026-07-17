@@ -1,6 +1,6 @@
 import AuthLayout from "../../../shared/layouts/AuthLayout";
 import AuthCard from "../../../shared/components/ui/AuthCard";
-import LoginForm from "../components/LoginForm";
+import LoginForm from "../components/loginform";
 
 export default function LoginPage() {
     return (
