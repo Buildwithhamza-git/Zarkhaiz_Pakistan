@@ -62,6 +62,7 @@ const signupService = async (signupData) => {
 }
 
 const loginService = async (logindata) => {
+    console.log(logindata);
     const { email, password } = logindata;
     const normalemail = normalizeEmail(email)
     const User = await findUserByEmail(normalemail)

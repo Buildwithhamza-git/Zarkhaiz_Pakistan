@@ -40,6 +40,14 @@ const registerSeller = async (userId, sellerData) => {
     return seller;
 };
 
+const getSellerProfile = async (userId) => {
+
+    const seller = await sellerRepository.findSellerByUserId(userId);
+
+    return seller;
+};
+
+
 module.exports = {
-    registerSeller,
+    registerSeller,getSellerProfile
 };

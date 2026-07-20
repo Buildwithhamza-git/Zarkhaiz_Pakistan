@@ -24,7 +24,6 @@ const authenticate = (req, res, next) => {
         const decoded = verifyToken(token);
 
         req.user = decoded;
-
         next();
 
     } catch (error) {

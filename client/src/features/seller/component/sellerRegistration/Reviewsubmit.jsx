@@ -5,6 +5,8 @@ export default function ReviewSubmit({
     formData,
     previousStep,
     handleSubmit,
+    loading,
+    error,
 }) {
     return (
         <div>
@@ -160,7 +162,17 @@ export default function ReviewSubmit({
 
             </div>
 
-            <div className="mt-10 flex items-start gap-3">
+            {/* Error Message */}
+
+            {error && (
+                <div className="mt-8 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+                    {error}
+                </div>
+            )}
+
+            {/* Terms & Conditions */}
+
+            <div className="mt-6 flex items-start gap-3">
 
                 <input
                     type="checkbox"
@@ -181,15 +193,17 @@ export default function ReviewSubmit({
 
                 <Button
                     variant="outline"
+                    disabled={loading}
                     onClick={previousStep}
                 >
                     ← Previous
                 </Button>
 
                 <Button
+                    disabled={loading}
                     onClick={handleSubmit}
                 >
-                    Submit Application
+                    {loading ? "Submitting..." : "Submit Application"}
                 </Button>
 
             </div>

@@ -3,6 +3,7 @@ const validateRequest = (schema) => {
         try {
 
             const result = await schema.safeParseAsync(req.body);
+            console.log(result);
 
             if (!result.success) {
 
@@ -15,7 +16,7 @@ const validateRequest = (schema) => {
                     success: false,
                     message: "Invalid Inputs",
                     errors,});
-            }
+            } 
             req.body = result.data;
 
             next();

@@ -4,7 +4,7 @@ const {generateToken} = require("../../shared//utils/jwtToken")
 
 const SignupController = async (req, res) => {
     try {
-        const user = await signupService(req.sanitizedBody)
+        const user = await signupService(req.body)
 
         return res.status(201).json({
             status: true,
@@ -25,7 +25,7 @@ const SignupController = async (req, res) => {
 const verifyOtpController=async (req, res) => {
     try {
 
-        const result = await verifyOtpService(req.sanitizedBody)
+        const result = await verifyOtpService(req.body)
         const token = await generateToken(result)
 
         return res.status(200).json({
@@ -47,7 +47,7 @@ const verifyOtpController=async (req, res) => {
 
 const verifyResetOtpController = async(req, res)=>{
     try{
-        const user = await verifyResetOtpService(req.sanitizedBody)
+        const user = await verifyResetOtpService(req.body)
 
         return res.status(200).json({
             success:true,
@@ -63,7 +63,7 @@ const verifyResetOtpController = async(req, res)=>{
 
 const resendOtpController = async (req, res) => {
     try {
-        const user = await resendOtpService(req.sanitizedBody);
+        const user = await resendOtpService(req.body);
 
         return res.status(200).json({
             success: true,
@@ -81,7 +81,7 @@ const resendOtpController = async (req, res) => {
 const loginController = async (req, res) => {
     try {
 
-        const user = await loginService(req.sanitizedBody)
+        const user = await loginService(req.body)
         res.status(200).json({
             success: true,
             message: "The User login successfully",
@@ -107,7 +107,7 @@ const loginController = async (req, res) => {
 
 const forgotPasswordController = async (req, res) => {
     try {
-        const email = req.sanitizedBody;
+        const email = req.body;
         const result = await forgotPasswordService(email)
 
         console.log(result);
@@ -124,7 +124,7 @@ const forgotPasswordController = async (req, res) => {
 
 const resetPasswordController = async (req, res) => {
     try {
-        await resetPasswordService(req.sanitizedBody);
+        await resetPasswordService(req.body);
         return res.status(200).json({
             success: true,
             message: "Password reset successfully",
