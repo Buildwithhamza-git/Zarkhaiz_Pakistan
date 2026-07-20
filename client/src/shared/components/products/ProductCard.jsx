@@ -32,7 +32,9 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
           <span className="font-semibold text-green-700">
             Rs. {product.price}
           </span>
-          <span className="text-gray-500">Qty: {product.quantity}</span>
+          <span className="text-gray-500">
+            Qty: {product.quantity} {product.unit}
+          </span>
         </div>
 
         <div className="mt-3 flex gap-2 border-t border-gray-100 pt-3">
@@ -53,5 +55,4 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
     </Card>
   );
 };
-
 export default ProductCard;
