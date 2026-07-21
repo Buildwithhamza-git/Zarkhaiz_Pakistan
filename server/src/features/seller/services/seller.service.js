@@ -48,6 +48,25 @@ const getSellerProfile = async (userId) => {
 };
 
 
+const getSellerDashboard = async (userId) => {
+
+    const seller =
+        await sellerRepository.findSellerDashboardByUserId(userId);
+
+    if (!seller) {
+        throw new Error("Seller profile not found.");
+    }
+
+    return {
+        seller,
+        stats: {
+            products: 0,
+            orders: 0,
+            customers: 0,
+            revenue: 0,
+        },
+    };
+};
 module.exports = {
-    registerSeller,getSellerProfile
+    registerSeller,getSellerProfile, getSellerDashboard
 };

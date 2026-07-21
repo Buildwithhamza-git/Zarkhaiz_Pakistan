@@ -27,7 +27,6 @@ import heroImg from "../../../../assets/images/hero/img1.png";
 const menuItems = [
   { label: "Dashboard", to: "/seller/dashboard", icon: LayoutDashboard },
   { label: "Products", to: "/seller/products", icon: Package },
-  { label: "Add Product", to: "/seller/products/add", icon: PlusCircle },
   { label: "Orders", to: "/seller/orders", icon: ClipboardList, badge: 8 },
   { label: "Customers", to: "/seller/customers", icon: Users },
   { label: "Reviews", to: "/seller/reviews", icon: Star },

@@ -12,3 +12,7 @@ export const registerSeller = async (formData) => {
 export const getSellerProfile = async () => {
     return await authFetch("/seller/profile");
 };
+
+export const getSellerDashboard = async () => {
+    return await authFetch("/seller/dashboard");
+};

@@ -31,6 +31,15 @@ const deleteSeller = async (sellerId) => {
     return await Seller.findByIdAndDelete(sellerId);
 };
 
+const findSellerDashboardByUserId = async (userId) => {
+    return await Seller.findOne({
+        user: userId,
+    }).populate(
+        "user",
+        "firstname lastname email profilePicture"
+    );
+};
+
 module.exports = {
     createSeller,
     findSellerByUserId,
@@ -38,4 +47,5 @@ module.exports = {
     findSellerByCNIC,
     updateSeller,
     deleteSeller,
+    findSellerDashboardByUserId
 };

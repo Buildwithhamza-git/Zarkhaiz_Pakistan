@@ -50,6 +50,25 @@ const getSellerProfile = async (req, res, next) => {
     }
 
 };
+
+const getSellerDashboard = async (req, res, next) => {
+    try {
+
+        const dashboard =
+            await sellerService.getSellerDashboard(
+                req.user.userId
+            );
+
+        return res.status(200).json({
+            success: true,
+            data: dashboard,
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
-    registerSeller,getSellerProfile
+    registerSeller,getSellerProfile, getSellerDashboard
 };

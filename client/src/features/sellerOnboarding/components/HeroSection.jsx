@@ -1,6 +1,6 @@
 import { ArrowRight, BadgeCheck, BarChart3, Headphones, Play, ShieldCheck, Store, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import farmerImage from "../assets/farmer.png";
+import farmerImage from "../assets/img.png";
 
 const highlights = [
   { icon: Users, title: "Reach more buyers", text: "Sell across Pakistan" },
@@ -86,7 +86,7 @@ export default function HeroSection() {
           <div className="absolute left-4 top-8 w-[220px] rounded-2xl border border-white/70 bg-white/95 p-4 shadow-2xl backdrop-blur sm:left-8 sm:top-12">
             <div className="flex items-center justify-between">
               <p className="text-xs font-bold text-slate-500">Your business</p>
-              <BadgeCheck size={18} className="text-[#2f7d32]" />
+              <BadgeCheck size={18} className="text-[#2f7d32]" /> 
             </div>
             <p className="mt-4 text-xs text-slate-500">Monthly sales</p>
             <p className="mt-1 text-2xl font-black text-[#173f1b]">Rs. 125,750</p>

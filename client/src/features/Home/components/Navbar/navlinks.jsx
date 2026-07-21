@@ -3,7 +3,8 @@ import { getSellerProfile } from "../../../seller/services/sellerApi";
 
 const links = [
     { name: "Home", path: "/" },
-    { name: "Categories", path: "/categories" },
+    { name: "Products", path: "/products" },
+
     { name: "About", path: "/about" },
 ];
 

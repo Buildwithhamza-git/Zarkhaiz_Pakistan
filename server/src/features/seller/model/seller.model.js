@@ -40,7 +40,7 @@ const sellerSchema = new mongoose.Schema(
             enum: [
                 "Individual",
                 "Farmer",
-                "Company"   
+                "Company"
             ],
             required: true,
         },
@@ -49,6 +49,10 @@ const sellerSchema = new mongoose.Schema(
             type: String,
             required: true,
             unique: true,
+        },
+        logo: {
+            type: String,
+            default: "",
         },
 
         bankName: {
