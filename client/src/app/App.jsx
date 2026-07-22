@@ -14,11 +14,13 @@ import Dashboard from "../features/seller/component/dashboard/dashboard";
 import ProductsPage from "../features/seller/component/products/productsPages";
 import AddProductPage from "../features/seller/component/products/ProductForm";
 import SellerPendingApproval from "../features/seller/pages/sellerPendingApproval";
+import MarketplaceProductsPage from "../features/marketplace/layouts/ProductsPage";
 
 export default function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/products" element={<MarketplaceProductsPage />} />
       <Route path="/verify-reset-otp" element={<VerifyResetOtpPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/signup" element={<SignupPage />} />
