@@ -1,5 +1,6 @@
 import Navbar from "../components/Navbar/Navbar";
 import Hero from "../components/Hero/Hero";
+import AboutSection from "../components/About/AboutSection";
 import CategorySection from "../components/category/categorySection";
 import FeaturedProductSection from "../components/products/featuredproductsection";
 import WhyChooseZarkhaiz from "../components/WhyChooseZarkhaiz/WhyChooseZarkhaiz";
@@ -12,13 +13,14 @@ export default function HomePage() {
         <div className="min-h-screen bg-[#F8FAF7]">
             <Navbar />
 
-            <main className="pb-12  bg-white">
+            <main className="bg-white pb-12">
                 <Hero />
                 <CategorySection />
                 <FeaturedProductSection />
                 <WhyChooseZarkhaiz />
                 <HowItWorks />
-                <FAQ/>
+                <FAQ />
+                <AboutSection />
             </main>
 
             <Footer />
