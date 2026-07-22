@@ -14,6 +14,7 @@ import Dashboard from "../features/seller/component/dashboard/dashboard";
 import ProductsPage from "../features/seller/component/products/productsPages";
 import AddProductPage from "../features/seller/component/products/ProductForm";
 import SellerPendingApproval from "../features/seller/pages/sellerPendingApproval";
+import ProfilePage from "../features/profile/pages/ProfilePage";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
       <Route path="/verify-otp" element={<VerifyOtpPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/profile" element={<ProfilePage />} />
       <Route path="/become-seller" element={<BecomeSellerPage />} />
       <Route path="/seller-registration" element={<SellerRegistrationPage />} />
       <Route path="/seller/pending" element={<SellerPendingApproval />}/>
