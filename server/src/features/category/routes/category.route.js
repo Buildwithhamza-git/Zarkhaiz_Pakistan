@@ -1,29 +1,54 @@
 const router = require("express").Router();
 
+const authenticate = require("../../../middlewares/authenticate");
 const validateRequest = require("../../../middlewares/validateRequest");
-const { CategorySchema } = require("../validation/category.validation");
+
+const {
+    CreateCategorySchema,
+    UpdateCategorySchema,
+} = require("../validation/category.validation");
 
 const {
     createCategory,
     getAllCategories,
     getCategory,
     updateCategory,
+    deleteCategory,
 } = require("../controller/category.controller");
 
+// Create Category (Admin)
 router.post(
     "/",
-    validateRequest(CategorySchema),
+    authenticate,
+    validateRequest(CreateCategorySchema),
     createCategory
 );
 
-router.get("/", getAllCategories);
+// Get All Categories (Public)
+router.get(
+    "/",
+    getAllCategories
+);
 
-router.get("/:id", getCategory);
+// Get Single Category (Public)
+router.get(
+    "/:id",
+    getCategory
+);
 
+// Update Category (Admin)
 router.patch(
     "/:id",
-    validateRequest(CategorySchema.partial()),
+    authenticate,
+    validateRequest(UpdateCategorySchema),
     updateCategory
 );
+
+// Delete Category (Admin)
+// router.delete(
+//     "/:id",
+//     authenticate,
+//     deleteCategory
+// );
 
 module.exports = router;

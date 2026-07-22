@@ -40,6 +40,15 @@ const updateCategoryService = async (id, data) => {
         throw new Error("Category not found.");
     }
 
+    if (data.name && data.name !== category.name) {
+
+        const existingCategory = await findCategoryByName(data.name);
+
+        if (existingCategory) {
+            throw new Error("Category already exists.");
+        }
+    }
+
     return await updateCategory(id, data);
 };
 

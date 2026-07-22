@@ -5,7 +5,12 @@ const createSeller = async (sellerData) => {
 };
 
 const findSellerByUserId = async (userId) => {
-    return await Seller.findOne({ user: userId });
+    return await Seller.findOne({
+        user: userId,
+    }).populate(
+        "user",
+        "firstname lastname email profilePicture"
+    );
 };
 
 const findSellerById = async (sellerId) => {

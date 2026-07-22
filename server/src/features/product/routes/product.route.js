@@ -1,10 +1,11 @@
 const router = require("express").Router();
 
-const uploadProduct = require("../../../shared/uploadmiddleware/uploadProduct");
-const validateRequest = require("../../../middlewares/validateRequest");
-const  {ProductSchema}  = require("../validation/product.validation")
-
 const authenticate = require("../../../middlewares/authenticate");
+const validateRequest = require("../../../middlewares/validateRequest");
+
+const uploadProduct = require("../../../shared/uploadmiddleware/uploadProduct");
+
+const { ProductSchema } = require("../validation/product.validation");
 
 const {
     createProduct,
@@ -15,17 +16,28 @@ const {
     deleteProduct,
 } = require("../controller/product.controller");
 
-// Public Routes
-router.get("/", getAllProducts);
-router.get("/seller/my-products", authenticate, getSellerProducts);
-router.get("/:id", getProduct);
 
+// ====================================
+// Public Routes
+// ====================================
+
+router.get("/", getAllProducts);
+
+
+// ====================================
 // Seller Routes
+// ====================================
+
+router.get(
+    "/my-products",
+    authenticate,
+    getSellerProducts
+);
 
 router.post(
     "/",
     authenticate,
-    uploadProduct.array("images", 4),
+    uploadProduct.array("images", 5),
     validateRequest(ProductSchema),
     createProduct
 );
@@ -33,7 +45,7 @@ router.post(
 router.patch(
     "/:id",
     authenticate,
-    uploadProduct.array("images", 4),
+    uploadProduct.array("images", 5),
     validateRequest(ProductSchema.partial()),
     updateProduct
 );
@@ -43,5 +55,12 @@ router.delete(
     authenticate,
     deleteProduct
 );
+
+
+// ====================================
+// Public Product Details
+// ====================================
+
+router.get("/:id", getProduct);
 
 module.exports = router;

@@ -1,16 +1,25 @@
 const { z } = require("zod");
 
-const CategorySchema = z.object({
-
+const CreateCategorySchema = z.object({
     name: z
         .string()
-        .min(2)
-        .max(50),
+        .trim()
+        .min(2, "Category name must be at least 2 characters.")
+        .max(50, "Category name cannot exceed 50 characters."),
 
-    isActive: z
-        .boolean()
+    description: z
+        .string()
+        .trim()
+        .max(300)
         .optional()
+        .or(z.literal("")),
 
+    isActive: z.boolean().optional(),
 });
 
-module.exports = { CategorySchema };
+const UpdateCategorySchema = CreateCategorySchema.partial();
+
+module.exports = {
+    CreateCategorySchema,
+    UpdateCategorySchema,
+};

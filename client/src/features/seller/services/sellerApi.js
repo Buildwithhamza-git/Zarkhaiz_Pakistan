@@ -1,18 +1,19 @@
 import { authFetch } from "../../../utlis/authFetch";
 
+// Register Seller
 export const registerSeller = async (formData) => {
-  const response = await authFetch("/seller/register", {
+  return await authFetch("/seller/register", {
     method: "POST",
     body: formData,
   });
-
-  return response;
 };
 
-export const getSellerProfile = async () => {
-    return await authFetch("/seller/profile");
+// Current Seller (Application Status)
+export const getCurrentSeller = async () => {
+  return await authFetch("/seller/me");
 };
 
+// Seller Dashboard
 export const getSellerDashboard = async () => {
-    return await authFetch("/seller/dashboard");
+  return await authFetch("/seller/dashboard");
 };

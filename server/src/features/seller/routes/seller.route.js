@@ -6,7 +6,7 @@ const { SellerSchema } = require("../validations/seller.validation");
 const authenticate = require("../../../middlewares/authenticate");
 const uploadSeller = require("../../../shared/uploadmiddleware/uploadSeller")
 
-
+router.get("/me",authenticate,sellerController.getCurrentSeller);
 router.post("/register", authenticate,uploadSeller.fields([
         { name: "cnicFront", maxCount: 1 },
         { name: "cnicBack", maxCount: 1 },

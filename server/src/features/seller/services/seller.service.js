@@ -67,6 +67,18 @@ const getSellerDashboard = async (userId) => {
         },
     };
 };
+
+
+const getCurrentSellerService = async (userId) => {
+    const seller = await sellerRepository.findSellerByUserId(userId);
+
+    // If seller hasn't applied yet
+    if (!seller) {
+        return null;
+    }
+
+    return seller;
+};
 module.exports = {
-    registerSeller,getSellerProfile, getSellerDashboard
+    registerSeller,getSellerProfile, getSellerDashboard, getCurrentSellerService
 };

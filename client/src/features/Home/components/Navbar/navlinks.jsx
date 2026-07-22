@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { getSellerProfile } from "../../../seller/services/sellerApi";
+import { getCurrentSeller } from "../../../seller/services/sellerApi";
 
 const links = [
     { name: "Home", path: "/" },
@@ -12,46 +12,46 @@ export default function NavLinks() {
 
     const navigate = useNavigate();
 
-    const handleBecomeSeller = async () => {
-        try {
+ const handleBecomeSeller = async () => {
+    try {
+        const response = await getCurrentSeller();
 
-            const response = await getSellerProfile();
+        console.log("SELLER RESPONSE:", response);
 
-            if (!response.seller) {
-                navigate("/become-seller");
-                return;
-            }
+        const seller = response?.data?.seller;
 
-            switch (response.seller.status) {
+        if (!seller) {
+            navigate("/become-seller");
+            return;
+        }
 
-                case "pending":
-                    navigate("/seller/pending");
-                    break;
+        const status = seller.status;
 
-                case "approved":
-                    navigate("/seller/dashboard");
-                    break;
-
-                case "rejected":
-                    navigate("/become-seller");
-                    break;
-
-                default:
-                    navigate("/become-seller");
-            }
-
-        } catch (error) {
-            console.error(error);
-            if (error.message === "Unauthorized") {
-                navigate("/login");
-                return;
-            }
-            if (error.status === 401) {
-                navigate("/login");
-                return;
-            }
+        if (status === "pending") {
+            navigate("/seller/pending");
+        } else if (status === "approved") {
+            navigate("/seller/dashboard");
+        } else if (status === "rejected") {
+            navigate("/become-seller");
+        } else {
             navigate("/become-seller");
         }
+
+    } catch (error) {
+        console.error(error);
+
+        if (error.message === "Unauthorized" || error.status === 401) {
+            navigate("/login");
+            return;
+        }
+
+        if (error.status === 404) {
+            navigate("/become-seller");
+            return;
+        }
+
+        navigate("/seller/pending");
+    }
     };
 
     return (

@@ -7,6 +7,27 @@ const categorySchema = new mongoose.Schema(
       required: true,
       unique: true,
       trim: true,
+      enum: [
+        "Seeds",
+        "Fertilizers",
+        "Pesticides",
+        "Herbicides",
+        "Crops",
+        "Vegetables",
+        "Fruits",
+        "Irrigation",
+        "Farm Equipment",
+      ],
+    },
+
+    description: {
+      type: String,
+      trim: true,
+    },
+
+    image: {
+      type: String,
+      default: "",
     },
 
     isActive: {

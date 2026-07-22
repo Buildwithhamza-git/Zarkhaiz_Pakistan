@@ -7,7 +7,10 @@ const {
     deleteProductService,
 } = require("../service/product.service");
 
+
+// ====================================
 // Create Product
+// ====================================
 const createProduct = async (req, res, next) => {
     try {
 
@@ -17,7 +20,7 @@ const createProduct = async (req, res, next) => {
             req.files
         );
 
-        res.status(201).json({
+        return res.status(201).json({
             success: true,
             message: "Product created successfully.",
             data: product,
@@ -28,13 +31,16 @@ const createProduct = async (req, res, next) => {
     }
 };
 
+
+// ====================================
 // Get All Products
+// ====================================
 const getAllProducts = async (req, res, next) => {
     try {
 
         const products = await getAllProductsService();
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             data: products,
         });
@@ -44,13 +50,18 @@ const getAllProducts = async (req, res, next) => {
     }
 };
 
+
+// ====================================
 // Get Seller Products
+// ====================================
 const getSellerProducts = async (req, res, next) => {
     try {
 
-        const products = await getSellerProductsService(req.user.userId);
+        const products = await getSellerProductsService(
+            req.user.userId
+        );
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             data: products,
         });
@@ -60,13 +71,18 @@ const getSellerProducts = async (req, res, next) => {
     }
 };
 
-// Get Product
+
+// ====================================
+// Get Product By ID
+// ====================================
 const getProduct = async (req, res, next) => {
     try {
 
-        const product = await getProductService(req.params.id);
+        const product = await getProductService(
+            req.params.id
+        );
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             data: product,
         });
@@ -76,7 +92,10 @@ const getProduct = async (req, res, next) => {
     }
 };
 
+
+// ====================================
 // Update Product
+// ====================================
 const updateProduct = async (req, res, next) => {
     try {
 
@@ -87,7 +106,7 @@ const updateProduct = async (req, res, next) => {
             req.files
         );
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: "Product updated successfully.",
             data: product,
@@ -98,7 +117,10 @@ const updateProduct = async (req, res, next) => {
     }
 };
 
+
+// ====================================
 // Delete Product
+// ====================================
 const deleteProduct = async (req, res, next) => {
     try {
 
@@ -107,7 +129,7 @@ const deleteProduct = async (req, res, next) => {
             req.user.userId
         );
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: "Product deleted successfully.",
         });

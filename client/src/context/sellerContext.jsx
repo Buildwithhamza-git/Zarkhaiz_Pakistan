@@ -1,58 +1,98 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { getSellerDashboard } from "../features/seller/services/sellerApi";
+
+import {
+  getCurrentSeller,
+  getSellerDashboard,
+} from "../features/seller/services/sellerApi";
 
 const SellerContext = createContext();
 
 export default function SellerProvider({ children }) {
-    const [seller, setSeller] = useState(null);
-    
-    const [stats, setStats] = useState({products: 0,orders: 0,customers: 0,revenue: 0,});
+  const [seller, setSeller] = useState(null);
 
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+  const [stats, setStats] = useState({
+    products: 0,
+    orders: 0,
+    customers: 0,
+    revenue: 0,
+  });
 
-    const refreshDashboard = async () => {
-        try {
-            setLoading(true);
-            const response = await getSellerDashboard();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-            setSeller(response.data.seller);
-            setStats(response.data.stats);
+  // Seller Status
+  const isSeller = !!seller;
+  const isApproved = seller?.status === "approved";
+  const isPending = seller?.status === "pending";
+  const isRejected = seller?.status === "rejected";
 
-            setError("");
-        } catch (err) {
-            setSeller(null);
-            setStats(null);
+  // Load Seller Information
+  const refreshSeller = async () => {
+    try {
+      const response = await getCurrentSeller();
+      console.log("SELLER RESPONSE:", response);
 
-            setError(err.message || "Failed to load seller.");
-        } finally {
-            setLoading(false);
-        }
-    };
+      if (response.data) {
+        setSeller(response.data.seller);
+      } else {
+        setSeller(null);
+      }
+    } catch (err) {
+      setSeller(null);
+      setError(err.message || "Failed to load seller.");
+    }
+  };
 
-    useEffect(() => {
+  // Load Dashboard (Approved sellers only)
+  const refreshDashboard = async () => {
+    try {
+      const response = await getSellerDashboard();
+
+      setStats(response.data.stats || {});
+    } catch (err) {
+      setError(err.message || "Failed to load dashboard.");
+    }
+  };
+
+  useEffect(() => {
+    const initialize = async () => {
+      try {
         const token = localStorage.getItem("token");
 
-        if (token) {
-            refreshDashboard();
-        } else {
-            setLoading(false);
+        if (!token) {
+          setLoading(false);
+          return;
         }
-    }, []);
 
-    return (
-        <SellerContext.Provider
-            value={{
-                seller,
-                stats,
-                loading,
-                error,
-                refreshDashboard,
-            }}
-        >
-            {children}
-        </SellerContext.Provider>
-    );
+        await refreshSeller();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initialize();
+  }, []);
+
+  return (
+    <SellerContext.Provider
+      value={{
+        seller,
+        stats,
+        loading,
+        error,
+
+        isSeller,
+        isApproved,
+        isPending,
+        isRejected,
+
+        refreshSeller,
+        refreshDashboard,
+      }}
+    >
+      {children}
+    </SellerContext.Provider>
+  );
 }
 
 export const useSellerContext = () => useContext(SellerContext);
