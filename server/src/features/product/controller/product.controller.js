@@ -2,6 +2,9 @@ const {
     createProductService,
     getAllProductsService,
     getSellerProductsService,
+    getFeaturedProductsService,
+    getLatestProductsService,
+    getProductsByCategoryService,
     getProductService,
     updateProductService,
     deleteProductService,
@@ -38,11 +41,13 @@ const createProduct = async (req, res, next) => {
 const getAllProducts = async (req, res, next) => {
     try {
 
-        const products = await getAllProductsService();
+        const products = await getAllProductsService(req.query);
 
         return res.status(200).json({
             success: true,
-            data: products,
+            message: "Products fetched successfully.",
+            data: products.products,
+            pagination: products.pagination,
         });
 
     } catch (error) {
@@ -139,11 +144,63 @@ const deleteProduct = async (req, res, next) => {
     }
 };
 
+// Featured Products
+const getFeaturedProducts = async (req, res, next) => {
+    try {
+
+        const products = await getFeaturedProductsService();
+
+        return res.status(200).json({
+            success: true,
+            data: products,
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Latest Products
+const getLatestProducts = async (req, res, next) => {
+    try {
+
+        const products = await getLatestProductsService();
+
+        return res.status(200).json({
+            success: true,
+            data: products,
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Products By Category
+const getProductsByCategory = async (req, res, next) => {
+    try {
+
+        const products = await getProductsByCategoryService(
+            req.params.categoryId
+        );
+
+        return res.status(200).json({
+            success: true,
+            data: products,
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
 module.exports = {
     createProduct,
     getAllProducts,
     getSellerProducts,
     getProduct,
     updateProduct,
+    getFeaturedProducts ,
+    getLatestProducts ,
+    getProductsByCategory ,
     deleteProduct,
 };

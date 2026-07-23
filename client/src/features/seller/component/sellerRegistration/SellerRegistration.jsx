@@ -1,173 +1,258 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
 import SellerStepper from "./sellerstepper";
 import StoreInformation from "./storeinfo";
 import BusinessInformation from "./BusinessInformation";
 import BankInformation from "./BankInformation";
 import DocumentsUpload from "./DocumentsUpload";
 import ReviewSubmit from "./Reviewsubmit";
-import { registerSeller } from "../../services/sellerApi";
 
+import {
+  registerSeller,
+  getCurrentSeller,
+} from "../../services/sellerApi";
+
+import { useSellerContext } from "../../../../context/sellerContext";
 
 export default function SellerRegistration() {
-    const [currentStep, setCurrentStep] = useState(1);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
-    const navigate = useNavigate();
-    const [formData, setFormData] = useState({
+  const navigate = useNavigate();
 
-        logo: null,
-        storeName: "",
-        description: "",
-        province: "",
-        city: "",
-        address: "",
+  const { refreshSeller } = useSellerContext();
 
-        businessType: "",
-        cnic: "",
+  const [currentStep, setCurrentStep] = useState(1);
 
-        bankName: "",
-        accountTitle: "",
-        iban: "",
-        jazzCash: "",
-        easyPaisa: "",
+  const [loading, setLoading] = useState(false);
 
-        documents: {
-            cnicFront: null,
-            cnicBack: null,
+  const [error, setError] = useState("");
+
+  const [formData, setFormData] = useState({
+    logo: null,
+
+    storeName: "",
+    description: "",
+    province: "",
+    city: "",
+    address: "",
+
+    businessType: "",
+    cnic: "",
+
+    bankName: "",
+    accountTitle: "",
+    iban: "",
+    jazzCash: "",
+    easyPaisa: "",
+
+    documents: {
+      cnicFront: null,
+      cnicBack: null,
+    },
+  });
+
+  // ======================================
+  // Prevent seller from accessing registration again
+  // ======================================
+
+  useEffect(() => {
+    const checkSeller = async () => {
+      try {
+        const response = await getCurrentSeller();
+
+        const seller = response?.data?.seller;
+
+        if (!seller) return;
+
+        switch (seller.status) {
+          case "pending":
+            navigate("/seller/pending", {
+              replace: true,
+            });
+            break;
+
+          case "approved":
+            navigate("/seller/dashboard", {
+              replace: true,
+            });
+            break;
+
+          case "rejected":
+            navigate("/become-seller", {
+              replace: true,
+            });
+            break;
+
+          default:
+            break;
         }
-
-
-    });
-
-    const nextStep = () => {
-        setCurrentStep((prev) => prev + 1);
+      } catch (error) {
+        if (error.status === 401) {
+          navigate("/login", {
+            replace: true,
+          });
+        }
+      }
     };
 
-    const previousStep = () => {
-        setCurrentStep((prev) => prev - 1);
-    };
+    checkSeller();
+  }, [navigate]);
 
-    const handleSubmit = async () => {
-        try {
-            setLoading(true);
-        setError("");
-            const data = new FormData();
+  // ======================================
 
-            // Store Information
-            data.append("storeName", formData.storeName);
-            data.append("description", formData.description);
-            data.append("province", formData.province);
-            data.append("city", formData.city);
-            data.append("address", formData.address);
+  const nextStep = () => {
+    setCurrentStep((prev) => prev + 1);
+  };
 
-            // Business Information
-            data.append("businessType", formData.businessType);
-            data.append("cnic", formData.cnic);
+  const previousStep = () => {
+    setCurrentStep((prev) => prev - 1);
+  };
 
-            // Bank Information
-            data.append("bankName", formData.bankName);
-            data.append("accountTitle", formData.accountTitle);
-            data.append("iban", formData.iban);
-            data.append("jazzCash", formData.jazzCash);
-            data.append("easyPaisa", formData.easyPaisa);
+  // ======================================
+  // Submit
+  // ======================================
 
-            // Documents
-            if (formData.logo) {
-                data.append("logo", formData.logo);
-            }
+  const handleSubmit = async () => {
+    if (loading) return;
 
-            if (formData.documents.cnicFront) {
-                data.append("cnicFront", formData.documents.cnicFront);
-            }
+    try {
+      setLoading(true);
 
-            if (formData.documents.cnicBack) {
-                data.append("cnicBack", formData.documents.cnicBack);
-            }
+      setError("");
 
-            const response = await registerSeller(data);
+      const data = new FormData();
 
-            console.log(response);
+      // Store
 
-            navigate("/seller/pending");
+      data.append("storeName", formData.storeName);
+      data.append("description", formData.description);
+      data.append("province", formData.province);
+      data.append("city", formData.city);
+      data.append("address", formData.address);
 
-        } catch (error) {
-              setError(error.message || "Something went wrong");
-            console.error(error);
-        }
-        finally {
-        setLoading(false);
+      // Business
+
+      data.append("businessType", formData.businessType);
+      data.append("cnic", formData.cnic);
+
+      // Bank
+
+      data.append("bankName", formData.bankName);
+      data.append("accountTitle", formData.accountTitle);
+      data.append("iban", formData.iban);
+      data.append("jazzCash", formData.jazzCash);
+      data.append("easyPaisa", formData.easyPaisa);
+
+      // Logo
+
+      if (formData.logo) {
+        data.append("logo", formData.logo);
+      }
+
+      // Documents
+
+      if (formData.documents.cnicFront) {
+        data.append(
+          "cnicFront",
+          formData.documents.cnicFront
+        );
+      }
+
+      if (formData.documents.cnicBack) {
+        data.append(
+          "cnicBack",
+          formData.documents.cnicBack
+        );
+      }
+
+      // Register Seller
+
+      await registerSeller(data);
+
+      // Refresh Seller Context
+
+      await refreshSeller();
+
+      navigate("/seller/pending", {
+        replace: true,
+      });
+    } catch (error) {
+      console.log(error);
+
+      setError(
+        error.message ||
+          "Failed to submit seller application."
+      );
+    } finally {
+      setLoading(false);
     }
-    };
-    return (
-        <section className="py-16 px-6 " >
-            <div className="max-w-5xl mx-auto   ">
+  };
 
-                <div className="text-center mb-10">
+  return (
+    <section className="px-6 py-16">
+      <div className="mx-auto max-w-5xl">
 
-                    <h1 className="text-4xl font-bold text-green-800">
-                        Become a Seller
-                    </h1>
+        <div className="mb-10 text-center">
+          <h1 className="text-4xl font-bold text-green-800">
+            Become a Seller
+          </h1>
 
-                    <p className="mt-3 text-gray-500">
-                        Join Pakistan's largest agriculture marketplace.
-                    </p>
+          <p className="mt-3 text-gray-500">
+            Join Pakistan's largest agriculture marketplace.
+          </p>
+        </div>
 
-                </div>
-                <div className="w-full mx-2">
-                    <SellerStepper currentStep={currentStep} />
+        <SellerStepper currentStep={currentStep} />
 
-                    <div className="mt-8 bg-white rounded-3xl shadow-lg p-10">
+        <div className="mt-8 rounded-3xl bg-white p-10 shadow-lg">
 
-                        {currentStep === 1 && (
-                            <StoreInformation
-                                formData={formData}
-                                setFormData={setFormData}
-                                nextStep={nextStep}
-                            />
-                        )}
+          {currentStep === 1 && (
+            <StoreInformation
+              formData={formData}
+              setFormData={setFormData}
+              nextStep={nextStep}
+            />
+          )}
 
-                        {currentStep === 2 && (
-                            <BusinessInformation
-                                formData={formData}
-                                setFormData={setFormData}
-                                nextStep={nextStep}
-                                previousStep={previousStep}
-                            />
-                        )}
+          {currentStep === 2 && (
+            <BusinessInformation
+              formData={formData}
+              setFormData={setFormData}
+              nextStep={nextStep}
+              previousStep={previousStep}
+            />
+          )}
 
-                        {currentStep === 3 && (
-                            <BankInformation
-                                formData={formData}
-                                setFormData={setFormData}
-                                nextStep={nextStep}
-                                previousStep={previousStep}
-                            />
-                        )}
+          {currentStep === 3 && (
+            <BankInformation
+              formData={formData}
+              setFormData={setFormData}
+              nextStep={nextStep}
+              previousStep={previousStep}
+            />
+          )}
 
-                        {currentStep === 4 && (
+          {currentStep === 4 && (
+            <DocumentsUpload
+              formData={formData}
+              setFormData={setFormData}
+              nextStep={nextStep}
+              previousStep={previousStep}
+            />
+          )}
 
-                            <DocumentsUpload
-                                formData={formData}
-                                setFormData={setFormData}
-                                nextStep={nextStep}
-                                previousStep={previousStep}
-                            />
+          {currentStep === 5 && (
+            <ReviewSubmit
+              formData={formData}
+              previousStep={previousStep}
+              handleSubmit={handleSubmit}
+              loading={loading}
+              error={error}
+            />
+          )}
 
-                        )}
+        </div>
 
-                        {currentStep === 5 && (
-                            <ReviewSubmit
-                                formData={formData}
-                                previousStep={previousStep}
-                                handleSubmit={handleSubmit}
-                                loading={loading}
-                                error={error}
-                            />
-                        )}
-                    </div>
-
-                </div></div>
-        </section>
-    );
+      </div>
+    </section>
+  );
 }
