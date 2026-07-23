@@ -1,3 +1,6 @@
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+
 import Navbar from "../components/Navbar/Navbar";
 import Hero from "../components/Hero/Hero";
 import AboutSection from "../components/About/AboutSection";
@@ -9,6 +12,23 @@ import FAQ from "../components/FAQ/FAQ";
 import Footer from "../components/Footer/Footer";
 
 export default function HomePage() {
+    const location = useLocation();
+
+   useEffect(() => {
+    if (location.hash === "#about") {
+        const section = document.getElementById("about");
+
+        if (section) {
+            setTimeout(() => {
+                section.scrollIntoView({ behavior: "smooth" });
+
+                // ✅ REMOVE HASH after scrolling (prevents refresh issue)
+                window.history.replaceState(null, "", window.location.pathname);
+            }, 100);
+        }
+    }
+}, [location]);
+
     return (
         <div className="min-h-screen bg-[#F8FAF7]">
             <Navbar />
@@ -19,8 +39,12 @@ export default function HomePage() {
                 <FeaturedProductSection />
                 <WhyChooseZarkhaiz />
                 <HowItWorks />
+
+                {/* IMPORTANT: Add ID here */}
+                <div id="about">
+                    <AboutSection />
+                </div>
                 <FAQ />
-                <AboutSection />
             </main>
 
             <Footer />

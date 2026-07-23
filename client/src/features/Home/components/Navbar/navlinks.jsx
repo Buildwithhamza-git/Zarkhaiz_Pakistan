@@ -18,15 +18,20 @@ export default function NavLinks({ mobile = false, onNavigate }) {
   };
 
   // ✅ About scroll (Asfand feature)
-  const handleAboutClick = () => {
-    const aboutSection = document.getElementById("about");
+ const handleAboutClick = () => {
+  closeMobileMenu();
 
+  // If already on home → scroll directly
+  if (window.location.pathname === "/") {
+    const aboutSection = document.getElementById("about");
     if (aboutSection) {
       aboutSection.scrollIntoView({ behavior: "smooth" });
     }
-
-    closeMobileMenu();
-  };
+  } else {
+    // Navigate to home with hash
+    navigate("/#about");
+  }
+};
 
   // ✅ Seller logic (YOUR feature - better)
   const handleSellerAction = () => {
