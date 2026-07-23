@@ -16,7 +16,8 @@ const {
 // ====================================
 const createProduct = async (req, res, next) => {
     try {
-
+        console.log("Body:", req.body);
+console.log("Files:", req.files);
         const product = await createProductService(
             req.user.userId,
             req.body,

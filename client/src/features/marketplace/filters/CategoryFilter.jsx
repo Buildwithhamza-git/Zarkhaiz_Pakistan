@@ -1,45 +1,96 @@
-import { useState } from "react";
-import { ChevronUp } from "lucide-react";
-import { categories } from "../data/categories";
+import { Grid2x2 } from "lucide-react";
+import useMarketplaceCategories from "../hooks/useMarketplacecategory";
 
-const CategoryFilter = () => {
-  const [open, setOpen] = useState(true);
-  const [active, setActive] = useState("all");
+export default function CategoryFilter({ filters, setFilters }) {
 
-  return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-      <button
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        className="flex w-full items-center justify-between"
-      >
-        <h3 className="text-base font-bold text-gray-900">Categories</h3>
-        <ChevronUp size={18} className={`text-gray-400 transition-transform ${open ? "" : "rotate-180"}`} />
-      </button>
+    const {
+        categories,
+        loading,
+    } = useMarketplaceCategories();
 
-      {open && (
-        <ul className="mt-4 space-y-1">
-          {categories.map(({ id, name, icon: Icon, count }) => (
-            <li key={id}>
-              <button
-                type="button"
-                onClick={() => setActive(id)}
-                className={`flex w-full items-center justify-between rounded-lg px-2 py-2 text-sm transition ${
-                  active === id ? "font-semibold text-green-700" : "text-gray-600 hover:text-green-700"
-                }`}
-              >
-                <span className="flex items-center gap-2">
-                  <Icon size={16} className={active === id ? "text-green-700" : "text-gray-400"} />
-                  {name}
-                </span>
-                <span className="text-xs text-gray-400">({count})</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-};
+    if (loading) {
+        return (
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+                <h3 className="font-bold text-lg text-gray-900 mb-5">
+                    Categories
+                </h3>
 
-export default CategoryFilter;
+                <div className="space-y-2">
+                    {[1, 2, 3, 4, 5].map((item) => (
+                        <div
+                            key={item}
+                            className="h-9 rounded-lg bg-gray-200 animate-pulse"
+                        />
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+
+            <h3 className="font-bold text-lg text-gray-900 mb-5">
+                Categories
+            </h3>
+
+            <div className="space-y-1">
+
+                {/* All Categories */}
+
+                <button
+                    onClick={() =>
+                        setFilters((prev) => ({
+                            ...prev,
+                            category: "",
+                        }))
+                    }
+                    className={`w-full flex items-center gap-3 px-2 py-2 rounded-lg transition
+                        ${
+                            filters.category === ""
+                                ? "bg-green-50 text-green-700"
+                                : "hover:bg-gray-50 text-gray-700"
+                        }`}
+                >
+                    <Grid2x2 size={16} />
+
+                    <span className="text-sm">
+                        All Categories
+                    </span>
+
+                </button>
+
+                {/* Backend Categories */}
+
+                {categories.map((category) => (
+
+                    <button
+                        key={category._id}
+                        onClick={() =>
+                            setFilters((prev) => ({
+                                ...prev,
+                                category: category._id,
+                            }))
+                        }
+                        className={`w-full flex items-center gap-3 px-2 py-2 rounded-lg transition
+                            ${
+                                filters.category === category._id
+                                    ? "bg-green-50 text-green-700"
+                                    : "hover:bg-gray-50 text-gray-700"
+                            }`}
+                    >
+                        <Grid2x2 size={16} />
+
+                        <span className="text-sm">
+                            {category.name}
+                        </span>
+
+                    </button>
+
+                ))}
+
+            </div>
+
+        </div>
+    );
+}

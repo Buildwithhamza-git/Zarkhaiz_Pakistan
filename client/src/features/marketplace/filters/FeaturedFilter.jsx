@@ -1,36 +1,44 @@
-import { useState } from "react";
-import { ChevronUp } from "lucide-react";
-
-const FeaturedFilter = () => {
-  const [open, setOpen] = useState(true);
-  const [checked, setChecked] = useState(false);
-
+export default function FeaturedFilter({
+  filters,
+  setFilters,
+}) {
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-      <button
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        className="flex w-full items-center justify-between"
-      >
-        <h3 className="text-base font-bold text-gray-900">Featured</h3>
-        <ChevronUp size={18} className={`text-gray-400 transition-transform ${open ? "" : "rotate-180"}`} />
-      </button>
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
 
-      {open && (
-        <label className="mt-4 flex cursor-pointer items-center gap-3">
+      <h3 className="font-bold text-lg mb-5">
+        Featured
+      </h3>
+
+      <label className="flex items-center justify-between cursor-pointer">
+
+        <div className="flex items-center gap-3">
+
           <input
             type="checkbox"
-            checked={checked}
-            onChange={() => setChecked((prev) => !prev)}
-            className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+            checked={filters.featured === "Featured"}
+            onChange={(e) =>
+              setFilters((prev) => ({
+                ...prev,
+                featured: e.target.checked
+                  ? "Featured"
+                  : "",
+              }))
+            }
+            className="h-4 w-4 accent-green-600"
           />
-          <span className="text-sm text-gray-700">
-            Featured Products <span className="text-gray-400">(45)</span>
+
+          <span className="text-sm">
+            Featured Products
           </span>
-        </label>
-      )}
+
+        </div>
+
+        <span className="text-xs text-gray-500">
+          (45)
+        </span>
+
+      </label>
+
     </div>
   );
-};
-
-export default FeaturedFilter;
+}

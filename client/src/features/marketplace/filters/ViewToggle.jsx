@@ -1,32 +1,41 @@
-import { useState } from "react";
 import { LayoutGrid, List } from "lucide-react";
 
-const ViewToggle = () => {
-  const [view, setView] = useState("grid");
-
+const ViewToggle = ({ filters, setFilters }) => {
   return (
-    <div className="flex shrink-0 items-center gap-1 rounded-xl border border-gray-200 p-1">
+    <div className="flex items-center rounded-xl border border-gray-200 overflow-hidden">
+
       <button
-        type="button"
-        onClick={() => setView("grid")}
-        aria-label="Grid view"
-        className={`rounded-lg p-2 transition ${
-          view === "grid" ? "bg-green-600 text-white" : "text-gray-400 hover:text-green-700"
+        onClick={() =>
+          setFilters((prev) => ({
+            ...prev,
+            view: "grid",
+          }))
+        }
+        className={`p-3 transition ${
+          filters.view === "grid"
+            ? "bg-green-600 text-white"
+            : "bg-white text-gray-500 hover:bg-gray-100"
         }`}
       >
         <LayoutGrid size={18} />
       </button>
 
       <button
-        type="button"
-        onClick={() => setView("list")}
-        aria-label="List view"
-        className={`rounded-lg p-2 transition ${
-          view === "list" ? "bg-green-600 text-white" : "text-gray-400 hover:text-green-700"
+        onClick={() =>
+          setFilters((prev) => ({
+            ...prev,
+            view: "list",
+          }))
+        }
+        className={`p-3 transition ${
+          filters.view === "list"
+            ? "bg-green-600 text-white"
+            : "bg-white text-gray-500 hover:bg-gray-100"
         }`}
       >
         <List size={18} />
       </button>
+
     </div>
   );
 };

@@ -1,49 +1,63 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-const sortOptions = [
-  "Newest First",
-  "Price: Low to High",
-  "Price: High to Low",
-  "Most Popular",
-  "Top Rated",
+const options = [
+  { label: "Newest", value: "newest" },
+  { label: "Price: Low to High", value: "price_asc" },
+  { label: "Price: High to Low", value: "price_desc" },
+  { label: "Popularity", value: "popular" },
 ];
 
-const SortDropdown = () => {
+const SortDropdown = ({ filters, setFilters }) => {
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState("Newest First");
+
+  const current =
+    options.find((o) => o.value === filters.sort)?.label || "Newest";
 
   return (
     <div className="relative">
+
       <button
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-700 transition hover:border-green-300"
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-3 text-sm"
       >
-        <span className="text-gray-500">Sort by:</span>
-        <span>{selected}</span>
-        <ChevronDown size={16} className={`text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} />
+        {current}
+
+        <ChevronDown
+          size={16}
+          className={`transition ${
+            open ? "rotate-180" : ""
+          }`}
+        />
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-20 mt-2 w-56 overflow-hidden rounded-xl border border-gray-100 bg-white py-1 shadow-lg">
-          {sortOptions.map((option) => (
+        <div className="absolute right-0 mt-2 w-56 rounded-xl border bg-white shadow-lg z-50">
+
+          {options.map((option) => (
             <button
-              key={option}
-              type="button"
+              key={option.value}
               onClick={() => {
-                setSelected(option);
+                setFilters((prev) => ({
+                  ...prev,
+                  sort: option.value,
+                }));
+
                 setOpen(false);
               }}
-              className={`block w-full px-4 py-2 text-left text-sm transition hover:bg-green-50 ${
-                option === selected ? "font-medium text-green-700" : "text-gray-600"
+              className={`block w-full px-4 py-3 text-left hover:bg-green-50 ${
+                filters.sort === option.value
+                  ? "font-semibold text-green-600"
+                  : ""
               }`}
             >
-              {option}
+              {option.label}
             </button>
           ))}
+
         </div>
       )}
+
     </div>
   );
 };

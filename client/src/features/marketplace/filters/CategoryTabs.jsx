@@ -1,28 +1,64 @@
-import { useState } from "react";
-import { categories } from "../data/categories";
+import useMarketplaceCategories from "../hooks/useMarketplacecategory";
 
-const CategoryTabs = () => {
-  const [active, setActive] = useState("all");
+export default function CategoryTabs({ filters, setFilters }) {
+  const { categories, loading } = useMarketplaceCategories();
+
+  if (loading) {
+    return (
+      <div className="flex gap-3 overflow-x-auto pb-1">
+        {[1, 2, 3, 4].map((item) => (
+          <div
+            key={item}
+            className="h-11 w-28 animate-pulse rounded-xl bg-gray-200"
+          />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="scrollbar-hide flex items-center gap-3 overflow-x-auto pb-1">
-      {categories.map(({ id, shortName, icon: Icon }) => (
+
+      {/* All Categories */}
+
+      <button
+        type="button"
+        onClick={() =>
+          setFilters({
+            ...filters,
+            category: "",
+          })
+        }
+        className={`flex shrink-0 items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition ${
+          filters.category === ""
+            ? "border-green-600 bg-green-600 text-white"
+            : "border-gray-200 bg-white text-gray-700 hover:border-green-300 hover:text-green-700"
+        }`}
+      >
+        All Categories
+      </button>
+
+      {/* Backend Categories */}
+
+      {categories.map((category) => (
         <button
-          key={id}
+          key={category._id}
           type="button"
-          onClick={() => setActive(id)}
+          onClick={() =>
+            setFilters({
+              ...filters,
+              category: category._id,
+            })
+          }
           className={`flex shrink-0 items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition ${
-            active === id
+            filters.category === category._id
               ? "border-green-600 bg-green-600 text-white"
               : "border-gray-200 bg-white text-gray-700 hover:border-green-300 hover:text-green-700"
           }`}
         >
-          <Icon size={16} />
-          {shortName}
+          {category.name}
         </button>
       ))}
     </div>
   );
-};
-
-export default CategoryTabs;
+}

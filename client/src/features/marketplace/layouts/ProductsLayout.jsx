@@ -1,11 +1,27 @@
+import { useState } from "react";
+
 import Navbar from "../../Home/components/Navbar/Navbar";
 import HeroSection from "./HeroSection";
+
 import SearchBar from "../filters/SearchBar";
 import CategoryTabs from "../filters/CategoryTabs";
-import Sidebar from "../filters/SideBar";
+import Sidebar from "../filters/Sidebar";
+
+import ProductsPage from "../pages/ProductsPage";
+
 import "../styles/marketplace.css";
 
-const ProductsLayout = () => {
+export default function ProductsLayout() {
+  const [filters, setFilters] = useState({
+    search: "",
+    category: "",
+    featured: "",
+    minPrice: 0,
+    maxPrice: 50000,
+    sort: "newest",
+    view: "grid",
+  });
+
   return (
     <div className="min-h-screen bg-[#F8FAF7]">
       <Navbar />
@@ -13,23 +29,37 @@ const ProductsLayout = () => {
       <HeroSection />
 
       <div className="mx-auto max-w-7xl px-6">
+        {/* Search */}
         <div className="relative z-10 -mt-8 space-y-4">
-          <SearchBar />
-          <CategoryTabs />
+          <SearchBar
+            filters={filters}
+            setFilters={setFilters}
+          />
+
+          <CategoryTabs
+            filters={filters}
+            setFilters={setFilters}
+          />
         </div>
 
-        <div className="flex flex-col gap-6 py-8 lg:flex-row">
-          <Sidebar />
+        {/* Main Layout */}
+        <div className="flex gap-6 py-8">
 
-          <main className="flex flex-1 items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white/60 p-16">
-            <p className="text-sm font-medium text-gray-400">
-              Products Grid will be integrated here.
-            </p>
+          {/* Left Sidebar */}
+          <Sidebar
+            filters={filters}
+            setFilters={setFilters}
+          />
+
+          {/* Products */}
+          <main className="flex-1">
+            <ProductsPage
+              filters={filters}
+            />
           </main>
+
         </div>
       </div>
     </div>
   );
-};
-
-export default ProductsLayout;
+}
