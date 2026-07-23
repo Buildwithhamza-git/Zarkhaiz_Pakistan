@@ -11,9 +11,10 @@ import SellerDashboardPage from "../features/seller/pages/sellerDashboardLayout"
 import SellerRegistrationPage from "../features/seller/pages/SellerRegistrationPage";
 import BecomeSellerPage from "../features/sellerOnboarding/pages/BecomeSellerPage";
 import Dashboard from "../features/seller/component/dashboard/dashboard";
-import ProductsPage from "../features/seller/component/products/productsPages";
+// import ProductsPage from "../features/seller/component/products/productsPages";
 import AddProductPage from "../features/seller/component/products/ProductForm";
 import SellerPendingApproval from "../features/seller/pages/sellerPendingApproval";
+import ProductsPage from "../features/marketplace/pages/ProductsPage";
 
 export default function App() {
   return (
@@ -35,7 +36,7 @@ export default function App() {
         <Route path="products" element={<ProductsPage/>}/>
         <Route path="products/add" element={<AddProductPage />}/>
       </Route>
-
+      <Route path="/products" element={<ProductsPage />} />
     </Routes>
 
   );
