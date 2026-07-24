@@ -14,7 +14,7 @@ import Dashboard from "../features/seller/component/dashboard/dashboard";
 // import ProductsPage from "../features/seller/component/products/productsPages";
 import AddProductPage from "../features/seller/component/products/ProductForm";
 import SellerPendingApproval from "../features/seller/pages/sellerPendingApproval";
-import ProductsPage from "../features/marketplace/pages/ProductsPage";
+import ProductsPage from "../features/marketplace/pages/productspage";
 
 export default function App() {
   return (
