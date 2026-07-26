@@ -22,7 +22,7 @@ export default function VerifyResetOtpForm() {
     const [otp, setOtp] = useState("");
     const [error, setError] = useState("");
 
-    const [timer, setTimer] = useState(60);
+    const [timer, setTimer] = useState(120);
     const [canResend, setCanResend] = useState(false);
 
     useEffect(() => {

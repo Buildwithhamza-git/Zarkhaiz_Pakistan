@@ -6,7 +6,7 @@ import ProductAddedModal from "./components/ProductAddedModal";
 
 import { getProducts } from "./services/marketplaceApi";
 
-const PRODUCTS_PER_PAGE = 12;
+const PRODUCTS_PER_PAGE = 9;
 
 export default function ProductsContent({ filters }) {
   const [products, setProducts] = useState([]);
@@ -78,8 +78,8 @@ export default function ProductsContent({ filters }) {
         setProducts(response.data ?? []);
 
         setPagination({
-          page: response.pagination?.page ?? 1,
-          total: response.pagination?.total ?? 0,
+          page: response.pagination?.page ?? response.pagination?.currentPage ?? 1,
+          total: response.pagination?.total ?? response.pagination?.totalProducts ?? 0,
           totalPages: response.pagination?.totalPages ?? 1,
         });
       } catch (error) {

@@ -57,25 +57,28 @@ const sellerSchema = new mongoose.Schema(
 
         bankName: {
             type: String,
-            required: true,
+            trim: true,
         },
 
         accountTitle: {
             type: String,
             required: true,
+            trim:true
         },
 
         iban: {
             type: String,
-            required: true,
+            trim: true,
         },
 
         jazzCash: {
             type: String,
+            trim: true
         },
 
         easyPaisa: {
             type: String,
+            trim: true
         },
 
         cnicFront: {

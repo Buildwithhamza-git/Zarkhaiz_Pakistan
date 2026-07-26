@@ -9,38 +9,26 @@ import { productSchema } from "../../validations/product.form.schema";
 import { getCategories } from "../../services/categoryApi";
 
 const units = [
-  "kg",
-  "g",
-  "ton",
-  "litre",
-  "ml",
-  "bag",
-  "packet",
-  "piece",
-  "dozen",
+  "kg","g","ton","litre","ml","bag","packet","piece","dozen",
 ];
 
 const statuses = [
-  "Active",
-  "Inactive",
-  "Out of Stock",
+  "Active","Inactive","Out of Stock",
 ];
 
-const ProductForm = ({
-  product,
-  onSubmit,
-  onCancel,
-}) => {
+const ProductForm = ({ product, onSubmit, onCancel }) => {
 
   const [categories, setCategories] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // ✅ FILE STATE (IMPORTANT FIX)
+  const [files, setFiles] = useState([]);
+
   const {
     register,
     handleSubmit,
     reset,
-    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(productSchema),
@@ -59,7 +47,6 @@ const ProductForm = ({
   // =============================
   // Load Categories
   // =============================
-
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -69,18 +56,15 @@ const ProductForm = ({
         console.log(err);
       }
     };
-
     fetchCategories();
   }, []);
 
   // =============================
   // Edit Mode
   // =============================
-
   useEffect(() => {
 
     if (!product) {
-
       reset({
         name: "",
         description: "",
@@ -91,8 +75,8 @@ const ProductForm = ({
         status: "Active",
         featured: false,
       });
-
       setImagePreviews([]);
+      setFiles([]);
       return;
     }
 
@@ -114,33 +98,28 @@ const ProductForm = ({
   }, [product, reset]);
 
   // =============================
-  // Image Preview
+  // Image Change
   // =============================
+  const handleImageChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
 
-  const images = watch("images");
+    console.log("FILES SELECTED:", selectedFiles);
 
-  useEffect(() => {
+    setFiles(selectedFiles);
 
-    if (!images || images.length === 0) return;
-
-    const previews = [];
-
-    Array.from(images).forEach(file => {
-      previews.push(URL.createObjectURL(file));
-    });
+    const previews = selectedFiles.map(file =>
+      URL.createObjectURL(file)
+    );
 
     setImagePreviews(previews);
-
-  }, [images]);
+  };
 
   // =============================
   // Submit
   // =============================
-
   const submitHandler = async (data) => {
 
     try {
-      
       setLoading(true);
 
       const formData = new FormData();
@@ -154,33 +133,31 @@ const ProductForm = ({
       formData.append("status", data.status);
       formData.append("featured", data.featured);
 
-      if (data.images) {
-        Array.from(data.images).forEach(image => {
-          formData.append("images", image);
+      // ✅ APPEND IMAGES FROM STATE (FINAL FIX)
+      if (files.length > 0) {
+        files.forEach(file => {
+          formData.append("images", file);
         });
+      }
+
+      // ✅ DEBUG
+      console.log("FORMDATA:");
+      for (let pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
       }
 
       await onSubmit(formData);
 
     } finally {
-
       setLoading(false);
-
     }
-
   };
 
   return (
-
-    <form
-      onSubmit={handleSubmit(submitHandler)}
-      className="space-y-5"
-    >
+    <form onSubmit={handleSubmit(submitHandler)} className="space-y-5">
 
       {/* Images */}
-
       <div>
-
         <label className="mb-2 block text-sm font-semibold">
           Product Images
         </label>
@@ -189,246 +166,79 @@ const ProductForm = ({
           type="file"
           multiple
           accept="image/*"
-          {...register("images")}
-          className="w-full rounded-lg border border-dashed border-gray-300 p-3"
+          onChange={handleImageChange}
         />
-
       </div>
 
+      {/* Preview */}
       {imagePreviews.length > 0 && (
-
         <div className="grid grid-cols-5 gap-3">
-
-          {imagePreviews.map((image, index) => (
-
+          {imagePreviews.map((img, i) => (
             <img
-              key={index}
-              src={image}
+              key={i}
+              src={img}
               alt="preview"
               className="h-24 w-full rounded-lg border object-cover"
             />
-
           ))}
-
         </div>
-
       )}
 
       {/* Name */}
-
-      <Input
-        label="Product Name"
-        {...register("name")}
-      />
-
-      <p className="text-sm text-red-500">
-        {errors.name?.message}
-      </p>
+      <Input label="Product Name" {...register("name")} />
+      <p className="text-sm text-red-500">{errors.name?.message}</p>
 
       {/* Description */}
+      <textarea
+        rows={4}
+        {...register("description")}
+        className="w-full border p-3"
+      />
+      <p className="text-sm text-red-500">{errors.description?.message}</p>
 
-      <div>
+      {/* Category */}
+      <select {...register("category")} className="w-full border p-3">
+        <option value="">Select Category</option>
+        {categories.map(cat => (
+          <option key={cat._id} value={cat._id}>
+            {cat.name}
+          </option>
+        ))}
+      </select>
 
-        <label className="mb-2 block text-sm font-semibold">
-          Description
-        </label>
+      {/* Price & Quantity */}
+      <Input type="number" label="Price" {...register("price")} />
+      <Input type="number" label="Quantity" {...register("quantity")} />
 
-        <textarea
-          rows={4}
-          {...register("description")}
-          className="w-full rounded-lg border border-gray-300 p-3"
-        />
+      {/* Unit */}
+      <select {...register("unit")} className="w-full border p-3">
+        {units.map(u => <option key={u}>{u}</option>)}
+      </select>
 
-        <p className="mt-1 text-sm text-red-500">
-          {errors.description?.message}
-        </p>
-
-      </div>
-
-      {/* Category + Status */}
-
-      <div className="grid grid-cols-2 gap-5">
-
-        <div>
-
-          <label className="mb-2 block text-sm font-semibold">
-            Category
-          </label>
-
-          <select
-            {...register("category")}
-            className="w-full rounded-lg border border-gray-300 p-3"
-          >
-
-            <option value="">
-              Select Category
-            </option>
-
-            {categories.map(category => (
-
-              <option
-                key={category._id}
-                value={category._id}
-              >
-                {category.name}
-              </option>
-
-            ))}
-
-          </select>
-
-          <p className="mt-1 text-sm text-red-500">
-            {errors.category?.message}
-          </p>
-
-        </div>
-
-        <div>
-
-          <label className="mb-2 block text-sm font-semibold">
-            Status
-          </label>
-
-          <select
-            {...register("status")}
-            className="w-full rounded-lg border border-gray-300 p-3"
-          >
-
-            {statuses.map(status => (
-
-              <option
-                key={status}
-                value={status}
-              >
-                {status}
-              </option>
-
-            ))}
-
-          </select>
-
-        </div>
-
-      </div>
-
-      {/* Price Quantity Unit */}
-
-      <div className="grid grid-cols-3 gap-5">
-
-        <div>
-
-          <Input
-            label="Price"
-            type="number"
-            {...register("price")}
-          />
-
-          <p className="mt-1 text-sm text-red-500">
-            {errors.price?.message}
-          </p>
-
-        </div>
-
-        <div>
-
-          <Input
-            label="Quantity"
-            type="number"
-            {...register("quantity")}
-          />
-
-          <p className="mt-1 text-sm text-red-500">
-            {errors.quantity?.message}
-          </p>
-
-        </div>
-
-        <div>
-
-          <label className="mb-2 block text-sm font-semibold">
-            Unit
-          </label>
-
-          <select
-            {...register("unit")}
-            className="w-full rounded-lg border border-gray-300 p-3"
-          >
-
-            {units.map(unit => (
-
-              <option
-                key={unit}
-                value={unit}
-              >
-                {unit}
-              </option>
-
-            ))}
-
-          </select>
-
-        </div>
-
-      </div>
+      {/* Status */}
+      <select {...register("status")} className="w-full border p-3">
+        {statuses.map(s => <option key={s}>{s}</option>)}
+      </select>
 
       {/* Featured */}
-
-      <div className="rounded-lg border border-yellow-300 bg-yellow-50 p-4">
-
-        <label className="flex items-start gap-3">
-
-          <input
-            type="checkbox"
-            {...register("featured")}
-            className="mt-1"
-          />
-
-          <div>
-
-            <h4 className="font-medium">
-              Featured Product
-            </h4>
-
-            <p className="text-sm text-gray-600">
-              Featured products appear at the top of the marketplace.
-              Approval and payment are required before activation.
-            </p>
-
-          </div>
-
-        </label>
-
-      </div>
+      <label className="flex gap-2">
+        <input type="checkbox" {...register("featured")} />
+        Featured Product
+      </label>
 
       {/* Buttons */}
-
       <div className="flex justify-end gap-3">
-
-        <Button
-          variant="ghost"
-          type="button"
-          onClick={onCancel}
-        >
+        <Button type="button" onClick={onCancel}>
           Cancel
         </Button>
 
-        <Button
-          type="submit"
-          disabled={loading}
-        >
-          {loading
-            ? "Saving..."
-            : product
-              ? "Update Product"
-              : "Add Product"}
+        <Button type="submit" disabled={loading}>
+          {loading ? "Saving..." : "Save Product"}
         </Button>
-
       </div>
 
     </form>
-
   );
-
 };
 
 export default ProductForm;

@@ -1,4 +1,9 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+    createContext,
+    useContext,
+    useEffect,
+    useState,
+} from "react";
 
 const AuthContext = createContext();
 
@@ -10,25 +15,59 @@ export default function AuthProvider({ children }) {
 
     const [loading, setLoading] = useState(true);
 
+    // ==========================================
+    // Restore Authentication From Local Storage
+    // ==========================================
+
     useEffect(() => {
 
-        const savedUser = localStorage.getItem("user");
+        try {
 
-        const savedToken = localStorage.getItem("token");
+            const savedUser =
+                localStorage.getItem("user");
 
-        if(savedUser && savedToken){
+            const savedToken =
+                localStorage.getItem("token");
 
-            setUser(JSON.parse(savedUser));
+            if (savedUser && savedToken) {
 
-            setToken(savedToken);
+                setUser(
+                    JSON.parse(savedUser)
+                );
+
+                setToken(savedToken);
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Failed to restore authentication:",
+                error
+            );
+
+            localStorage.removeItem("user");
+            localStorage.removeItem("token");
+
+            setUser(null);
+            setToken(null);
+
+        } finally {
+
+            setLoading(false);
 
         }
 
-        setLoading(false);
-
     }, []);
 
-    const login = (userData, tokenData)=>{
+    // ==========================================
+    // Login
+    // ==========================================
+
+    const login = (
+        userData,
+        tokenData
+    ) => {
 
         localStorage.setItem(
             "user",
@@ -46,7 +85,11 @@ export default function AuthProvider({ children }) {
 
     };
 
-    const logout = ()=>{
+    // ==========================================
+    // Logout
+    // ==========================================
+
+    const logout = () => {
 
         localStorage.removeItem("user");
 
@@ -58,23 +101,16 @@ export default function AuthProvider({ children }) {
 
     };
 
-    return(
+    return (
 
         <AuthContext.Provider
             value={{
-
                 user,
-
                 token,
-
                 loading,
-
                 login,
-
                 logout,
-
                 setUser,
-
             }}
         >
 
@@ -86,4 +122,5 @@ export default function AuthProvider({ children }) {
 
 }
 
-export const useAuthContext = () => useContext(AuthContext);
+export const useAuthContext =
+    () => useContext(AuthContext);
