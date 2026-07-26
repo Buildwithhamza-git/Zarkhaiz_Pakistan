@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 igimport { z } from "zod";
+=======
+import { z } from "zod";
+>>>>>>> origin/hamza
 
 /* ============================================================
    REGEX

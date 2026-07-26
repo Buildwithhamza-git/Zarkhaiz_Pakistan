@@ -35,7 +35,8 @@ const verifyOtpController=async (req, res) => {
             user: {
                 id: result._id,
                 email: result.email,
-                role: result.role
+                role: result.role,
+                isVerified: result.isVerified 
             }
         })
     } catch (error) {
@@ -91,7 +92,8 @@ const loginController = async (req, res) => {
                 email: user.User.email,
                 role: user.User.role,
                 firstname: user.User.firstname,
-                lastname: user.User.lastname
+                lastname: user.User.lastname,
+                isVerified:user.User.isVerified 
             }
         })
 

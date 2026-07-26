@@ -1,5 +1,6 @@
 const Seller = require("../../seller/model/seller.model");
 const Category = require("../../category/category.model");
+const { getUploadedImageUrls } = require("../utils/normalizeUploadedFiles");
 
 const {
     createProduct,
@@ -34,9 +35,7 @@ const createProductService = async (userId, productData, files) => {
         throw new Error("Category not found.");
     }
 
-    const images = files?.length
-        ? files.map(file => file.path)
-        : [];
+    const images = getUploadedImageUrls(files);
 
     const product = await createProduct({
         seller: seller._id,
@@ -163,7 +162,7 @@ const updateProductService = async (
     }
 
     if (files?.length) {
-        updateData.images = files.map(file => file.path);
+        updateData.images = getUploadedImageUrls(files);
     }
 
     const updatedProduct = await updateProduct(

@@ -17,7 +17,7 @@ const otpSchema = z.object({
 });
 
 const OTP_LENGTH = 6;
-const RESEND_COOLDOWN_SECONDS = 60;
+const RESEND_COOLDOWN_SECONDS = 120;
 
 export default function VerifyOtpForm() {
     const navigate = useNavigate();
@@ -28,6 +28,7 @@ export default function VerifyOtpForm() {
     const [resendCooldown, setResendCooldown] = useState(RESEND_COOLDOWN_SECONDS);
     const [isRedirecting, setIsRedirecting] = useState(false);
     const otpInputsRef = useRef([]);
+    const [isResending, setIsResending] = useState(false);
 
     const email = location.state?.email || "";
 
@@ -173,87 +174,100 @@ export default function VerifyOtpForm() {
             return;
         }
 
+        setIsResending(true);
+
         try {
             await resendOtp({ email });
+
             setResendCooldown(RESEND_COOLDOWN_SECONDS);
+
             setOtpDigits(Array(OTP_LENGTH).fill(""));
+
             setValue("otp", "", {
                 shouldValidate: true,
                 shouldDirty: true,
             });
+
             setNotice("A fresh verification code has been sent to your email.");
         } catch (error) {
-            const message = error?.message || "Unable to resend code. Please try again.";
+            const message =
+                error?.message || "Unable to resend code. Please try again.";
+
             setError("otp", {
                 type: "server",
                 message,
             });
+        } finally {
+            setIsResending(false);
         }
-    };
+    
+};
 
-    return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="rounded-2xl border border-green-100 bg-green-50/80 p-4 text-sm text-gray-700">
-                <p className="font-semibold text-green-800">Verify your email</p>
-                <p className="mt-1">
-                    We sent a 6-digit code to <span className="font-semibold text-green-700">{email || "your email"}</span>.
-                </p>
-            </div>
+return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <div className="rounded-2xl border border-green-100 bg-green-50/80 p-4 text-sm text-gray-700">
+            <p className="font-semibold text-green-800">Verify your email</p>
+            <p className="mt-1">
+                We sent a 6-digit code to <span className="font-semibold text-green-700">{email || "your email"}</span>.
+            </p>
+        </div>
 
-            <FormField label="Verification Code" required error={errors.otp?.message}>
-                <div className="flex gap-2 sm:gap-3" onPaste={handleOtpPaste}>
-                    {otpDigits.map((digit, index) => (
-                        <input
-                            key={index}
-                            ref={(element) => {
-                                otpInputsRef.current[index] = element;
-                            }}
-                            type="text"
-                            inputMode="numeric"
-                            autoComplete="one-time-code"
-                            maxLength={1}
-                            value={digit}
-                            onChange={(event) => handleOtpDigitChange(index, event.target.value)}
-                            onKeyDown={(event) => handleOtpKeyDown(index, event)}
-                            className={`h-12 w-11 rounded-xl border text-center text-lg font-semibold outline-none transition focus:border-green-600 focus:ring-2 focus:ring-green-200 sm:h-14 sm:w-12 ${
-                                errors.otp?.message
-                                    ? "border-red-500"
-                                    : "border-gray-300"
+        <FormField label="Verification Code" required error={errors.otp?.message}>
+            <div className="flex gap-2 sm:gap-3" onPaste={handleOtpPaste}>
+                {otpDigits.map((digit, index) => (
+                    <input
+                        key={index}
+                        ref={(element) => {
+                            otpInputsRef.current[index] = element;
+                        }}
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        maxLength={1}
+                        value={digit}
+                        onChange={(event) => handleOtpDigitChange(index, event.target.value)}
+                        onKeyDown={(event) => handleOtpKeyDown(index, event)}
+                        className={`h-12 w-11 rounded-xl border text-center text-lg font-semibold outline-none transition focus:border-green-600 focus:ring-2 focus:ring-green-200 sm:h-14 sm:w-12 ${errors.otp?.message
+                                ? "border-red-500"
+                                : "border-gray-300"
                             }`}
-                            aria-label={`OTP digit ${index + 1}`}
-                        />
-                    ))}
-                </div>
-            </FormField>
-
-            {notice && <p className="text-sm font-medium text-green-700">{notice}</p>}
-
-            <Button type="submit" fullWidth loading={loading || isRedirecting}>
-                {isRedirecting ? "Redirecting to login..." : "Verify OTP"}
-            </Button>
-
-            <div className="flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between">
-                <button
-                    type="button"
-                    className={`font-semibold transition ${
-                        resendCooldown > 0
-                            ? "cursor-not-allowed text-gray-400"
-                            : "text-green-700 hover:text-green-800"
-                    }`}
-                    onClick={handleResend}
-                    disabled={resendCooldown > 0 || loading}
-                >
-                    {resendCooldown > 0 ? `Resend code in ${formattedTimer}` : "Resend code"}
-                </button>
-
-                <button
-                    type="button"
-                    className="font-semibold text-gray-600 transition hover:text-gray-800"
-                    onClick={() => navigate("/signup")}
-                >
-                    Back to signup
-                </button>
+                        aria-label={`OTP digit ${index + 1}`}
+                    />
+                ))}
             </div>
-        </form>
-    );
+        </FormField>
+
+        {notice && <p className="text-sm font-medium text-green-700">{notice}</p>}
+
+        <Button type="submit" fullWidth loading={loading || isRedirecting}>
+            {isRedirecting ? "Redirecting to login..." : "Verify OTP"}
+        </Button>
+
+        <div className="flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+            <button
+                type="button"
+                className={`font-semibold transition ${resendCooldown > 0 || isResending
+                        ? "cursor-not-allowed text-gray-400"
+                        : "text-green-700 hover:text-green-800"
+                    }`}
+                onClick={handleResend}
+                disabled={resendCooldown > 0 || isResending}
+            >
+                {isResending
+                    ? "Sending..."
+                    : resendCooldown > 0
+                        ? `Resend code in ${formattedTimer}`
+                        : "Resend code"}
+            </button>
+
+            <button
+                type="button"
+                className="font-semibold text-gray-600 transition hover:text-gray-800"
+                onClick={() => navigate("/signup")}
+            >
+                Back to signup
+            </button>
+        </div>
+    </form>
+);
 }

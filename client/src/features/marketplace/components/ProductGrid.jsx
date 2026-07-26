@@ -8,7 +8,7 @@ export default function ProductGrid({
   products,
   loading,
   page,
-  perPage = 12,
+  perPage = 9,
   total = 0,
   totalPages,
   onPageChange,
@@ -36,7 +36,7 @@ export default function ProductGrid({
         className={
           view === "list"
             ? "flex flex-col gap-5"
-            : "grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            : "grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
         }
       >
         {products.map((product) => (

@@ -49,10 +49,14 @@ const ProductSchema = z.object({
     .enum(["Active", "Inactive", "Out of Stock"])
     .optional(),
 
-  featured: z
-    .coerce
-    .boolean()
-    .optional(),
+  featured: z.preprocess((value) => {
+    if (typeof value === "string") {
+      if (value.toLowerCase() === "true") return true;
+      if (value.toLowerCase() === "false") return false;
+    }
+
+    return value;
+  }, z.boolean().optional()),
 });
 
 module.exports = {

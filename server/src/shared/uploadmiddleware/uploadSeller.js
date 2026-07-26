@@ -1,63 +1,41 @@
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("../../config/cloudinary");
 
-// Create uploads/sellers folder if it doesn't exist
-const uploadPath = path.join(__dirname, "../../uploads/sellers");
+// Cloudinary storage
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => {
 
-if (!fs.existsSync(uploadPath)) {
-    fs.mkdirSync(uploadPath, { recursive: true });
-}
+    let folder = "sellers/misc";
 
-// Storage configuration
-const storage = multer.diskStorage({
-
-    destination(req, file, cb) {
-        cb(null, uploadPath);
-    },
-
-    filename(req, file, cb) {
-
-        const uniqueName =
-            Date.now() +
-            "-" +
-            Math.round(Math.random() * 1e9);
-
-        cb(
-            null,
-            uniqueName + path.extname(file.originalname)
-        );
-    },
-});
-
-// File Filter
-const fileFilter = (req, file, cb) => {
-
-    const allowedTypes = /jpg|jpeg|png|webp/;
-
-    const extension = allowedTypes.test(
-        path.extname(file.originalname).toLowerCase()
-    );
-
-    const mimeType = allowedTypes.test(file.mimetype);
-
-    if (extension && mimeType) {
-        return cb(null, true);
+    // 📂 organize uploads
+    if (file.fieldname === "logo") {
+      folder = "sellers/logos";
     }
 
-    cb(new Error("Only JPG, JPEG, PNG and WEBP images are allowed."));
-};
+    if (
+      file.fieldname === "cnicFront" ||
+      file.fieldname === "cnicBack"
+    ) {
+      folder = "sellers/documents";
+    }
 
+    return {
+      folder,
+      allowed_formats: ["jpg", "jpeg", "png", "webp", "pdf"],
+      public_id:
+        Date.now() + "-" + file.originalname.split(".")[0],
+    };
+  },
+});
+
+// Multer config
 const uploadSeller = multer({
-
-    storage,
-
-    fileFilter,
-
-    limits: {
-        fileSize: 5 * 1024 * 1024,
-    },
-
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB
+  },
 });
 
 module.exports = uploadSeller;

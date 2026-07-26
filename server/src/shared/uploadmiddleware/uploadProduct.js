@@ -3,24 +3,19 @@ const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("../../config/cloudinary");
 
 const storage = new CloudinaryStorage({
-    cloudinary,
-    params: {
-        folder: "zarkhaiz/products",
-        allowed_formats: [
-            "jpg",
-            "jpeg",
-            "png",
-            "webp",
-        ],
-        resource_type: "image",
-    },
+  cloudinary,
+  params: async (req, file) => ({
+    folder: "products",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    public_id: `${Date.now()}-${file.originalname.split(".")[0]}`,
+  }),
 });
 
 const uploadProduct = multer({
-    storage,
-    limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB
-    },
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
 });
 
 module.exports = uploadProduct;
