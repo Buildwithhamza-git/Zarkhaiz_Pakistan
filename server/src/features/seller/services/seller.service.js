@@ -26,6 +26,7 @@ const registerSeller = async (userId, sellerData) => {
         throw new Error("CNIC already registered.");
     }
 
+
     const seller =
         await sellerRepository.createSeller({
             ...sellerData,
@@ -79,6 +80,8 @@ const getCurrentSellerService = async (userId) => {
 
     return seller;
 };
+
+
 module.exports = {
     registerSeller,getSellerProfile, getSellerDashboard, getCurrentSellerService
 };

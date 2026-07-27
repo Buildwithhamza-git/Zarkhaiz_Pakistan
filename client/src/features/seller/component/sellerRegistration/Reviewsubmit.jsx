@@ -1,254 +1,182 @@
-import Button from "../../../../shared/components/ui/button";
-import { CheckCircle } from "lucide-react";
+import { useFormContext } from "react-hook-form";
 
 export default function ReviewSubmit({
-    formData,
-    previousStep,
-    handleSubmit,
-    loading,
-    error,
+  previousStep,
+  goToStep,
+  handleSubmit: onSubmitFinal,
+  loading,
+  error,
 }) {
-    return (
-        <div>
+  const { watch } = useFormContext();
 
-            <div className="text-center">
+  const data = watch();
 
-                <CheckCircle
-                    className="mx-auto text-green-700"
-                    size={70}
-                />
+  const getPreview = (file) => {
+    if (!file) return null;
+    if (file instanceof File) return URL.createObjectURL(file);
+    return file;
+  };
 
-                <h2 className="text-3xl font-bold mt-5 text-green-800">
-                    Review Your Information
-                </h2>
+  return (
+    <div>
 
-                <p className="text-gray-500 mt-2">
-                    Please review all information before submitting.
-                </p>
+      <h2 className="text-3xl font-bold text-green-800">
+        Review & Submit
+      </h2>
 
-            </div>
+      <p className="mt-2 text-gray-500">
+        Double-check your information before submitting
+      </p>
 
-            <div className="mt-12 space-y-8">
+      {/* ================= STORE ================= */}
+      <Section
+        title="Store Information"
+        onEdit={() => goToStep(1)}
+      >
+        <Item label="Store Name" value={data.storeName} />
+        <Item label="Province" value={data.province} />
+        <Item label="City" value={data.city} />
+        <Item label="Address" value={data.address} />
+        <Item label="Description" value={data.description} />
 
-                {/* Store */}
+        {data.logo && (
+          <ImagePreview file={data.logo} />
+        )}
+      </Section>
 
-                <section className="border rounded-2xl p-6">
+      {/* ================= BUSINESS ================= */}
+      <Section
+        title="Business Information"
+        onEdit={() => goToStep(2)}
+      >
+        <Item label="Business Type" value={data.businessType} />
+        <Item label="CNIC" value={data.cnic} />
+      </Section>
 
-                    <h3 className="font-bold text-lg mb-5">
-                        Store Information
-                    </h3>
+      {/* ================= BANK ================= */}
+      <Section
+        title="Payment Information"
+        onEdit={() => goToStep(3)}
+      >
+        <Item label="Bank Name" value={data.bankName} />
+        <Item label="Account Title" value={data.accountTitle} />
+        <Item label="IBAN" value={data.iban} />
+        <Item label="JazzCash" value={data.jazzCash} />
+        <Item label="EasyPaisa" value={data.easyPaisa} />
+      </Section>
 
-                    <div className="grid md:grid-cols-2 gap-4">
+      {/* ================= DOCUMENTS ================= */}
+      <Section
+        title="Documents"
+        onEdit={() => goToStep(4)}
+      >
+        <div className="flex gap-6 flex-wrap">
 
-                        <Info
-                            title="Store Name"
-                            value={formData.storeName}
-                        />
+          <ImagePreview
+            label="CNIC Front"
+            file={data?.documents?.cnicFront}
+          />
 
-                        <Info
-                            title="Province"
-                            value={formData.province}
-                        />
-
-                        <Info
-                            title="City"
-                            value={formData.city}
-                        />
-
-                        <Info
-                            title="Address"
-                            value={formData.address}
-                        />
-
-                    </div>
-
-                    <div className="mt-5">
-
-                        <Info
-                            title="Description"
-                            value={formData.description}
-                        />
-
-                    </div>
-
-                </section>
-
-                {/* Business */}
-
-                <section className="border rounded-2xl p-6">
-
-                    <h3 className="font-bold text-lg mb-5">
-                        Business Information
-                    </h3>
-
-                    <div className="grid md:grid-cols-2 gap-4">
-
-                        <Info
-                            title="Business Type"
-                            value={formData.businessType}
-                        />
-
-                        <Info
-                            title="CNIC"
-                            value={formData.cnic}
-                        />
-
-                    </div>
-
-                </section>
-
-                {/* Bank */}
-
-                <section className="border rounded-2xl p-6">
-
-                    <h3 className="font-bold text-lg mb-5">
-                        Payment Information
-                    </h3>
-
-                    <div className="grid md:grid-cols-2 gap-4">
-
-                        <Info
-                            title="Bank"
-                            value={formData.bankName}
-                        />
-
-                        <Info
-                            title="Account Title"
-                            value={formData.accountTitle}
-                        />
-
-                        <Info
-                            title="IBAN"
-                            value={formData.iban}
-                        />
-
-                        <Info
-                            title="JazzCash"
-                            value={formData.jazzCash}
-                        />
-
-                        <Info
-                            title="EasyPaisa"
-                            value={formData.easyPaisa}
-                        />
-
-                    </div>
-
-                </section>
-
-                {/* Documents */}
-
-                <section className="border rounded-2xl p-6">
-
-                    <h3 className="font-bold text-lg mb-5">
-                        Uploaded Documents
-                    </h3>
-
-                    <div className="grid grid-cols-2 md:grid-cols-2 gap-5">
-
-                        <Preview
-                            title="CNIC Front"
-                            file={formData.documents.cnicFront}
-                        />
-
-                        <Preview
-                            title="CNIC Back"
-                            file={formData.documents.cnicBack}
-                        />
-
-                    </div>
-
-                </section>
-
-            </div>
-
-            {/* Error Message */}
-
-            {error && (
-                <div className="mt-8 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
-                    {error}
-                </div>
-            )}
-
-            {/* Terms & Conditions */}
-
-            <div className="mt-6 flex items-start gap-3">
-
-                <input
-                    type="checkbox"
-                    required
-                    className="mt-1"
-                />
-
-                <p className="text-sm text-gray-600">
-
-                    I confirm that all information is correct and agree to
-                    Zarkhaiz Pakistan Seller Terms & Conditions.
-
-                </p>
-
-            </div>
-
-            <div className="flex justify-between mt-10">
-
-                <Button
-                    variant="outline"
-                    disabled={loading}
-                    onClick={previousStep}
-                >
-                    ← Previous
-                </Button>
-
-                <Button
-                    disabled={loading}
-                    onClick={handleSubmit}
-                >
-                    {loading ? "Submitting..." : "Submit Application"}
-                </Button>
-
-            </div>
+          <ImagePreview
+            label="CNIC Back"
+            file={data?.documents?.cnicBack}
+          />
 
         </div>
-    );
+      </Section>
+
+      {/* ================= ERROR ================= */}
+      {error && (
+        <p className="text-red-600 mt-4">{error}</p>
+      )}
+
+      {/* ================= ACTIONS ================= */}
+      <div className="mt-10 flex justify-between">
+
+        <button
+          type="button"
+          onClick={previousStep}
+          className="px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+        >
+          Back
+        </button>
+
+        <button
+          type="button"
+          onClick={onSubmitFinal}
+          disabled={loading}
+          className="px-8 py-3 bg-green-700 text-white rounded-xl hover:bg-green-800"
+        >
+          {loading ? "Submitting..." : "Submit Application"}
+        </button>
+
+      </div>
+
+    </div>
+  );
 }
 
-function Info({ title, value }) {
-    return (
-        <div>
-            <p className="text-sm text-gray-500">{title}</p>
-            <p className="font-semibold">{value || "-"}</p>
-        </div>
-    );
+/* ================= COMPONENTS ================= */
+
+function Section({ title, children, onEdit }) {
+  return (
+    <div className="mt-6 bg-white border rounded-2xl p-6 shadow-sm">
+
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold text-gray-800">
+          {title}
+        </h3>
+
+        <button
+          onClick={onEdit}
+          className="text-sm text-blue-600 hover:underline"
+        >
+          Edit
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {children}
+      </div>
+
+    </div>
+  );
 }
 
-function Preview({ title, file }) {
+function Item({ label, value }) {
+  return (
+    <div>
+      <p className="text-xs text-gray-500">{label}</p>
+      <p className="font-medium text-gray-800">
+        {value || "-"}
+      </p>
+    </div>
+  );
+}
 
-    return (
+function ImagePreview({ file, label }) {
+  if (!file) return null;
 
-        <div>
+  const src =
+    file instanceof File
+      ? URL.createObjectURL(file)
+      : file;
 
-            <p className="text-sm font-medium mb-2">
-                {title}
-            </p>
+  return (
+    <div className="mt-3">
 
-            {file ? (
+      {label && (
+        <p className="text-xs text-gray-500 mb-1">
+          {label}
+        </p>
+      )}
 
-                <img
-                    src={URL.createObjectURL(file)}
-                    className="h-28 w-full rounded-xl object-cover border"
-                    alt=""
-                />
+      <img
+        src={src}
+        alt="preview"
+        className="w-40 h-28 object-cover rounded-lg border"
+      />
 
-            ) : (
-
-                <div className="h-28 rounded-xl border flex items-center justify-center text-sm text-gray-400">
-                    Not Uploaded
-                </div>
-
-            )}
-
-        </div>
-
-    );
-
+    </div>
+  );
 }

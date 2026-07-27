@@ -5,7 +5,7 @@ const validateRequest = require("../../../middlewares/validateRequest");
 
 const uploadProduct = require("../../../shared/uploadmiddleware/uploadProduct");
 
-const { ProductSchema } = require("../validation/product.validation");
+const { ProductSchema, ProductUpdateSchema } = require("../validation/product.validation");
 
 const {
     createProduct,
@@ -55,7 +55,7 @@ router.patch(
     "/:id",
     authenticate,
     uploadProduct.array("images", 5),
-    validateRequest(ProductSchema.partial()),
+    validateRequest(ProductUpdateSchema),
     updateProduct
 );
 

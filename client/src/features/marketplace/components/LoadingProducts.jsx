@@ -20,9 +20,7 @@ export default function LoadingProducts({ count = 12 }) {
             className="
                 grid grid-cols-1 gap-4
                 sm:grid-cols-2
-                md:grid-cols-3
-                lg:grid-cols-4
-                2xl:grid-cols-6
+                lg:grid-cols-3
             "
         >
             {Array.from({ length: count }).map((_, i) => (

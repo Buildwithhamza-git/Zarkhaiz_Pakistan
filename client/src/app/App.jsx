@@ -21,6 +21,9 @@ import SellerDashboardPage from "../features/seller/pages/sellerDashboardLayout"
 import Dashboard from "../features/seller/component/dashboard/dashboard";
 import ProductsPage from "../features/seller/component/products/productsPages";
 import AddProductPage from "../features/seller/component/products/ProductForm";
+import ProfilePage from "../features/profile/pages/ProfilePage"
+
+
 
 // Marketplace (Mubashir)
 import MarketplaceProductsPage from "../features/marketplace/layouts/ProductsPage";
@@ -28,6 +31,8 @@ import MarketplaceProductsPage from "../features/marketplace/layouts/ProductsPag
 // Routes
 import ProtectedRoute from "../routes/Protectedroutes";
 import SellerRoute from "../routes/SellerRoutes";
+
+import CartPage from "../features/cart/component/CartPage";
 
 export default function App() {
   return (
@@ -57,6 +62,8 @@ export default function App() {
         <Route path="/become-seller" element={<BecomeSellerPage />} />
         <Route path="/seller-registration" element={<SellerRegistrationPage />} />
         <Route path="/seller/pending" element={<SellerPendingApproval />} />
+        <Route path="/profile" element={<ProfilePage/>}/>
+        <Route path="/cart" element={<CartPage />} />
       </Route>
 
 

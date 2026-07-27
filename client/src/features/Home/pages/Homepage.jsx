@@ -15,6 +15,12 @@ export default function HomePage() {
     const location = useLocation();
 
    useEffect(() => {
+
+     window.scrollTo({
+    top: 0,
+    behavior: "smooth", 
+  });
+
     if (location.hash === "#about") {
         const section = document.getElementById("about");
 

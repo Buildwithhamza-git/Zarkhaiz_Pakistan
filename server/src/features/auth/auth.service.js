@@ -201,9 +201,6 @@ const resendOtpService = async (Resenddata)=>{
     if(!user){
         throw new Error ("Email is not registered")
     }
-    if(user.isVerified){
-        throw new Error ("Account is Already Verified")
-    }
 
     const otp = generateOtp()
     const otpExpire = otpExpiry()

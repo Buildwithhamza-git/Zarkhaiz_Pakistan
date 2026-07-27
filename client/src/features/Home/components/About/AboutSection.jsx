@@ -131,13 +131,7 @@ export default function AboutSection() {
                                 <ArrowRight size={18} aria-hidden="true" />
                             </Link>
 
-                            <Link
-                                to="/become-seller"
-                                className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-green-700 bg-white px-6 py-3.5 font-semibold text-green-700 transition hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2"
-                            >
-                                <Store size={18} aria-hidden="true" />
-                                Become a Seller
-                            </Link>
+                            
                         </div>
                     </div>
 

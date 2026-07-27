@@ -10,31 +10,38 @@ const {
     deleteProductService,
 } = require("../service/product.service");
 
-
+const { ProductSchema } = require("../validation/product.validation");
 // ====================================
 // Create Product
 // ====================================
-const createProduct = async (req, res, next) => {
-    try {
-        console.log("Body:", req.body);
-console.log("Files:", req.files);
-        const product = await createProductService(
-            req.user.userId,
-            req.body,
-            req.files
-        );
 
-        return res.status(201).json({
-            success: true,
-            message: "Product created successfully.",
-            data: product,
-        });
+const createProduct = async (req, res) => {
+  try {
 
-    } catch (error) {
-        next(error);
-    }
+    console.log("FILES:", req.files);
+    console.log("User", req.user);
+
+    const parsed = ProductSchema.parse(req.body);
+
+    const product = await createProductService(
+      req.user.userId,
+      parsed,
+      req.files
+    );
+
+    res.status(201).json({
+      success: true,
+      data: product,
+    });
+
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      success: false,
+      message: err.message,
+    });
+  }
 };
-
 
 // ====================================
 // Get All Products
@@ -46,9 +53,14 @@ const getAllProducts = async (req, res, next) => {
 
         return res.status(200).json({
             success: true,
-            message: "Products fetched successfully.",
-            data: products.products,
-            pagination: products.pagination,
+            message: products.products?.length ? "Products fetched successfully." : "No products found",
+            data: products.products ?? [],
+            pagination: products.pagination ?? {
+                currentPage: 1,
+                totalPages: 1,
+                totalProducts: 0,
+                limit: 12,
+            },
         });
 
     } catch (error) {
@@ -200,8 +212,8 @@ module.exports = {
     getSellerProducts,
     getProduct,
     updateProduct,
-    getFeaturedProducts ,
-    getLatestProducts ,
-    getProductsByCategory ,
+    getFeaturedProducts,
+    getLatestProducts,
+    getProductsByCategory,
     deleteProduct,
 };

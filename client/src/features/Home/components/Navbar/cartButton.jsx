@@ -1,25 +1,35 @@
 import { ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+import { useCartContext } from "../../../../context/cartContext";
+
 export default function CartButton() {
     const navigate = useNavigate();
 
-    // Later this will come from Redux/Context/API
-    const cartCount = 3;
+    const {
+        totalItems,
+        loading,
+    } = useCartContext();
+
+    const handleCartClick = () => {
+        navigate("/cart");
+    };
 
     return (
         <button
-            onClick={() => navigate("/cart")}
+            type="button"
+            onClick={handleCartClick}
+            aria-label={`Shopping cart with ${totalItems} items`}
             className="
                 relative
                 flex
+                h-11
+                w-11
                 items-center
                 justify-center
-                w-11
-                h-11
                 rounded-full
-                hover:bg-green-50
                 transition
+                hover:bg-green-50
             "
         >
             <ShoppingCart
@@ -27,25 +37,27 @@ export default function CartButton() {
                 className="text-gray-700"
             />
 
-            {cartCount > 0 && (
+            {/* Cart Count */}
+            {!loading && totalItems > 0 && (
                 <span
                     className="
                         absolute
-                        -top-1
                         -right-1
-                        w-5
-                        h-5
-                        rounded-full
-                        bg-red-500
-                        text-white
-                        text-[11px]
-                        font-semibold
+                        -top-1
                         flex
+                        h-5
+                        min-w-5
                         items-center
                         justify-center
+                        rounded-full
+                        bg-red-500
+                        px-1
+                        text-[11px]
+                        font-semibold
+                        text-white
                     "
                 >
-                    {cartCount}
+                    {totalItems > 99 ? "99+" : totalItems}
                 </span>
             )}
         </button>

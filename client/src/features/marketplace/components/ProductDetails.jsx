@@ -1,178 +1,183 @@
+import { useState } from "react";
 import {
   ArrowLeft,
-  CheckCircle2,
-  PackageX,
+  Heart,
+  MapPin,
+  PackageCheck,
+  ShieldCheck,
   ShoppingCart,
-  User,
+  Star,
+  Store,
+  Truck,
 } from "lucide-react";
 
 import ProductRating from "./ProductRating";
 import ProductBadge from "./ProductBadge";
 import Button from "../../../shared/components/ui/button";
-
-function formatPKR(amount) {
-  if (amount == null) return "";
-  return new Intl.NumberFormat("en-PK").format(amount);
-}
+import {
+  formatPKR,
+  getProductDisplayData,
+  getStockMeta,
+} from "../utils/productDisplay";
 
 export default function ProductDetails({
   product,
   onBack,
   onAddToCart,
 }) {
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [liked, setLiked] = useState(false);
+  
+
   if (!product) return null;
 
-  const {
-    name,
-    description,
-    price,
-    quantity,
-    images = [],
-    category,
-    seller,
-    averageRating,
-    totalReviews,
-    featured,
-    unit,
-  } = product;
+  const display = getProductDisplayData(product);
+  const stockMeta = getStockMeta(display.quantity, display.unit);
 
-  const image =
-    images.length > 0
-      ? images[0]
-      : "https://placehold.co/600x600?text=No+Image";
+  
+  // ✅ FIXED IMAGE HANDLING
+  const gallery =
+    product?.images?.map((img) => img?.url).filter(Boolean) || [];
 
-  const isOutOfStock = quantity === 0;
-  const isLowStock = quantity > 0 && quantity <= 10;
+  const imageList =
+    gallery.length > 0
+      ? gallery
+      : [
+          display?.imageUrl ||
+            "https://placehold.co/500x500?text=No+Image",
+        ];
 
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
+    <div className="rounded-[28px] border border-gray-200 bg-white p-4 shadow-sm sm:p-6 lg:p-8">
       <button
         onClick={onBack}
-        className="mb-5 inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+        className="mb-6 inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
       >
         <ArrowLeft size={17} />
         Back to Products
       </button>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.05fr_0.95fr]">
+        {/* ================= IMAGE SECTION ================= */}
+        <div className="space-y-3">
+          <div className="relative overflow-hidden rounded-3xl border border-gray-200 bg-gray-50">
+            <img
+              src={imageList[selectedImage]}
+              alt={display.productName}
+              className="aspect-square w-full object-cover"
+            />
 
-        {/* IMAGE */}
+            {display.featured && (
+              <div className="absolute left-4 top-4">
+                <ProductBadge type="featured" />
+              </div>
+            )}
+          </div>
 
-        <div className="relative overflow-hidden rounded-2xl bg-gray-50">
-          <img
-            src={image}
-            alt={name}
-            className="aspect-square w-full object-cover"
-          />
-
-          {featured && (
-            <div className="absolute top-3 left-3">
-              <ProductBadge type="featured" />
+          {imageList.length > 1 && (
+            <div className="grid grid-cols-4 gap-2">
+              {imageList.map((image, index) => (
+                <button
+                  key={`${image}-${index}`}
+                  onClick={() => setSelectedImage(index)}
+                  className={`overflow-hidden rounded-xl border ${
+                    selectedImage === index
+                      ? "border-green-600"
+                      : "border-gray-200"
+                  }`}
+                >
+                  <img
+                    src={image}
+                    alt={`${display.productName} ${index + 1}`}
+                    className="h-20 w-full object-cover"
+                  />
+                </button>
+              ))}
             </div>
           )}
         </div>
 
-        {/* DETAILS */}
-
+        {/* ================= DETAILS SECTION ================= */}
         <div className="flex flex-col">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-[0.25em] text-green-700">
+              {display.categoryName}
+            </span>
 
-          <p className="text-xs font-semibold uppercase tracking-wide text-green-700">
-            {category?.name}
-          </p>
+            <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold uppercase text-gray-600">
+              {display.status}
+            </span>
+          </div>
 
-          <h1 className="mt-2 text-3xl font-bold text-gray-900">
-            {name}
+          <h1 className="mt-3 text-3xl font-bold text-gray-900">
+            {display.productName}
           </h1>
 
           <div className="mt-3">
             <ProductRating
-              rating={averageRating}
-              reviews={totalReviews}
+              rating={display.averageRating}
+              reviews={display.totalReviews}
             />
           </div>
 
-          <div className="mt-5">
+          <div className="mt-5 flex flex-wrap items-end gap-3">
             <span className="text-3xl font-bold text-green-700">
-              Rs. {formatPKR(price)}
+              Rs. {formatPKR(display.price)}
             </span>
-
-            <span className="ml-3 text-gray-500">
-              / {unit}
+            <span className="text-sm text-gray-500">
+              Per {display.unit}
             </span>
           </div>
 
-          <p className="mt-5 leading-relaxed text-gray-600">
-            {description}
+          <p className="mt-5 text-gray-600 leading-7">
+            {display.description}
           </p>
 
-          <div className="mt-6 flex flex-wrap gap-5 border-y border-gray-100 py-4">
-
-            <div className="flex items-center gap-2 text-sm text-gray-700">
-              <User size={15} />
-              <span>
-                Sold by{" "}
-                <strong>
-                  {seller?.businessName ||
-                    seller?.shopName ||
-                    seller?.name ||
-                    "Seller"}
-                </strong>
+          {/* STOCK INFO */}
+          <div className="mt-6 rounded-2xl border border-gray-200 bg-gray-50 p-4">
+            <div className="flex items-center gap-2">
+              <PackageCheck
+                size={16}
+                className="text-green-600"
+              />
+              <span
+                className={`text-sm font-semibold ${stockMeta.tone}`}
+              >
+                {stockMeta.label}
               </span>
             </div>
-
-            <div className="flex items-center gap-2 text-sm">
-
-              {isOutOfStock ? (
-                <>
-                  <PackageX
-                    size={15}
-                    className="text-red-500"
-                  />
-
-                  <span className="font-medium text-red-600">
-                    Out of Stock
-                  </span>
-                </>
-              ) : (
-                <>
-                  <CheckCircle2
-                    size={15}
-                    className={
-                      isLowStock
-                        ? "text-yellow-500"
-                        : "text-green-600"
-                    }
-                  />
-
-                  <span
-                    className={`font-medium ${
-                      isLowStock
-                        ? "text-yellow-600"
-                        : "text-green-700"
-                    }`}
-                  >
-                    {isLowStock
-                      ? `Only ${quantity} left`
-                      : "In Stock"}
-                  </span>
-                </>
-              )}
-
-            </div>
-
           </div>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          {/* SELLER */}
+          <div className="mt-6 rounded-2xl border border-gray-200 p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-green-50 text-green-700">
+                <Store size={18} />
+              </div>
 
+              <div>
+                <p className="font-semibold text-gray-900">
+                  Sold by {display.sellerName}
+                </p>
+
+                <p className="mt-1 flex items-center gap-2 text-sm text-gray-600">
+                  <MapPin size={14} />
+                  {display.sellerLocation}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* ACTION BUTTONS */}
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button
               variant="primary"
               size="lg"
               fullWidth
-              disabled={isOutOfStock}
               leftIcon={<ShoppingCart size={18} />}
               onClick={() => onAddToCart(product)}
             >
-              Add To Cart
+              Add to cart
             </Button>
 
             <Button
@@ -181,11 +186,9 @@ export default function ProductDetails({
               fullWidth
               onClick={onBack}
             >
-              Back to Products
+              Continue shopping
             </Button>
-
           </div>
-
         </div>
       </div>
     </div>

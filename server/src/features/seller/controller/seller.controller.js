@@ -1,35 +1,39 @@
 const sellerService = require("../services/seller.service");
 
+
 const registerSeller = async (req, res, next) => {
     try {
+
         if (req.files?.logo) {
-            req.body.logo = req.files.logo[0].filename;
+            req.body.logo = req.files.logo[0].path;
+            req.body.logoId = req.files.logo[0].filename;
         }
 
         if (req.files?.cnicFront) {
-            req.body.cnicFront = req.files.cnicFront[0].filename;
+            req.body.cnicFront = req.files.cnicFront[0].path;
+            req.body.cnicFrontId = req.files.cnicFront[0].filename;
         }
 
         if (req.files?.cnicBack) {
-            req.body.cnicBack = req.files.cnicBack[0].filename;
+            req.body.cnicBack = req.files.cnicBack[0].path;
+            req.body.cnicBackId = req.files.cnicBack[0].filename;
         }
 
-        const seller = await sellerService.registerSeller(  
+        const seller = await sellerService.registerSeller(
             req.user.userId,
             req.body
         );
+
         return res.status(201).json({
             success: true,
             message: "Seller registration submitted successfully.",
             data: seller,
         });
 
-
     } catch (error) {
         next(error);
     }
 };
-
 const getSellerProfile = async (req, res, next) => {
 
     try {
