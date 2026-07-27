@@ -14,6 +14,9 @@ const {
     getProduct,
     updateProduct,
     deleteProduct,
+    getFeaturedProducts,
+    getLatestProducts,
+    getProductsByCategory,
 } = require("../controller/product.controller");
 
 
@@ -22,6 +25,12 @@ const {
 // ====================================
 
 router.get("/", getAllProducts);
+
+router.get("/featured", getFeaturedProducts);
+
+router.get("/latest", getLatestProducts);
+
+router.get("/category/:categoryId", getProductsByCategory);
 
 
 // ====================================
@@ -58,7 +67,7 @@ router.delete(
 
 
 // ====================================
-// Public Product Details
+// Product Details (Must Be Last)
 // ====================================
 
 router.get("/:id", getProduct);

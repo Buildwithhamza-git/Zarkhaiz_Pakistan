@@ -44,12 +44,93 @@ const getSellerProductById = async (productId, sellerId) => {
 };
 
 // ======================================
-// Get All Active Products
+// Get All Products (Search + Filter + Sort + Pagination)
 // ======================================
-const getAllProducts = async () => {
-    return await Product.find({
+const getAllProducts = async ({
+    page = 1,
+    limit = 12,
+    search,
+    category,
+    featured,
+    minPrice,
+    maxPrice,
+    sort = "latest",
+}) => {
+
+    const filter = {
         status: "Active",
-    })
+    };
+
+    // Search
+    if (search) {
+        filter.name = {
+            $regex: search,
+            $options: "i",
+        };
+    }
+
+    // Category
+    if (category) {
+        filter.category = category;
+    }
+
+    // Featured
+    if (featured === "true") {
+        filter.featured = true;
+    }
+
+    // Price Filter
+    if (minPrice || maxPrice) {
+        filter.price = {};
+
+        if (minPrice) {
+            filter.price.$gte = Number(minPrice);
+        }
+
+        if (maxPrice) {
+            filter.price.$lte = Number(maxPrice);
+        }
+    }
+
+    // Sorting
+    let sortOption = {};
+
+    switch (sort) {
+
+        case "latest":
+            sortOption = { createdAt: -1 };
+            break;
+
+        case "oldest":
+            sortOption = { createdAt: 1 };
+            break;
+
+        case "price-low":
+            sortOption = { price: 1 };
+            break;
+
+        case "price-high":
+            sortOption = { price: -1 };
+            break;
+
+        case "rating":
+            sortOption = { averageRating: -1 };
+            break;
+
+        case "popular":
+            sortOption = { totalSold: -1 };
+            break;
+
+        default:
+            sortOption = {
+                featured: -1,
+                createdAt: -1,
+            };
+    }
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const products = await Product.find(filter)
         .populate("category")
         .populate({
             path: "seller",
@@ -58,7 +139,21 @@ const getAllProducts = async () => {
                 select: "firstname lastname",
             },
         })
-        .sort({ featured: -1, createdAt: -1 });
+        .sort(sortOption)
+        .skip(skip)
+        .limit(Number(limit));
+
+    const totalProducts = await Product.countDocuments(filter);
+
+    return {
+        products,
+        pagination: {
+            currentPage: Number(page),
+            totalPages: Math.ceil(totalProducts / Number(limit)),
+            totalProducts,
+            limit: Number(limit),
+        },
+    };
 };
 
 // ======================================
@@ -109,6 +204,45 @@ const deleteProduct = async (id) => {
     return await Product.findByIdAndDelete(id);
 };
 
+
+// ======================================
+// Get Featured Products
+// ======================================
+const getFeaturedProducts = async (limit = 8) => {
+    return await Product.find({
+        status: "Active",
+        featured: true,
+    })
+        .populate("category")
+        .populate({
+            path: "seller",
+            populate: {
+                path: "user",
+                select: "firstname lastname",
+            },
+        })
+        .sort({ createdAt: -1 })
+        .limit(limit);
+};
+
+// ======================================
+// Get Latest Products
+// ======================================
+const getLatestProducts = async (limit = 10) => {
+    return await Product.find({
+        status: "Active",
+    })
+        .populate("category")
+        .populate({
+            path: "seller",
+            populate: {
+                path: "user",
+                select: "firstname lastname",
+            },
+        })
+        .sort({ createdAt: -1 })
+        .limit(limit);
+};
 module.exports = {
     createProduct,
     getSellerProducts,
@@ -117,6 +251,8 @@ module.exports = {
     getAllProducts,
     getProductsByCategory,
     searchProducts,
+    getFeaturedProducts,
+    getLatestProducts,
     updateProduct,
     deleteProduct,
 };

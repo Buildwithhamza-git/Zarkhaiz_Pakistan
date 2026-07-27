@@ -6,6 +6,8 @@ const {
     getAllProducts,
     getProductById,
     getSellerProducts,
+    getFeaturedProducts,
+    getLatestProducts,
     updateProduct,
     deleteProduct,
 } = require("../repository/product.repository");
@@ -33,8 +35,8 @@ const createProductService = async (userId, productData, files) => {
     }
 
     const images = files?.length
-    ? files.map(file => file.path)
-    : [];
+        ? files.map(file => file.path)
+        : [];
 
     const product = await createProduct({
         seller: seller._id,
@@ -61,9 +63,27 @@ const createProductService = async (userId, productData, files) => {
 // ====================================
 // Get All Products
 // ====================================
-const getAllProductsService = async () => {
+const getAllProductsService = async (query) => {
 
-    return await getAllProducts();
+    return await getAllProducts({
+
+        page: query.page || 1,
+
+        limit: query.limit || 12,
+
+        search: query.search,
+
+        category: query.category,
+
+        featured: query.featured,
+
+        minPrice: query.minPrice,
+
+        maxPrice: query.maxPrice,
+
+        sort: query.sort || "latest",
+
+    });
 
 };
 
@@ -143,8 +163,8 @@ const updateProductService = async (
     }
 
     if (files?.length) {
-    updateData.images = files.map(file => file.path);
-}
+        updateData.images = files.map(file => file.path);
+    }
 
     const updatedProduct = await updateProduct(
         productId,
@@ -186,12 +206,42 @@ const deleteProductService = async (
 
 };
 
+// ====================================
+// Featured Products
+// ====================================
+const getFeaturedProductsService = async () => {
+
+    return await getFeaturedProducts();
+
+};
+
+// ====================================
+// Latest Products
+// ====================================
+const getLatestProductsService = async () => {
+
+    return await getLatestProducts();
+
+};
+
+// ====================================
+// Products By Category
+// ====================================
+const getProductsByCategoryService = async (categoryId) => {
+
+    return await getProductsByCategory(categoryId);
+
+};
+
 
 module.exports = {
     createProductService,
     getAllProductsService,
+    getLatestProductsService,
     getSellerProductsService,
+    getProductsByCategoryService,
     getProductService,
     updateProductService,
+    getFeaturedProductsService,
     deleteProductService,
 };

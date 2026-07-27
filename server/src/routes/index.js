@@ -4,6 +4,7 @@ router.use("/auth", require("../features/auth/auth.routes"));
 router.use("/seller", require("../features/seller/routes/seller.route"));
 router.use("/categories", require("../features/category/routes/category.route"));
 router.use("/products", require("../features/product/routes/product.route"));
+router.use("/marketplace",require("../features/marketplace/routes/marketplace.routes"));
 
 // Later
 // router.use("/categories", require("../features/categories/category.routes"));

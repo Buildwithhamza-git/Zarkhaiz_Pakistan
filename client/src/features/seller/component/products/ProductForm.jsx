@@ -1,207 +1,434 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 import Input from "../../../../shared/components/ui/input";
 import Button from "../../../../shared/components/ui/button";
 
-const categories = ["Vegetables", "Fruits", "Grains", "Dairy", "Other"];
-const statuses = ["Active", "Inactive", "Out of Stock"];
-const units = ["kg", "g", "litre", "ml", "piece", "dozen"];
+import { productSchema } from "../../validations/product.form.schema";
+import { getCategories } from "../../services/categoryApi";
 
-const ProductForm = ({ onSubmit, onCancel }) => {
-  const [form, setForm] = useState({
-    name: "",
-    category: categories[0],
-    price: "",
-    quantity: "",
-    unit: units[0],
-    status: statuses[0],
-    image: "",
+const units = [
+  "kg",
+  "g",
+  "ton",
+  "litre",
+  "ml",
+  "bag",
+  "packet",
+  "piece",
+  "dozen",
+];
+
+const statuses = [
+  "Active",
+  "Inactive",
+  "Out of Stock",
+];
+
+const ProductForm = ({
+  product,
+  onSubmit,
+  onCancel,
+}) => {
+
+  const [categories, setCategories] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      category: "",
+      price: "",
+      quantity: "",
+      unit: "kg",
+      status: "Active",
+      featured: false,
+    },
   });
-  const [preview, setPreview] = useState(null);
-  const [errors, setErrors] = useState({});
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+  // =============================
+  // Load Categories
+  // =============================
 
-    // clear error for this field as soon as user edits it
-    if (errors[name]) {
-      setErrors({ ...errors, [name]: undefined });
-    }
-  };
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getCategories();
+        setCategories(response.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
 
-  const handleImage = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setPreview(url);
-      setForm({ ...form, image: url });
-    }
-  };
+    fetchCategories();
+  }, []);
 
-  const validate = () => {
-    const newErrors = {};
+  // =============================
+  // Edit Mode
+  // =============================
 
-    if (!form.name.trim()) {
-      newErrors.name = "Product name is required";
-    } else if (form.name.trim().length < 2) {
-      newErrors.name = "Product name must be at least 2 characters";
-    } else if (form.name.trim().length > 20) {
-      newErrors.name = "Product name must not exceed 20 characters";
-    }
+  useEffect(() => {
 
-    if (form.price === "" || form.price === null) {
-      newErrors.price = "Price is required";
-    } else if (isNaN(form.price) || Number(form.price) <= 0) {
-      newErrors.price = "Price must be a number greater than 0";
-    }
+    if (!product) {
 
-    if (form.quantity === "" || form.quantity === null) {
-      newErrors.quantity = "Quantity is required";
-    } else if (
-      isNaN(form.quantity) ||
-      Number(form.quantity) < 0 ||
-      !Number.isInteger(Number(form.quantity))
-    ) {
-      newErrors.quantity = "Quantity must be a whole number, 0 or more";
+      reset({
+        name: "",
+        description: "",
+        category: "",
+        price: "",
+        quantity: "",
+        unit: "kg",
+        status: "Active",
+        featured: false,
+      });
+
+      setImagePreviews([]);
+      return;
     }
 
-    if (!form.unit) {
-      newErrors.unit = "Please select a unit";
+    reset({
+      name: product.name,
+      description: product.description,
+      category: product.category?._id,
+      price: product.price,
+      quantity: product.quantity,
+      unit: product.unit,
+      status: product.status,
+      featured: product.featured,
+    });
+
+    if (product.images?.length) {
+      setImagePreviews(product.images);
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  }, [product, reset]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (validate()) {
-      onSubmit(form);
+  // =============================
+  // Image Preview
+  // =============================
+
+  const images = watch("images");
+
+  useEffect(() => {
+
+    if (!images || images.length === 0) return;
+
+    const previews = [];
+
+    Array.from(images).forEach(file => {
+      previews.push(URL.createObjectURL(file));
+    });
+
+    setImagePreviews(previews);
+
+  }, [images]);
+
+  // =============================
+  // Submit
+  // =============================
+
+  const submitHandler = async (data) => {
+
+    try {
+      
+      setLoading(true);
+
+      const formData = new FormData();
+
+      formData.append("name", data.name);
+      formData.append("description", data.description);
+      formData.append("category", data.category);
+      formData.append("price", data.price);
+      formData.append("quantity", data.quantity);
+      formData.append("unit", data.unit);
+      formData.append("status", data.status);
+      formData.append("featured", data.featured);
+
+      if (data.images) {
+        Array.from(data.images).forEach(image => {
+          formData.append("images", image);
+        });
+      }
+
+      await onSubmit(formData);
+
+    } finally {
+
+      setLoading(false);
+
     }
+
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+
+    <form
+      onSubmit={handleSubmit(submitHandler)}
+      className="space-y-5"
+    >
+
+      {/* Images */}
+
       <div>
-        <label className="mb-2 block text-sm font-medium text-gray-700">
-          Product Image
+
+        <label className="mb-2 block text-sm font-semibold">
+          Product Images
         </label>
+
         <input
           type="file"
+          multiple
           accept="image/*"
-          onChange={handleImage}
-          className="block w-full text-sm text-gray-600"
+          {...register("images")}
+          className="w-full rounded-lg border border-dashed border-gray-300 p-3"
         />
-        {preview && (
-          <img
-            src={preview}
-            alt="preview"
-            className="mt-2 h-24 w-24 rounded-lg object-cover"
-          />
-        )}
+
       </div>
 
-      <div>
-        <Input
-          label="Product Name"
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-          maxLength={20}
-          required
-        />
-        {errors.name && (
-          <p className="mt-1 text-xs text-red-600">{errors.name}</p>
-        )}
-      </div>
+      {imagePreviews.length > 0 && (
 
-      <div>
-        <label className="mb-2 block text-sm font-medium text-gray-700">
-          Category
-        </label>
-        <select
-          name="category"
-          value={form.category}
-          onChange={handleChange}
-          className="w-full rounded-lg border border-gray-300 py-3 px-4 text-sm text-gray-700 outline-none focus:border-green-600 focus:ring-2 focus:ring-green-200"
-        >
-          {categories.map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
-      </div>
+        <div className="grid grid-cols-5 gap-3">
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Input
-            label="Price (Rs.)"
-            type="number"
-            name="price"
-            value={form.price}
-            onChange={handleChange}
-            required
-          />
-          {errors.price && (
-            <p className="mt-1 text-xs text-red-600">{errors.price}</p>
-          )}
-        </div>
+          {imagePreviews.map((image, index) => (
 
-        <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">
-            Quantity
-          </label>
-          <div className="flex gap-2">
-            <input
-              type="number"
-              name="quantity"
-              value={form.quantity}
-              onChange={handleChange}
-              className="w-full rounded-lg border border-gray-300 py-3 px-4 text-sm text-gray-700 outline-none focus:border-green-600 focus:ring-2 focus:ring-green-200"
-              required
+            <img
+              key={index}
+              src={image}
+              alt="preview"
+              className="h-24 w-full rounded-lg border object-cover"
             />
-            <select
-              name="unit"
-              value={form.unit}
-              onChange={handleChange}
-              className="rounded-lg border border-gray-300 py-3 px-2 text-sm text-gray-700 outline-none focus:border-green-600 focus:ring-2 focus:ring-green-200"
-            >
-              {units.map((u) => (
-                <option key={u} value={u}>{u}</option>
-              ))}
-            </select>
-          </div>
-          {errors.quantity && (
-            <p className="mt-1 text-xs text-red-600">{errors.quantity}</p>
-          )}
+
+          ))}
+
         </div>
-      </div>
+
+      )}
+
+      {/* Name */}
+
+      <Input
+        label="Product Name"
+        {...register("name")}
+      />
+
+      <p className="text-sm text-red-500">
+        {errors.name?.message}
+      </p>
+
+      {/* Description */}
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-gray-700">
-          Status
+
+        <label className="mb-2 block text-sm font-semibold">
+          Description
         </label>
-        <select
-          name="status"
-          value={form.status}
-          onChange={handleChange}
-          className="w-full rounded-lg border border-gray-300 py-3 px-4 text-sm text-gray-700 outline-none focus:border-green-600 focus:ring-2 focus:ring-green-200"
-        >
-          {statuses.map((s) => (
-            <option key={s} value={s}>{s}</option>
-          ))}
-        </select>
+
+        <textarea
+          rows={4}
+          {...register("description")}
+          className="w-full rounded-lg border border-gray-300 p-3"
+        />
+
+        <p className="mt-1 text-sm text-red-500">
+          {errors.description?.message}
+        </p>
+
       </div>
 
-      <div className="flex justify-end gap-3 pt-2">
-        <Button type="button" variant="ghost" onClick={onCancel}>
+      {/* Category + Status */}
+
+      <div className="grid grid-cols-2 gap-5">
+
+        <div>
+
+          <label className="mb-2 block text-sm font-semibold">
+            Category
+          </label>
+
+          <select
+            {...register("category")}
+            className="w-full rounded-lg border border-gray-300 p-3"
+          >
+
+            <option value="">
+              Select Category
+            </option>
+
+            {categories.map(category => (
+
+              <option
+                key={category._id}
+                value={category._id}
+              >
+                {category.name}
+              </option>
+
+            ))}
+
+          </select>
+
+          <p className="mt-1 text-sm text-red-500">
+            {errors.category?.message}
+          </p>
+
+        </div>
+
+        <div>
+
+          <label className="mb-2 block text-sm font-semibold">
+            Status
+          </label>
+
+          <select
+            {...register("status")}
+            className="w-full rounded-lg border border-gray-300 p-3"
+          >
+
+            {statuses.map(status => (
+
+              <option
+                key={status}
+                value={status}
+              >
+                {status}
+              </option>
+
+            ))}
+
+          </select>
+
+        </div>
+
+      </div>
+
+      {/* Price Quantity Unit */}
+
+      <div className="grid grid-cols-3 gap-5">
+
+        <div>
+
+          <Input
+            label="Price"
+            type="number"
+            {...register("price")}
+          />
+
+          <p className="mt-1 text-sm text-red-500">
+            {errors.price?.message}
+          </p>
+
+        </div>
+
+        <div>
+
+          <Input
+            label="Quantity"
+            type="number"
+            {...register("quantity")}
+          />
+
+          <p className="mt-1 text-sm text-red-500">
+            {errors.quantity?.message}
+          </p>
+
+        </div>
+
+        <div>
+
+          <label className="mb-2 block text-sm font-semibold">
+            Unit
+          </label>
+
+          <select
+            {...register("unit")}
+            className="w-full rounded-lg border border-gray-300 p-3"
+          >
+
+            {units.map(unit => (
+
+              <option
+                key={unit}
+                value={unit}
+              >
+                {unit}
+              </option>
+
+            ))}
+
+          </select>
+
+        </div>
+
+      </div>
+
+      {/* Featured */}
+
+      <div className="rounded-lg border border-yellow-300 bg-yellow-50 p-4">
+
+        <label className="flex items-start gap-3">
+
+          <input
+            type="checkbox"
+            {...register("featured")}
+            className="mt-1"
+          />
+
+          <div>
+
+            <h4 className="font-medium">
+              Featured Product
+            </h4>
+
+            <p className="text-sm text-gray-600">
+              Featured products appear at the top of the marketplace.
+              Approval and payment are required before activation.
+            </p>
+
+          </div>
+
+        </label>
+
+      </div>
+
+      {/* Buttons */}
+
+      <div className="flex justify-end gap-3">
+
+        <Button
+          variant="ghost"
+          type="button"
+          onClick={onCancel}
+        >
           Cancel
         </Button>
-        <Button type="submit" variant="primary">
-          Add Product
+
+        <Button
+          type="submit"
+          disabled={loading}
+        >
+          {loading
+            ? "Saving..."
+            : product
+              ? "Update Product"
+              : "Add Product"}
         </Button>
+
       </div>
+
     </form>
+
   );
+
 };
 
 export default ProductForm;

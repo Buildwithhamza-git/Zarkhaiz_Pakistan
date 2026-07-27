@@ -4,18 +4,22 @@ import { BrowserRouter } from "react-router-dom";
 
 import App from "./app/App";
 import "./index.css";
+
 import AuthProvider from "./context/authContext";
-import { ProductsProvider } from "./context/productsContext";
 import SellerProvider from "./context/sellerContext";
+import MarketplaceProvider from "./context/MarketplaceContext";
+import { ProductsProvider } from "./context/productsContext";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-    <BrowserRouter>
-        <AuthProvider>
-            <SellerProvider>
-                <ProductsProvider>
-                    <App />
-                </ProductsProvider>
-            </SellerProvider>
-        </AuthProvider>
-    </BrowserRouter>
-); 
+  <BrowserRouter>
+    <AuthProvider>
+      <SellerProvider>
+        <MarketplaceProvider>
+          <ProductsProvider>
+            <App />
+          </ProductsProvider>
+        </MarketplaceProvider>
+      </SellerProvider>
+    </AuthProvider>
+  </BrowserRouter>
+);
