@@ -9,15 +9,13 @@ const statusStyles = {
 
 const ProductCard = ({ product, onEdit, onDelete }) => {
   const safeProduct = product || {};
-  const image =
-    Array.isArray(safeProduct.images) && safeProduct.images.length > 0
-      ? safeProduct.images.find(Boolean) || "https://placehold.co/500x350?text=No+Image"
-      : "https://placehold.co/500x350?text=No+Image";
-
+ const image =
+  safeProduct?.images?.[0]?.url ||
+  "https://placehold.co/500x350?text=No+Image";
   const productName = safeProduct.name || "Unnamed Product";
   const categoryName = safeProduct.category?.name || safeProduct.category || "Uncategorized";
   const price = Number(safeProduct.price ?? 0);
-  const quantity = Number(safeProduct.quantity ?? 0);
+  const quantity = Number(safeProduct.stock ?? safeProduct.quantity ?? 0);
   const unit = safeProduct.unit || "unit";
   const status = safeProduct.status || "Active";
   const featured = Boolean(safeProduct.featured);

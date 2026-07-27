@@ -95,6 +95,11 @@ const methods = useForm({
   // ==========================
 
   useEffect(() => {
+
+     window.scrollTo({
+    top: 0,
+    behavior: "smooth", // optional (remove if you want instant)
+  });
     const subscription = watch((value) => {
       localStorage.setItem(
         STORAGE_KEY,

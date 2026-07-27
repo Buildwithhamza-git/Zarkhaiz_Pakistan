@@ -53,9 +53,14 @@ const getAllProducts = async (req, res, next) => {
 
         return res.status(200).json({
             success: true,
-            message: "Products fetched successfully.",
-            data: products.products,
-            pagination: products.pagination,
+            message: products.products?.length ? "Products fetched successfully." : "No products found",
+            data: products.products ?? [],
+            pagination: products.pagination ?? {
+                currentPage: 1,
+                totalPages: 1,
+                totalProducts: 0,
+                limit: 12,
+            },
         });
 
     } catch (error) {

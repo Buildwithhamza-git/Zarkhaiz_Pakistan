@@ -5,19 +5,20 @@ const categorySchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
-      unique: true,
       trim: true,
-      enum: [
-        "Seeds",
-        "Fertilizers",
-        "Pesticides",
-        "Herbicides",
-        "Crops",
-        "Vegetables",
-        "Fruits",
-        "Irrigation",
-        "Farm Equipment",
-      ],
+    },
+
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+    },
+
+    parent: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      default: null, // null = main category
     },
 
     description: {

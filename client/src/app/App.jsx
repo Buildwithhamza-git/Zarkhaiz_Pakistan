@@ -32,6 +32,8 @@ import MarketplaceProductsPage from "../features/marketplace/layouts/ProductsPag
 import ProtectedRoute from "../routes/Protectedroutes";
 import SellerRoute from "../routes/SellerRoutes";
 
+import CartPage from "../features/cart/component/CartPage";
+
 export default function App() {
   return (
     <Routes>
@@ -61,6 +63,7 @@ export default function App() {
         <Route path="/seller-registration" element={<SellerRegistrationPage />} />
         <Route path="/seller/pending" element={<SellerPendingApproval />} />
         <Route path="/profile" element={<ProfilePage/>}/>
+        <Route path="/cart" element={<CartPage />} />
       </Route>
 
 

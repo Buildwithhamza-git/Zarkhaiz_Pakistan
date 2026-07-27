@@ -1,3 +1,6 @@
+const mongoose = require("mongoose");
+const slugify = require("slugify");
+
 const Seller = require("../../seller/model/seller.model");
 const Category = require("../../category/category.model");
 const { getUploadedImageUrls } = require("../utils/normalizeUploadedFiles");
@@ -14,6 +17,27 @@ const {
 } = require("../repository/product.repository");
 
 
+const resolveCategory = async (categoryValue) => {
+    if (!categoryValue) return null;
+
+    if (typeof categoryValue === "object" && categoryValue._id) {
+        categoryValue = categoryValue._id;
+    }
+
+    const value = String(categoryValue).trim();
+
+    if (!value) return null;
+
+    if (mongoose.Types.ObjectId.isValid(value)) {
+        return await Category.findById(value);
+    }
+
+    return await Category.findOne({
+        slug: value.toLowerCase(),
+        isActive: true,
+    });
+};
+
 // ====================================
 // Create Product
 // ====================================
@@ -29,13 +53,19 @@ const createProductService = async (userId, productData, files) => {
         throw new Error("Your seller account is not approved yet.");
     }
 
-    const category = await Category.findById(productData.category);
+    const category = await resolveCategory(productData.category);
 
     if (!category) {
         throw new Error("Category not found.");
     }
 
-    const images = getUploadedImageUrls(files);
+    const rawImages = getUploadedImageUrls(files);
+    const images = rawImages.map((img) =>
+        typeof img === "string" ? { url: img } : img
+    );
+    const stock = Number(productData.stock ?? productData.quantity ?? 0);
+    const featured = Boolean(productData.featured ?? productData.isFeatured ?? false);
+    const slug = productData.slug || slugify(productData.name, { lower: true, strict: true });
 
     const product = await createProduct({
         seller: seller._id,
@@ -44,15 +74,19 @@ const createProductService = async (userId, productData, files) => {
         name: productData.name,
         description: productData.description,
 
-        price: productData.price,
-        quantity: productData.quantity,
+        slug,
+        price: Number(productData.price),
+        stock,
         unit: productData.unit,
 
+        discountPrice: Number(productData.discountPrice ?? 0),
+        brand: productData.brand || "",
+        tags: Array.isArray(productData.tags) ? productData.tags : [],
         images,
 
         status: productData.status || "Active",
-
-        featured: productData.featured || false,
+        featured,
+        isFeatured: featured,
     });
 
     return product;
@@ -62,28 +96,33 @@ const createProductService = async (userId, productData, files) => {
 // ====================================
 // Get All Products
 // ====================================
-const getAllProductsService = async (query) => {
+const getAllProductsService = async (query = {}) => {
+    const category = query.category && query.category !== "all"
+        ? await resolveCategory(query.category)
+        : null;
+
+    if (query.category && query.category !== "all" && !category) {
+        return {
+            products: [],
+            pagination: {
+                currentPage: Number(query.page || 1),
+                totalPages: 1,
+                totalProducts: 0,
+                limit: Number(query.limit || 12),
+            },
+        };
+    }
 
     return await getAllProducts({
-
         page: query.page || 1,
-
         limit: query.limit || 12,
-
         search: query.search,
-
-        category: query.category,
-
+        category: category?._id || null,
         featured: query.featured,
-
         minPrice: query.minPrice,
-
         maxPrice: query.maxPrice,
-
         sort: query.sort || "latest",
-
     });
-
 };
 
 
@@ -149,21 +188,49 @@ const updateProductService = async (
         throw new Error("Unauthorized.");
     }
 
+    // ✅ CATEGORY VALIDATION
     if (updateData.category) {
-
-        const category = await Category.findById(
-            updateData.category
-        );
+        const category = await resolveCategory(updateData.category);
 
         if (!category) {
             throw new Error("Category not found.");
         }
 
+        updateData.category = category._id;
     }
 
-    if (files?.length) {
-        updateData.images = getUploadedImageUrls(files);
+    // ✅ HANDLE IMAGES PROPERLY
+    let existingImages = [];
+
+    if (updateData.existingImages) {
+        try {
+            const parsed = JSON.parse(updateData.existingImages);
+
+            existingImages = parsed.map((url) => ({ url }));
+
+        } catch (err) {
+            throw new Error("Invalid existingImages format.");
+        }
     }
+
+    // ✅ NEW UPLOADED IMAGES
+    let newImages = [];
+
+    if (files?.length) {
+        const rawImages = getUploadedImageUrls(files);
+
+        newImages = rawImages.map((img) =>
+            typeof img === "string" ? { url: img } : img
+        );
+    }
+
+    // ✅ MERGE IMAGES
+    if (existingImages.length || newImages.length) {
+        updateData.images = [...existingImages, ...newImages];
+    }
+
+    // ❗ REMOVE TEMP FIELD
+    delete updateData.existingImages;
 
     const updatedProduct = await updateProduct(
         productId,
@@ -171,9 +238,7 @@ const updateProductService = async (
     );
 
     return updatedProduct;
-
 };
-
 
 // ====================================
 // Delete Product
@@ -227,9 +292,13 @@ const getLatestProductsService = async () => {
 // Products By Category
 // ====================================
 const getProductsByCategoryService = async (categoryId) => {
+    const category = await resolveCategory(categoryId);
 
-    return await getProductsByCategory(categoryId);
+    if (!category) {
+        return [];
+    }
 
+    return await getProductsByCategory(category._id);
 };
 
 

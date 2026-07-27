@@ -165,6 +165,13 @@ const getProductsByCategory = async (categoryId) => {
         status: "Active",
     })
         .populate("category")
+        .populate({
+            path: "seller",
+            populate: {
+                path: "user",
+                select: "firstname lastname",
+            },
+        })
         .sort({ featured: -1, createdAt: -1 });
 };
 

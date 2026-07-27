@@ -11,12 +11,13 @@ const {
 const {
     createCategory,
     getAllCategories,
-    getCategory,
+    getCategoryBySlug,
     updateCategory,
-    deleteCategory,
+    // deleteCategory,
 } = require("../controller/category.controller");
 
-// Create Category (Admin)
+
+// 🔥 CREATE CATEGORY (Admin)
 router.post(
     "/",
     authenticate,
@@ -24,19 +25,23 @@ router.post(
     createCategory
 );
 
-// Get All Categories (Public)
+
+// 🔥 GET ALL CATEGORIES (Public)
+// should return TREE (parent + children)
 router.get(
     "/",
     getAllCategories
 );
 
-// Get Single Category (Public)
+
+// 🔥 GET SINGLE CATEGORY BY SLUG (Public)
 router.get(
-    "/:id",
-    getCategory
+    "/slug/:slug",
+    getCategoryBySlug
 );
 
-// Update Category (Admin)
+
+// 🔥 UPDATE CATEGORY (Admin)
 router.patch(
     "/:id",
     authenticate,
@@ -44,7 +49,8 @@ router.patch(
     updateCategory
 );
 
-// Delete Category (Admin)
+
+// 🔥 DELETE CATEGORY (Admin)
 // router.delete(
 //     "/:id",
 //     authenticate,

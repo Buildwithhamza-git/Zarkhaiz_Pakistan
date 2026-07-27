@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
 import ProductGrid from "./components/ProductGrid";
 import ProductDetails from "./components/ProductDetails";
@@ -6,9 +7,26 @@ import ProductAddedModal from "./components/ProductAddedModal";
 
 import { getProducts } from "./services/marketplaceApi";
 
+import { useCartContext } from "../../context/cartContext";
+
 const PRODUCTS_PER_PAGE = 9;
 
-export default function ProductsContent({ filters }) {
+export default function ProductsContent({ filters, setFilters }) {
+  const { slug } = useParams();
+
+  // ======================================
+  // Cart
+  // ======================================
+
+  const {
+    addToCart,
+    actionLoading,
+  } = useCartContext();
+
+  // ======================================
+  // Products
+  // ======================================
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,14 +38,41 @@ export default function ProductsContent({ filters }) {
     page: 1,
   });
 
+  // ======================================
+  // Product Details
+  // ======================================
+
   const [selectedProduct, setSelectedProduct] = useState(null);
+
+  // ======================================
+  // Cart Modal
+  // ======================================
 
   const [showCartModal, setShowCartModal] = useState(false);
 
-  const [debouncedSearch, setDebouncedSearch] = useState(filters.search);
+  // ======================================
+  // Search
+  // ======================================
+
+  const [debouncedSearch, setDebouncedSearch] = useState(
+    filters.search
+  );
 
   // ======================================
-  // Debounced Search
+  // URL Category → Filters
+  // ======================================
+
+  useEffect(() => {
+    if (slug) {
+      setFilters((prev) => ({
+        ...prev,
+        category: slug,
+      }));
+    }
+  }, [slug, setFilters]);
+
+  // ======================================
+  // Debounce Search
   // ======================================
 
   useEffect(() => {
@@ -39,7 +84,7 @@ export default function ProductsContent({ filters }) {
   }, [filters.search]);
 
   // ======================================
-  // Reset page whenever filters change
+  // Reset Page When Filters Change
   // ======================================
 
   useEffect(() => {
@@ -78,12 +123,24 @@ export default function ProductsContent({ filters }) {
         setProducts(response.data ?? []);
 
         setPagination({
-          page: response.pagination?.page ?? response.pagination?.currentPage ?? 1,
-          total: response.pagination?.total ?? response.pagination?.totalProducts ?? 0,
-          totalPages: response.pagination?.totalPages ?? 1,
+          page:
+            response.pagination?.page ??
+            response.pagination?.currentPage ??
+            1,
+
+          total:
+            response.pagination?.total ??
+            response.pagination?.totalProducts ??
+            0,
+
+          totalPages:
+            response.pagination?.totalPages ?? 1,
         });
       } catch (error) {
-        console.error("Failed to fetch products:", error);
+        console.error(
+          "Failed to fetch products:",
+          error
+        );
 
         setProducts([]);
 
@@ -109,17 +166,57 @@ export default function ProductsContent({ filters }) {
   ]);
 
   // ======================================
-  // Product Details
+  // View Product Details
   // ======================================
 
   const handleViewDetails = (product) => {
+    console.log("Selected Product:", product);
 
-    console.log("Selected Product", product);
     setSelectedProduct(product);
   };
 
+  // ======================================
+  // Back From Details
+  // ======================================
+
   const handleBack = () => {
     setSelectedProduct(null);
+  };
+
+  // ======================================
+  // Add Product To Cart
+  // ======================================
+
+  const handleAddToCart = async (product) => {
+    if (!product?._id) {
+      console.error(
+        "Cannot add product: product ID is missing.",
+        product
+      );
+
+      return;
+    }
+
+    try {
+      console.log(
+        "Adding product to cart:",
+        product._id
+      );
+
+      await addToCart(product._id, 1);
+
+      setShowCartModal(true);
+    } catch (error) {
+      console.error(
+        "Failed to add product to cart:",
+        error
+      );
+
+      alert(
+        error?.message ||
+          "Unable to add this product to cart."
+      );
+    }
   };
 
   // ======================================
@@ -129,7 +226,9 @@ export default function ProductsContent({ filters }) {
   const handlePageChange = (nextPage) => {
     if (nextPage < 1) return;
 
-    if (nextPage > pagination.totalPages) return;
+    if (nextPage > pagination.totalPages) {
+      return;
+    }
 
     setPage(nextPage);
 
@@ -141,13 +240,18 @@ export default function ProductsContent({ filters }) {
     });
   };
 
+  // ======================================
+  // Render
+  // ======================================
+
   return (
     <>
       {selectedProduct ? (
         <ProductDetails
           product={selectedProduct}
           onBack={handleBack}
-          onAddToCart={() => setShowCartModal(true)}
+          onAddToCart={handleAddToCart}
+          addingToCart={actionLoading}
         />
       ) : (
         <ProductGrid
@@ -159,7 +263,8 @@ export default function ProductsContent({ filters }) {
           view={filters.view}
           onPageChange={handlePageChange}
           onViewDetails={handleViewDetails}
-          onAddToCart={() => setShowCartModal(true)}
+          onAddToCart={handleAddToCart}
+          addingToCart={actionLoading}
         />
       )}
 

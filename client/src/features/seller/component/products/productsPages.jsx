@@ -51,13 +51,15 @@ const ProductsPage = () => {
     }
   };
 
-  useEffect(() => {
-    loadProducts();
-  }, []);
+ useEffect(() => {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth", 
+  });
 
-  // =============================
-  // Add Product
-  // =============================
+  loadProducts();
+}, []);
+
 
   const handleAdd = async (formData) => {
     try {

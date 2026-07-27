@@ -13,18 +13,27 @@ export default function useProfile() {
     const [passwordLoading, setPasswordLoading] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
 
-    // 🔥 Toast state
+    // ======================================
+    // Toast
+    // ======================================
+
     const [toast, setToast] = useState({
         show: false,
         message: "",
     });
 
     const showToast = (message) => {
-        setToast({ show: true, message });
+        setToast({
+            show: true,
+            message,
+        });
     };
 
     const hideToast = () => {
-        setToast({ show: false, message: "" });
+        setToast({
+            show: false,
+            message: "",
+        });
     };
 
     // ======================================
@@ -33,6 +42,7 @@ export default function useProfile() {
 
     const fetchProfile = async () => {
         setFetchLoading(true);
+
         try {
             return await getProfileService();
         } finally {
@@ -41,55 +51,133 @@ export default function useProfile() {
     };
 
     // ======================================
-    // Save Profile (🔥 FIXED)
+    // Save Profile
     // ======================================
 
-const saveProfile = async (data, setError) => {
+   const saveProfile = async (data, setError) => {
     setSaveLoading(true);
+
     try {
-        const res = await updateProfileService(data);
+        const response = await updateProfileService(data);
 
         showToast("Profile updated successfully ✅");
-        return res;
 
+        return response;
     } catch (err) {
+        console.error("SAVE PROFILE ERROR:", err);
 
-        console.log("SAVE PROFILE ERROR:", err);
+        // ==========================================
+        // Get backend response
+        // ==========================================
 
-        // ✅ Extract backend error correctly
-        const backendError = err?.response?.data;
+        const responseData =
+            err?.response?.data ||
+            err?.data ||
+            {};
 
-        if (backendError?.field && setError) {
-            setError(backendError.field, {
-                type: "server",
-                message: backendError.message,
+        console.log(
+            "Backend validation response:",
+            responseData
+        );
+
+        // ==========================================
+        // Find errors array
+        // ==========================================
+
+        const fieldErrors =
+            responseData?.errors ||
+            responseData?.data?.errors ||
+            responseData?.data?.data?.errors ||
+            [];
+
+        // ==========================================
+        // Handle field validation errors
+        // ==========================================
+
+        if (
+            Array.isArray(fieldErrors) &&
+            fieldErrors.length > 0 &&
+            typeof setError === "function"
+        ) {
+            fieldErrors.forEach((fieldError) => {
+                if (
+                    fieldError?.field &&
+                    fieldError?.message
+                ) {
+                    console.log(
+                        "Setting form error:",
+                        fieldError.field,
+                        fieldError.message
+                    );
+
+                    setError(fieldError.field, {
+                        type: "server",
+                        message: fieldError.message,
+                    });
+                }
             });
 
-            showToast(backendError.message);
-        } else {
-            showToast(backendError?.message || "Something went wrong ❌");
+            // IMPORTANT:
+            // Don't show "Something went wrong"
+            // toast for field validation errors.
+            return null;
         }
+
+        // ==========================================
+        // Single field error fallback
+        // ==========================================
+
+        if (
+            responseData?.field &&
+            responseData?.message &&
+            typeof setError === "function"
+        ) {
+            setError(responseData.field, {
+                type: "server",
+                message: responseData.message,
+            });
+
+            return null;
+        }
+
+        // ==========================================
+        // General backend error
+        // ==========================================
+
+        const message =
+            responseData?.message ||
+            err?.message ||
+            "Something went wrong ❌";
+
+        showToast(message);
 
         throw err;
     } finally {
         setSaveLoading(false);
     }
 };
-
     // ======================================
     // Change Password
     // ======================================
 
     const changePassword = async (data) => {
         setPasswordLoading(true);
+
         try {
-            const res = await changePasswordService(data);
+            const response =
+                await changePasswordService(data);
 
-            showToast("Password updated successfully 🔒");
+            showToast(
+                "Password updated successfully 🔒"
+            );
 
-            return res;
+            return response;
         } catch (error) {
-            showToast(error.message || "Failed to change password");
+            showToast(
+                error?.message ||
+                    "Failed to change password"
+            );
+
             throw error;
         } finally {
             setPasswordLoading(false);
@@ -102,19 +190,31 @@ const saveProfile = async (data, setError) => {
 
     const deleteAccount = async (data) => {
         setDeleteLoading(true);
+
         try {
-            const res = await deleteAccountService(data);
+            const response =
+                await deleteAccountService(data);
 
-            showToast("Account deleted successfully");
+            showToast(
+                "Account deleted successfully"
+            );
 
-            return res;
+            return response;
         } catch (error) {
-            showToast(error.message || "Failed to delete account");
+            showToast(
+                error?.message ||
+                    "Failed to delete account"
+            );
+
             throw error;
         } finally {
             setDeleteLoading(false);
         }
     };
+
+    // ======================================
+    // Return
+    // ======================================
 
     return {
         fetchProfile,
@@ -127,7 +227,6 @@ const saveProfile = async (data, setError) => {
         passwordLoading,
         deleteLoading,
 
-        // 🔥 expose toast
         toast,
         hideToast,
     };

@@ -1,4 +1,5 @@
-const isAbsoluteUrl = (value) => typeof value === "string" && /^(https?:|data:)/i.test(value);
+const isAbsoluteUrl = (value) =>
+  typeof value === "string" && /^(https?:|data:)/i.test(value);
 
 export function formatPKR(amount) {
   if (amount == null || Number.isNaN(Number(amount))) return "0";
@@ -13,27 +14,44 @@ export function getProductDisplayData(product = {}, options = {}) {
     ? safeProduct.images.filter(Boolean)
     : [];
 
+  // ✅ FIXED IMAGE HANDLING (supports both object + string)
   const firstImage = images[0];
-  const imagePath = typeof firstImage === "string" ? firstImage : null;
-  const imageUrl = imagePath
-    ? isAbsoluteUrl(imagePath)
-      ? imagePath
-      : `${apiUrl}/${String(imagePath).replace(/\\/g, "/").replace(/^\/+/, "")}`
+
+  const rawImage =
+    typeof firstImage === "string"
+      ? firstImage
+      : firstImage?.url;
+
+  const imageUrl = rawImage
+    ? isAbsoluteUrl(rawImage)
+      ? rawImage
+      : `${apiUrl}/${String(rawImage)
+          .replace(/\\/g, "/")
+          .replace(/^\/+/, "")}`
     : "/placeholder-product.png";
 
-  const quantity = Number(safeProduct.quantity ?? 0);
+  const stock = Number(safeProduct.stock ?? safeProduct.quantity ?? 0);
   const price = Number(safeProduct.price ?? 0);
   const unit = safeProduct.unit || "unit";
   const status = safeProduct.status || "Active";
   const featured = Boolean(safeProduct.featured);
-  const outOfStock = quantity <= 0;
-  const lowStock = quantity > 0 && quantity <= 10;
+  const outOfStock = stock <= 0;
+  const lowStock = stock > 0 && stock <= 10;
 
-  const productName = safeProduct.name?.trim() || "Unnamed Product";
-  const categoryName = safeProduct.category?.name || safeProduct.category || "Uncategorized";
-  const description = safeProduct.description?.trim() || "High-quality product with reliable delivery and verified seller support.";
+  const productName =
+    safeProduct.name?.trim() || "Unnamed Product";
+
+  const categoryName =
+    safeProduct.category?.name ||
+    safeProduct.category ||
+    "Uncategorized";
+
+  const description =
+    safeProduct.description?.trim() ||
+    "High-quality product with reliable delivery and verified seller support.";
 
   const seller = safeProduct.seller || {};
+
   const sellerName =
     seller.storeName ||
     seller.businessName ||
@@ -44,7 +62,9 @@ export function getProductDisplayData(product = {}, options = {}) {
       : "Seller") ||
     "Seller";
 
-  const sellerLocation = [seller.city, seller.province].filter(Boolean).join(", ") || "Pakistan";
+  const sellerLocation =
+    [seller.city, seller.province].filter(Boolean).join(", ") ||
+    "Pakistan";
 
   return {
     imageUrl,
@@ -52,7 +72,7 @@ export function getProductDisplayData(product = {}, options = {}) {
     categoryName,
     description,
     price,
-    quantity,
+    quantity: stock,
     unit,
     status,
     featured,

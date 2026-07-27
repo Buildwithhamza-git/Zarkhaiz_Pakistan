@@ -10,13 +10,22 @@ const CreateCategorySchema = z.object({
     description: z
         .string()
         .trim()
-        .max(300)
+        .max(300, "Description cannot exceed 300 characters.")
         .optional()
+        .or(z.literal("")),
+
+    // 🔥 NEW: parent category (for subcategories)
+    parent: z
+        .string()
+        .optional()
+        .nullable()
         .or(z.literal("")),
 
     isActive: z.boolean().optional(),
 });
 
+
+// 🔥 UPDATE SCHEMA
 const UpdateCategorySchema = CreateCategorySchema.partial();
 
 module.exports = {

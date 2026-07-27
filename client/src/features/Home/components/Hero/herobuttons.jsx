@@ -1,6 +1,17 @@
 import { Link } from "react-router-dom";
+import { useAuthContext } from "../../../../context/authContext";
 
 export default function HeroButtons() {
+    const { user, seller } = useAuthContext();
+
+    const sellerStatus = seller?.status?.toLowerCase();
+    console.log(sellerStatus)
+
+    const canBecomeSeller =
+        !user || 
+        !seller ||
+        sellerStatus === "rejected";
+
     return (
         <div className="mt-10 flex gap-5">
 
@@ -20,24 +31,26 @@ export default function HeroButtons() {
                 Shop Now
             </Link>
 
-            <Link
-                to="/become-seller"
-                className="
-                    rounded-xl
-                    border-2
-                    border-green-700
-                    bg-white
-                    px-8
-                    py-4
-                    text-green-700
-                    font-semibold
-                    hover:bg-green-700
-                    hover:text-white
-                    transition
-                "
-            >
-                Become Seller
-            </Link>
+            {canBecomeSeller && (
+                <Link
+                    to="/become-seller"
+                    className="
+                        rounded-xl
+                        border-2
+                        border-green-700
+                        bg-white
+                        px-8
+                        py-4
+                        text-green-700
+                        font-semibold
+                        hover:bg-green-700
+                        hover:text-white
+                        transition
+                    "
+                >
+                    Become Seller
+                </Link>
+            )}
 
         </div>
     );

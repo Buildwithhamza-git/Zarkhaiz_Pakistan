@@ -22,6 +22,11 @@ const productSchema = new mongoose.Schema(
       maxlength: 120,
     },
 
+    slug: {
+      type: String,
+      unique: true,
+    },
+
     description: {
       type: String,
       required: true,
@@ -35,10 +40,14 @@ const productSchema = new mongoose.Schema(
       min: 0,
     },
 
-    quantity: {
+    discountPrice: {
+      type: Number,
+      default: 0,
+    },
+
+    stock: {
       type: Number,
       required: true,
-      min: 0,
       default: 0,
     },
 
@@ -58,22 +67,37 @@ const productSchema = new mongoose.Schema(
       required: true,
     },
 
-   images: {
-  type: [String],
-  default: [],
-},
+    brand: {
+      type: String,
+      default: "",
+    },
+
+    tags: [String],
+
+    images: [
+      {
+        url: String,
+        alt: String,
+      },
+    ],
 
     status: {
       type: String,
-      enum: [
-        "Active",
-        "Inactive",
-        "Out of Stock",
-      ],
+      enum: ["Active", "Inactive", "Out of Stock"],
       default: "Active",
     },
 
     featured: {
+      type: Boolean,
+      default: false,
+    },
+
+    isFeatured: {
+      type: Boolean,
+      default: false,
+    },
+
+    isDeleted: {
       type: Boolean,
       default: false,
     },
