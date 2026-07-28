@@ -69,7 +69,7 @@ export const storeSchema = z.object({
         .string({ required_error: "Store address is required." })
         .trim()
         .min(10, "Address must be at least 10 characters.")
-        .max(200, "Address cannot exceed 200 characters."),
+        .max(100, "Address cannot exceed 100 characters."),
 });
 
 /* ============================================================

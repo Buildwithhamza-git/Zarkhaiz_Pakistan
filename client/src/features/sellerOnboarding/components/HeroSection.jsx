@@ -1,6 +1,6 @@
 import { ArrowRight, BadgeCheck, BarChart3, Headphones, Play, ShieldCheck, Store, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import farmerImage from "../assets/img.png";
+import farmerImage from "../assets/farmer.png";
 const highlights = [
   { icon: Users, title: "Reach more buyers", text: "Sell across Pakistan" },
   { icon: BarChart3, title: "Grow your sales", text: "Use simple insights" },
