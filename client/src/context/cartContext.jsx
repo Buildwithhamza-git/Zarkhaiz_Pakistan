@@ -6,6 +6,7 @@ import {
     useMemo,
     useState,
 } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
     getCart,
@@ -26,12 +27,43 @@ const EMPTY_CART = {
 };
 
 export default function CartContextProvider({ children }) {
-    const { token, loading: authLoading } = useAuthContext();
+    const navigate = useNavigate();
+
+    const {
+        token,
+        loading: authLoading,
+    } = useAuthContext();
 
     const [cart, setCart] = useState(EMPTY_CART);
+
     const [loading, setLoading] = useState(true);
-    const [actionLoading, setActionLoading] = useState(false);
+
+    const [actionLoading, setActionLoading] =
+        useState(false);
+
     const [error, setError] = useState("");
+
+
+    // ==========================================
+    // Require Login
+    // ==========================================
+
+    const requireLogin = useCallback(() => {
+        if (token) {
+            return true;
+        }
+
+        navigate("/login", {
+            state: {
+                from: window.location.pathname,
+                message:
+                    "Please login to continue.",
+            },
+        });
+
+        return false;
+    }, [token, navigate]);
+
 
     // ==========================================
     // Normalize Cart
@@ -44,7 +76,8 @@ export default function CartContextProvider({ children }) {
 
         const totalItems = items.reduce(
             (total, item) =>
-                total + Number(item.quantity || 0),
+                total +
+                Number(item.quantity || 0),
             0
         );
 
@@ -60,7 +93,10 @@ export default function CartContextProvider({ children }) {
                     item.quantity || 0
                 );
 
-                return total + price * quantity;
+                return (
+                    total +
+                    price * quantity
+                );
             },
             0
         );
@@ -73,14 +109,17 @@ export default function CartContextProvider({ children }) {
         };
     }, []);
 
+
     // ==========================================
     // Fetch Cart
     // ==========================================
 
     const fetchCart = useCallback(async () => {
+
         if (!token) {
             setCart(EMPTY_CART);
             setLoading(false);
+
             return null;
         }
 
@@ -102,8 +141,13 @@ export default function CartContextProvider({ children }) {
             setCart(normalizedCart);
 
             return normalizedCart;
+
         } catch (err) {
-            console.error("Fetch cart error:", err);
+
+            console.error(
+                "Fetch cart error:",
+                err
+            );
 
             setCart(EMPTY_CART);
 
@@ -113,43 +157,62 @@ export default function CartContextProvider({ children }) {
             );
 
             return null;
+
         } finally {
             setLoading(false);
         }
-    }, [token, normalizeCart]);
+
+    }, [
+        token,
+        normalizeCart,
+    ]);
+
 
     // ==========================================
     // Initialize Cart
     // ==========================================
 
     useEffect(() => {
+
         if (authLoading) {
             return;
         }
 
         fetchCart();
-    }, [authLoading, fetchCart]);
+
+    }, [
+        authLoading,
+        fetchCart,
+    ]);
+
 
     // ==========================================
     // Add To Cart
     // ==========================================
 
     const addToCart = useCallback(
-        async (productId, quantity = 1) => {
-            if (!token) {
-                throw new Error(
-                    "Please login to add products to cart."
-                );
+        async (
+            productId,
+            quantity = 1
+        ) => {
+
+            // Redirect to login
+            // instead of showing alert
+
+            if (!requireLogin()) {
+                return null;
             }
 
             try {
+
                 setActionLoading(true);
                 setError("");
 
-                const response = await addToCartApi(
-                    productId,
-                    quantity
-                );
+                const response =
+                    await addToCartApi(
+                        productId,
+                        quantity
+                    );
 
                 const cartData =
                     response?.data?.cart ??
@@ -158,15 +221,23 @@ export default function CartContextProvider({ children }) {
                     null;
 
                 if (cartData) {
+
                     setCart(
-                        normalizeCart(cartData)
+                        normalizeCart(
+                            cartData
+                        )
                     );
+
                 } else {
+
                     await fetchCart();
+
                 }
 
                 return response;
+
             } catch (err) {
+
                 console.error(
                     "Add to cart error:",
                     err
@@ -178,16 +249,21 @@ export default function CartContextProvider({ children }) {
                 );
 
                 throw err;
+
             } finally {
+
                 setActionLoading(false);
+
             }
+
         },
         [
-            token,
+            requireLogin,
             normalizeCart,
             fetchCart,
         ]
     );
+
 
     // ==========================================
     // Remove Item
@@ -195,18 +271,22 @@ export default function CartContextProvider({ children }) {
 
     const removeItem = useCallback(
         async (productId) => {
-            if (!token) {
-                throw new Error(
-                    "Please login to modify your cart."
-                );
+
+            // Redirect to login
+
+            if (!requireLogin()) {
+                return null;
             }
 
             try {
+
                 setActionLoading(true);
                 setError("");
 
                 const response =
-                    await removeCartItemApi(productId);
+                    await removeCartItemApi(
+                        productId
+                    );
 
                 const cartData =
                     response?.data?.cart ??
@@ -215,15 +295,23 @@ export default function CartContextProvider({ children }) {
                     null;
 
                 if (cartData) {
+
                     setCart(
-                        normalizeCart(cartData)
+                        normalizeCart(
+                            cartData
+                        )
                     );
+
                 } else {
+
                     await fetchCart();
+
                 }
 
                 return response;
+
             } catch (err) {
+
                 console.error(
                     "Remove cart item error:",
                     err
@@ -235,156 +323,238 @@ export default function CartContextProvider({ children }) {
                 );
 
                 throw err;
+
             } finally {
+
                 setActionLoading(false);
+
             }
+
         },
         [
-            token,
+            requireLogin,
             normalizeCart,
             fetchCart,
         ]
     );
+
 
     // ==========================================
     // Update Quantity
     // ==========================================
 
     const updateQuantity = useCallback(
-    async (productId, quantity) => {
-        if (!token) {
-            throw new Error(
-                "Please login to update your cart."
-            );
-        }
+        async (
+            productId,
+            quantity
+        ) => {
 
-        const numericQuantity = Number(quantity);
+            // Redirect to login
 
-        if (
-            !Number.isInteger(numericQuantity) ||
-            numericQuantity < 1
-        ) {
-            return removeItem(productId);
-        }
-
-        try {
-            setActionLoading(true);
-            setError("");
-
-            // Update backend
-            await updateCartItemApi(
-                productId,
-                numericQuantity
-            );
-
-            // Always get fresh cart from backend
-            const updatedCart = await fetchCart();
-
-            return updatedCart;
-        } catch (err) {
-            console.error(
-                "Update cart error:",
-                err
-            );
-
-            setError(
-                err?.message ||
-                "Failed to update cart."
-            );
-
-            throw err;
-        } finally {
-            setActionLoading(false);
-        }
-    },
-    [
-        token,
-        fetchCart,
-        removeItem,
-    ]
-);
-
-
-
-    const clearCart = useCallback(async () => {
-        if (!token) {
-            throw new Error(
-                "Please login to modify your cart."
-            );
-        }
-
-        try {
-            setActionLoading(true);
-            setError("");
-
-            const response =
-                await clearCartApi();
-
-            const cartData =
-                response?.data?.cart ??
-                response?.cart ??
-                null;
-
-            if (cartData) {
-                setCart(
-                    normalizeCart(cartData)
-                );
-            } else {
-                setCart(EMPTY_CART);
+            if (!requireLogin()) {
+                return null;
             }
 
-            return response;
-        } catch (err) {
-            console.error(
-                "Clear cart error:",
-                err
-            );
+            const numericQuantity =
+                Number(quantity);
 
-            setError(
-                err?.message ||
-                "Failed to clear cart."
-            );
+            // Quantity below 1
+            // means remove item
 
-            throw err;
-        } finally {
-            setActionLoading(false);
-        }
-    }, [
-        token,
-        normalizeCart,
-    ]);
+            if (
+                !Number.isInteger(
+                    numericQuantity
+                ) ||
+                numericQuantity < 1
+            ) {
+
+                return removeItem(
+                    productId
+                );
+
+            }
+
+            try {
+
+                setActionLoading(true);
+                setError("");
+
+                await updateCartItemApi(
+                    productId,
+                    numericQuantity
+                );
+
+                // Always fetch fresh cart
+                // from backend
+
+                const updatedCart =
+                    await fetchCart();
+
+                return updatedCart;
+
+            } catch (err) {
+
+                console.error(
+                    "Update cart error:",
+                    err
+                );
+
+                setError(
+                    err?.message ||
+                    "Failed to update cart."
+                );
+
+                throw err;
+
+            } finally {
+
+                setActionLoading(false);
+
+            }
+
+        },
+        [
+            requireLogin,
+            fetchCart,
+            removeItem,
+        ]
+    );
 
 
+    // ==========================================
+    // Clear Cart
+    // ==========================================
 
-    const clearCartError = useCallback(() => {
-        setError("");
-    }, []);
+    const clearCart = useCallback(
+        async () => {
+
+            // Redirect to login
+
+            if (!requireLogin()) {
+                return null;
+            }
+
+            try {
+
+                setActionLoading(true);
+                setError("");
+
+                const response =
+                    await clearCartApi();
+
+                const cartData =
+                    response?.data?.cart ??
+                    response?.cart ??
+                    null;
+
+                if (cartData) {
+
+                    setCart(
+                        normalizeCart(
+                            cartData
+                        )
+                    );
+
+                } else {
+
+                    setCart(
+                        EMPTY_CART
+                    );
+
+                }
+
+                return response;
+
+            } catch (err) {
+
+                console.error(
+                    "Clear cart error:",
+                    err
+                );
+
+                setError(
+                    err?.message ||
+                    "Failed to clear cart."
+                );
+
+                throw err;
+
+            } finally {
+
+                setActionLoading(false);
+
+            }
+
+        },
+        [
+            requireLogin,
+            normalizeCart,
+        ]
+    );
 
 
+    // ==========================================
+    // Clear Error
+    // ==========================================
+
+    const clearCartError =
+        useCallback(() => {
+            setError("");
+        }, []);
+
+
+    // ==========================================
+    // Context Value
+    // ==========================================
 
     const value = useMemo(
         () => ({
-            // Cart data
+            // --------------------------
+            // Cart
+            // --------------------------
+
             cart,
+
             items: cart.items,
 
-            // Cart calculations
-            totalItems: cart.totalItems,
-            subtotal: cart.subtotal,
+            // --------------------------
+            // Calculations
+            // --------------------------
 
-            // Loading states
+            totalItems:
+                cart.totalItems,
+
+            subtotal:
+                cart.subtotal,
+
+            // --------------------------
+            // Loading
+            // --------------------------
+
             loading,
+
             actionLoading,
 
+            // --------------------------
             // Error
+            // --------------------------
+
             error,
 
+            // --------------------------
             // Operations
+            // --------------------------
+
             fetchCart,
+
             addToCart,
+
             updateQuantity,
+
             removeItem,
+
             clearCart,
+
             clearCartError,
         }),
         [
@@ -401,19 +571,29 @@ export default function CartContextProvider({ children }) {
         ]
     );
 
+
+    // ==========================================
+    // Provider
+    // ==========================================
+
     return (
-        <CartContext.Provider value={value}>
+        <CartContext.Provider
+            value={value}
+        >
             {children}
         </CartContext.Provider>
     );
 }
 
+
 // ==========================================
-// useCartContext Hook
+// useCartContext
 // ==========================================
 
 export function useCartContext() {
-    const context = useContext(CartContext);
+
+    const context =
+        useContext(CartContext);
 
     if (!context) {
         throw new Error(
