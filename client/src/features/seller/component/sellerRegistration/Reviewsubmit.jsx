@@ -37,11 +37,19 @@ export default function ReviewSubmit({
         <Item label="Province" value={data.province} />
         <Item label="City" value={data.city} />
         <Item label="Address" value={data.address} />
-        <Item label="Description" value={data.description} />
 
         {data.logo && (
-          <ImagePreview file={data.logo} />
+          <div className="image-container md:col-span-2 block mb-4">
+            <ImagePreview file={data.logo} label="Store Logo" />
+          </div>
         )}
+
+        <div className="description-container md:col-span-2 block mt-4 clear-both">
+          <p className="text-xs text-gray-500">Description</p>
+          <p className="font-medium text-gray-800 whitespace-pre-wrap break-words">
+            {data.description || "-"}
+          </p>
+        </div>
       </Section>
 
       {/* ================= BUSINESS ================= */}

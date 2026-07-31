@@ -50,7 +50,7 @@ export default function StoreInformation({ nextStep }) {
                     <div className="mt-3">
 
                         <ImageUpload
-                            label="Store Logo"
+                           
                             value={watch("logo")}
                             onChange={(file) =>
                                 setValue("logo", file, {
@@ -197,7 +197,7 @@ export default function StoreInformation({ nextStep }) {
                         rows="5"
                         {...register("description")}
                         placeholder="Write a short description about your store..."
-                        className={`mt-2 w-full rounded-xl border p-3 outline-none resize-none
+                        className={`mt-6 w-full rounded-xl border p-3 outline-none resize-none
                         ${
                             errors.description
                                 ? "border-red-500"

@@ -25,8 +25,9 @@ export default function SellerStepper({
                 const active =
                     currentStep === stepNumber;
 
-                const clickable =
-                    stepNumber < currentStep;
+                // All steps are clickable so the user can jump
+                // to any section at any time.
+                const clickable = true;
 
                 return (
 
@@ -37,12 +38,8 @@ export default function SellerStepper({
 
                         <button
                             type="button"
-                            disabled={!clickable}
-                            onClick={() =>
-                                clickable &&
-                                goToStep(stepNumber)
-                            }
-                            className="flex flex-col items-center group disabled:cursor-default"
+                            onClick={() => goToStep(stepNumber)}
+                            className="flex flex-col items-center group cursor-pointer"
                         >
 
                             <div
@@ -76,11 +73,7 @@ export default function SellerStepper({
                                             : ""
                                     }
 
-                                    ${
-                                        clickable
-                                            ? "group-hover:scale-105"
-                                            : ""
-                                    }
+                                    group-hover:scale-105
                                 `}
                             >
 
@@ -108,11 +101,7 @@ export default function SellerStepper({
                                             : "text-gray-600"
                                     }
 
-                                    ${
-                                        clickable
-                                            ? "group-hover:text-green-700"
-                                            : ""
-                                    }
+                                    group-hover:text-green-700
                                 `}
                             >
                                 {step}

@@ -5,10 +5,42 @@ import { z } from "zod";
 ============================================================ */
 
 const nameRegex = /^[A-Za-z ]+$/;
-const storeRegex = /^[A-Za-z0-9 ]+$/;
-const cnicRegex = /^\d{13}$/;
+// Alphanumeric input allowed, but plain numeric-only strings are rejected
+const storeRegex = /^(?!\d+$)[a-zA-Z0-9\s\-,.#]+$/;
+const addressRegex = /^(?!\d+$)[a-zA-Z0-9\s\-,.#]+$/;
+const cnicRegex = /^\d{5}-\d{7}-\d{1}$/;
+
 const phoneRegex = /^(03\d{9}|\+923\d{9}|923\d{9})$/;
-const ibanRegex = /^[A-Za-z0-9]+$/;
+
+// Generic IBAN structural check: 2-letter country code + 2 check digits + up to 30 alphanumeric chars
+const ibanGenericRegex = /^[A-Z]{2}\d{2}[A-Z0-9]{1,30}$/;
+
+// Known IBAN lengths per country (extend as needed). Used for country-specific validation.
+const ibanCountryLengths = {
+    PK: 24, // Pakistan
+    AE: 23, // UAE
+    SA: 24, // Saudi Arabia
+    GB: 22, // United Kingdom
+    DE: 22, // Germany
+    FR: 27, // France
+};
+
+function isValidIban(value) {
+    if (!value) return false;
+    const iban = value.toUpperCase().replace(/\s+/g, "");
+
+    if (iban.length > 34) return false;
+    if (!ibanGenericRegex.test(iban)) return false;
+
+    const countryCode = iban.slice(0, 2);
+    const expectedLength = ibanCountryLengths[countryCode];
+
+    if (expectedLength && iban.length !== expectedLength) {
+        return false;
+    }
+
+    return true;
+}
 
 /* ============================================================
    STORE STEP (STEP 1)
@@ -37,10 +69,10 @@ export const storeSchema = z.object({
         .string({ required_error: "Store name is required." })
         .trim()
         .min(3, "Store name must be at least 3 characters.")
-        .max(60, "Store name cannot exceed 60 characters.")
+        .max(25, "Store name cannot exceed 25 characters.")
         .regex(
             storeRegex,
-            "Store name can contain only letters, numbers and spaces."
+            "Store name must contain letters and cannot be numbers only."
         ),
 
     description: z
@@ -60,6 +92,7 @@ export const storeSchema = z.object({
     city: z
         .string({ required_error: "City is required." })
         .trim()
+        .max(20, "City cannot exceed 20 characters.")
         .regex(
             nameRegex,
             "City can contain only letters."
@@ -69,7 +102,11 @@ export const storeSchema = z.object({
         .string({ required_error: "Store address is required." })
         .trim()
         .min(10, "Address must be at least 10 characters.")
-        .max(200, "Address cannot exceed 200 characters."),
+        .max(100, "Address cannot exceed 100 characters.")
+        .regex(
+            addressRegex,
+            "Store address must contain letters and cannot be numbers only."
+        ),
 });
 
 /* ============================================================
@@ -101,9 +138,21 @@ export const businessSchema = z.object({
 export const bankSchema = z
     .object({
 
-        bankName: z.string().trim().optional(),
-        accountTitle: z.string().trim().optional(),
-        iban: z.string().trim().optional(),
+        bankName: z
+        .string()
+        .trim()
+        .max(20, "Account title cannot exceed 20 characters.")
+        .optional(),
+        accountTitle: z
+            .string()
+            .trim()
+            .max(20, "Account title cannot exceed 20 characters.")
+            .optional(),
+        iban: z
+            .string()
+            .trim()
+            .max(34, "IBAN cannot exceed 34 characters.")
+            .optional(),
         jazzCash: z.string().trim().optional(),
         easyPaisa: z.string().trim().optional(),
 
@@ -168,11 +217,11 @@ export const bankSchema = z
                 path: ["iban"],
                 message: "IBAN is required.",
             });
-        } else if (!ibanRegex.test(data.iban)) {
+        } else if (!isValidIban(data.iban)) {
             ctx.addIssue({
                 code: "custom",
                 path: ["iban"],
-                message: "Invalid IBAN format.",
+                message: "Invalid IBAN format for the given country.",
             });
         }
     }
