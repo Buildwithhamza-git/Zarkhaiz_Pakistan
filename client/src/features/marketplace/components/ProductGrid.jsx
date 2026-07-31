@@ -14,7 +14,10 @@ export default function ProductGrid({
   onPageChange,
   onViewDetails,
   onAddToCart,
-  addingToCart = false,
+
+  // ID of the product currently being added to cart
+  addingToCartId = null,
+
   view = "grid",
 }) {
   // ==========================================
@@ -54,16 +57,26 @@ export default function ProductGrid({
         }
       >
 
-        {products.map((product) => (
-          <ProductCard
-            key={product._id}
-            product={product}
-            view={view}
-            onViewDetails={onViewDetails}
-            onAddToCart={onAddToCart}
-            addingToCart={addingToCart}
-          />
-        ))}
+        {products.map((product) => {
+
+          const productId =
+            product?._id || product?.id;
+
+          return (
+            <ProductCard
+              key={productId}
+              product={product}
+              view={view}
+              onViewDetails={onViewDetails}
+              onAddToCart={onAddToCart}
+
+              // Only the clicked product receives true
+              addingToCart={
+                addingToCartId === productId
+              }
+            />
+          );
+        })}
 
       </div>
 
