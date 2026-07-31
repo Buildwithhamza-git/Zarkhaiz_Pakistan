@@ -50,7 +50,6 @@ export default function StoreInformation({ nextStep }) {
                     <div className="mt-3">
 
                         <ImageUpload
-                            label="Store Logo"
                             value={watch("logo")}
                             onChange={(file) =>
                                 setValue("logo", file, {

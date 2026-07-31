@@ -4,14 +4,16 @@ import HeroStats from "./Herostat";
 
 export default function Hero() {
     return (
-        <section className="relative">
+        <>
+        <section className="relative ">
 
             <HeroBackground />
 
             <HeroContent />
 
-            <HeroStats />
 
         </section>
+            <HeroStats /> 
+        </>
     );
 }

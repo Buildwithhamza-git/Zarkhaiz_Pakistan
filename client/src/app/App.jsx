@@ -44,6 +44,7 @@ export default function App() {
 
       <Route path="/" element={<HomePage />} />
       <Route path="/products" element={<MarketplaceProductsPage />} />
+      <Route path="/products/product/:id" element={<MarketplaceProductsPage />}/>
 
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
@@ -78,6 +79,7 @@ export default function App() {
 
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="products" element={<ProductsPage />} />
+          
           <Route path="products/add" element={<AddProductPage />} />
 
         </Route>

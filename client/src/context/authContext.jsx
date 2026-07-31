@@ -5,63 +5,227 @@ import {
     useState,
 } from "react";
 
-const AuthContext = createContext();
+import api from "../api/axios";
+
+const AuthContext = createContext(null);
 
 export default function AuthProvider({ children }) {
 
-    const [user, setUser] = useState(null);
+    const [user, setUserState] = useState(null);
+
+    const [seller, setSellerState] = useState(null);
 
     const [token, setToken] = useState(null);
 
     const [loading, setLoading] = useState(true);
 
+    const [sellerLoading, setSellerLoading] = useState(false);
+
+
     // ==========================================
-    // Restore Authentication From Local Storage
+    // SAVE USER
+    // ==========================================
+
+    const setUser = (userData) => {
+
+        if (userData) {
+
+            localStorage.setItem(
+                "user",
+                JSON.stringify(userData)
+            );
+
+        } else {
+
+            localStorage.removeItem("user");
+
+        }
+
+        setUserState(userData);
+    };
+
+
+    // ==========================================
+    // SAVE SELLER
+    // ==========================================
+
+    const setSeller = (sellerData) => {
+
+        if (sellerData) {
+
+            localStorage.setItem(
+                "seller",
+                JSON.stringify(sellerData)
+            );
+
+        } else {
+
+            localStorage.removeItem("seller");
+
+        }
+
+        setSellerState(sellerData);
+    };
+
+
+    // ==========================================
+    // FETCH CURRENT SELLER
+    // ==========================================
+
+    const fetchCurrentSeller = async () => {
+
+        if (!token) {
+            setSeller(null);
+            return;
+        }
+
+        setSellerLoading(true);
+
+        try {
+
+            /*
+             * IMPORTANT:
+             * Change "/seller/me" if your actual
+             * backend route is different.
+             */
+
+            const response =
+                await api.get("/seller/me");
+
+            console.log(
+                "CURRENT SELLER RESPONSE:",
+                response.data
+            );
+
+            const sellerData =
+                response.data?.data?.seller || null;
+
+            setSeller(sellerData);
+
+        } catch (error) {
+
+            /*
+             * 404 / 401 / no seller means
+             * the user simply isn't a seller.
+             */
+
+            if (
+                error.response?.status === 404 ||
+                error.response?.status === 401
+            ) {
+
+                setSeller(null);
+
+            } else {
+
+                console.error(
+                    "Failed to fetch seller:",
+                    error
+                );
+
+            }
+
+        } finally {
+
+            setSellerLoading(false);
+
+        }
+    };
+
+
+    // ==========================================
+    // RESTORE AUTHENTICATION
     // ==========================================
 
     useEffect(() => {
 
-        try {
+        const restoreAuth = async () => {
 
-            const savedUser =
-                localStorage.getItem("user");
+            try {
 
-            const savedToken =
-                localStorage.getItem("token");
+                const savedUser =
+                    localStorage.getItem("user");
 
-            if (savedUser && savedToken) {
+                const savedToken =
+                    localStorage.getItem("token");
 
-                setUser(
-                    JSON.parse(savedUser)
+                const savedSeller =
+                    localStorage.getItem("seller");
+
+
+                if (
+                    savedUser &&
+                    savedToken
+                ) {
+
+                    const parsedUser =
+                        JSON.parse(savedUser);
+
+                    setUserState(parsedUser);
+
+                    setToken(savedToken);
+
+
+                    /*
+                     * Temporarily restore seller
+                     * from localStorage.
+                     */
+
+                    if (savedSeller) {
+
+                        setSellerState(
+                            JSON.parse(savedSeller)
+                        );
+
+                    }
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Failed to restore authentication:",
+                    error
                 );
 
-                setToken(savedToken);
+                localStorage.removeItem("user");
+                localStorage.removeItem("token");
+                localStorage.removeItem("seller");
+
+                setUserState(null);
+                setSellerState(null);
+                setToken(null);
+
+            } finally {
+
+                setLoading(false);
 
             }
 
-        } catch (error) {
+        };
 
-            console.error(
-                "Failed to restore authentication:",
-                error
-            );
-
-            localStorage.removeItem("user");
-            localStorage.removeItem("token");
-
-            setUser(null);
-            setToken(null);
-
-        } finally {
-
-            setLoading(false);
-
-        }
+        restoreAuth();
 
     }, []);
 
+
     // ==========================================
-    // Login
+    // FETCH SELLER AFTER AUTH RESTORED
+    // ==========================================
+
+    useEffect(() => {
+
+        if (!token) {
+            return;
+        }
+
+        fetchCurrentSeller();
+
+    }, [token]);
+
+
+    // ==========================================
+    // LOGIN
     // ==========================================
 
     const login = (
@@ -79,14 +243,15 @@ export default function AuthProvider({ children }) {
             tokenData
         );
 
-        setUser(userData);
+        setUserState(userData);
 
         setToken(tokenData);
 
     };
 
+
     // ==========================================
-    // Logout
+    // LOGOUT
     // ==========================================
 
     const logout = () => {
@@ -95,22 +260,52 @@ export default function AuthProvider({ children }) {
 
         localStorage.removeItem("token");
 
-        setUser(null);
+        localStorage.removeItem("seller");
+
+        setUserState(null);
+
+        setSellerState(null);
 
         setToken(null);
 
     };
 
+
+    // ==========================================
+    // SELLER STATUS
+    // ==========================================
+
+    const sellerStatus =
+        seller?.status?.toLowerCase() || null;
+
+
+    // ==========================================
+    // PROVIDER
+    // ==========================================
+
     return (
 
         <AuthContext.Provider
             value={{
+
                 user,
+                seller,
+
                 token,
+
                 loading,
+                sellerLoading,
+
+                sellerStatus,
+
                 login,
                 logout,
+
                 setUser,
+                setSeller,
+
+                fetchCurrentSeller,
+
             }}
         >
 
@@ -122,5 +317,6 @@ export default function AuthProvider({ children }) {
 
 }
 
-export const useAuthContext =
-    () => useContext(AuthContext);
+
+export const useAuthContext = () =>
+    useContext(AuthContext);
