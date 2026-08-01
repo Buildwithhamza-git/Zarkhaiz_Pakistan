@@ -214,25 +214,8 @@ export default function CartContextProvider({ children }) {
                         quantity
                     );
 
-                const cartData =
-                    response?.data?.cart ??
-                    response?.cart ??
-                    response?.data ??
-                    null;
-
-                if (cartData) {
-
-                    setCart(
-                        normalizeCart(
-                            cartData
-                        )
-                    );
-
-                } else {
-
-                    await fetchCart();
-
-                }
+                // Always refetch so Navbar badge updates immediately
+                await fetchCart();
 
                 return response;
 
@@ -288,25 +271,8 @@ export default function CartContextProvider({ children }) {
                         productId
                     );
 
-                const cartData =
-                    response?.data?.cart ??
-                    response?.cart ??
-                    response?.data ??
-                    null;
-
-                if (cartData) {
-
-                    setCart(
-                        normalizeCart(
-                            cartData
-                        )
-                    );
-
-                } else {
-
-                    await fetchCart();
-
-                }
+                // Always refetch so Navbar badge updates immediately
+                await fetchCart();
 
                 return response;
 
@@ -442,26 +408,9 @@ export default function CartContextProvider({ children }) {
                 const response =
                     await clearCartApi();
 
-                const cartData =
-                    response?.data?.cart ??
-                    response?.cart ??
-                    null;
-
-                if (cartData) {
-
-                    setCart(
-                        normalizeCart(
-                            cartData
-                        )
-                    );
-
-                } else {
-
-                    setCart(
-                        EMPTY_CART
-                    );
-
-                }
+                // Reset to empty and refetch
+                setCart(EMPTY_CART);
+                await fetchCart();
 
                 return response;
 
