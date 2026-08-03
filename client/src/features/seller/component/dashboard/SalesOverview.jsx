@@ -1,13 +1,12 @@
-import React from "react";
-
+﻿
 import AreaLineChart from "../../../../shared/components/AreaLineChart";
 
 const salesOverview = [
-  { label: "May 17", value: 12 },
-  { label: "May 24", value: 22 },
-  { label: "May 31", value: 15 },
-  { label: "Jun 7", value: 24 },
-  { label: "Jun 14", value: 40 },
+  { name: "May 17", value: 12 },
+  { name: "May 24", value: 22 },
+  { name: "May 31", value: 15 },
+  { name: "Jun 7", value: 24 },
+  { name: "Jun 14", value: 40 },
 ];
 
 const SalesOverview = () => {

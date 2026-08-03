@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import { useState } from "react";
 import {
   Menu,
   Search,
@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import Input from "../../../../shared/components/ui/input";
 import { useSellerContext } from "../../../../context/sellerContext";
 import { useAuthContext } from "../../../../context/authContext";
+import SellerNotificationButton from "./SellerNotificationButton";
 
 const Topbar = ({ onToggleSidebar }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -125,6 +126,12 @@ const Topbar = ({ onToggleSidebar }) => {
       {/* ========================== */}
 
       <div className="flex items-center gap-3 sm:gap-5">
+
+        {/* ========================== */}
+        {/* NOTIFICATIONS */}
+        {/* ========================== */}
+
+        <SellerNotificationButton />
 
         {/* ========================== */}
         {/* SWITCH TO BUYER MODE */}
@@ -342,6 +349,10 @@ const Topbar = ({ onToggleSidebar }) => {
 
                 <button
                   type="button"
+                  onClick={() => {
+                    setDropdownOpen(false);
+                    navigate("/seller/settings/profile");
+                  }}
                   className="
                     w-full
                     px-4

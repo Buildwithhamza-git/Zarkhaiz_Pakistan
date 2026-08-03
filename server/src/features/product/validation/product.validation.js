@@ -106,6 +106,10 @@ const ProductUpdateSchema = z.object({
     }
     return value;
   }, z.boolean().optional()),
+  existingImages: z.union([
+    z.array(z.string()),
+    z.string(),
+  ]).optional(),
 }).transform((data) => ({
   ...data,
   stock: data.stock ?? data.quantity ?? undefined,

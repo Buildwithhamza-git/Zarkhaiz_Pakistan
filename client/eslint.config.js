@@ -17,5 +17,12 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
+    rules: {
+      // Async data-fetching in effects is a legitimate, widespread pattern here;
+      // this rule flags it even though setState only runs after `await`.
+      "react-hooks/set-state-in-effect": "off",
+      // Context files intentionally export both a Provider component and its hook.
+      "react-refresh/only-export-components": "off",
+    },
   },
 ])

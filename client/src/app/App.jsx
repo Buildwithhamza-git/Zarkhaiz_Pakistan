@@ -27,9 +27,21 @@ import ProfilePage from "../features/profile/pages/ProfilePage";
 // Marketplace
 import ProductsPages from "../features/marketplace/pages/productspage";
 
+// Orders
+import CheckoutPage from "../features/order/pages/CheckoutPage";
+import OrderSuccessPage from "../features/order/pages/OrderSuccessPage";
+import MyOrdersPage from "../features/order/pages/MyOrdersPage";
+import OrderDetailsPage from "../features/order/pages/OrderDetailsPage";
+import AdminOrdersPage from "../features/order/pages/AdminOrdersPage";
+
+// Seller orders
+import SellerOrdersPage from "../features/seller/component/orders/SellerOrdersPage";
+import SellerProfileSettings from "../features/seller/component/settings/SellerProfileSettings";
+
 // Routes
 import ProtectedRoute from "../routes/Protectedroutes";
 import SellerRoute from "../routes/SellerRoutes";
+import AdminRoute from "../routes/AdminRoutes";
 
 import CartPage from "../features/cart/component/CartPage";
 
@@ -102,6 +114,18 @@ export default function App() {
           <Route path="/seller/pending" element={<SellerPendingApproval />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
+          <Route path="/orders" element={<MyOrdersPage />} />
+          <Route path="/orders/:orderId" element={<OrderDetailsPage />} />
+        </Route>
+
+        {/* ===================== */}
+        {/* Admin Routes          */}
+        {/* ===================== */}
+
+        <Route element={<AdminRoute />}>
+          <Route path="/admin/orders" element={<AdminOrdersPage />} />
         </Route>
 
         {/* ===================== */}
@@ -114,6 +138,11 @@ export default function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="products" element={<ProductsPage />} />
             <Route path="products/add" element={<AddProductPage />} />
+            <Route path="orders" element={<SellerOrdersPage />} />
+            <Route
+              path="settings/profile"
+              element={<SellerProfileSettings />}
+            />
           </Route>
         </Route>
       </Routes>

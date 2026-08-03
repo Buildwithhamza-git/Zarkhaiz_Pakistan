@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+﻿import { useEffect } from "react";
 
 import { useSellerContext } from "../../../../context/sellerContext";
 
@@ -51,7 +51,7 @@ const Dashboard = () => {
 
       <RecentOrders />
 
-      <StoreStatus />
+      {/* <StoreStatus /> */}
 
       {/* Earnings */}
 

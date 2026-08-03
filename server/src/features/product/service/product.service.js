@@ -4,6 +4,7 @@ const slugify = require("slugify");
 const Seller = require("../../seller/model/seller.model");
 const Category = require("../../category/category.model");
 const { getUploadedImageUrls } = require("../utils/normalizeUploadedFiles");
+const AppError = require("../../../shared/utils/AppError");
 
 const {
     createProduct,
@@ -12,6 +13,7 @@ const {
     getSellerProducts,
     getFeaturedProducts,
     getLatestProducts,
+    getProductsByCategory,
     updateProduct,
     deleteProduct,
 } = require("../repository/product.repository");
@@ -152,7 +154,7 @@ const getProductService = async (productId) => {
     const product = await getProductById(productId);
 
     if (!product) {
-        throw new Error("Product not found.");
+        throw new AppError("Product not found.", 404);
     }
 
     return product;
@@ -181,11 +183,11 @@ const updateProductService = async (
     const product = await getProductById(productId);
 
     if (!product) {
-        throw new Error("Product not found.");
+        throw new AppError("Product not found.", 404);
     }
 
     if (product.seller._id.toString() !== seller._id.toString()) {
-        throw new Error("Unauthorized.");
+        throw new AppError("Unauthorized.", 403);
     }
 
     // ✅ CATEGORY VALIDATION
@@ -204,9 +206,14 @@ const updateProductService = async (
 
     if (updateData.existingImages) {
         try {
-            const parsed = JSON.parse(updateData.existingImages);
+            const raw =
+                typeof updateData.existingImages === "string"
+                    ? JSON.parse(updateData.existingImages)
+                    : updateData.existingImages;
 
-            existingImages = parsed.map((url) => ({ url }));
+            existingImages = (Array.isArray(raw) ? raw : []).map(
+                (url) => ({ url })
+            );
 
         } catch (err) {
             throw new Error("Invalid existingImages format.");
@@ -259,11 +266,11 @@ const deleteProductService = async (
     const product = await getProductById(productId);
 
     if (!product) {
-        throw new Error("Product not found.");
+        throw new AppError("Product not found.", 404);
     }
 
     if (product.seller._id.toString() !== seller._id.toString()) {
-        throw new Error("Unauthorized.");
+        throw new AppError("Unauthorized.", 403);
     }
 
     await deleteProduct(productId);

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Trash2, AlertTriangle } from "lucide-react";
 import Modal from "../../../shared/components/ui/Modal";
 import { deleteAccountApi } from "../api/profileApi";
-import { useNavigate } from "react-router-dom";
 import PasswordInput from "../../../shared/components/ui/PasswordInput";
 import Toast from "../../../shared/components/ui/Toast";
 
@@ -19,8 +18,6 @@ export default function DeleteAccountCard() {
         message: "",
         type: "success",
     });
-
-    const navigate = useNavigate();
 
     // ✅ Toast helper
     const showToast = (message, type = "success") => {

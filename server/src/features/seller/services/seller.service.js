@@ -1,5 +1,7 @@
 const sellerRepository = require("../repository/seller.repository");
 const userRepository = require("../..//auth/auth.repository");
+const orderRepository = require("../../order/order.repository");
+const AppError = require("../../../shared/utils/AppError");
 
 const registerSeller = async (userId, sellerData) => {
 
@@ -48,6 +50,31 @@ const getSellerProfile = async (userId) => {
     return seller;
 };
 
+const updateSellerProfileService = async (userId, updateData) => {
+
+    const seller = await sellerRepository.findSellerByUserId(userId);
+
+    if (!seller) {
+        throw new AppError("Seller profile not found.", 404);
+    }
+
+    /*
+     * Business-critical fields are protected from this endpoint:
+     * - CNIC is unique identity data tied to verification.
+     * - businessType was verified during approval.
+     * - status is managed by admins.
+     */
+    const safeData = { ...updateData };
+    delete safeData.cnic;
+    delete safeData.businessType;
+    delete safeData.status;
+    delete safeData.user;
+
+    await sellerRepository.updateSeller(seller._id, safeData);
+
+    return await sellerRepository.findSellerByUserId(userId);
+};
+
 
 const getSellerDashboard = async (userId) => {
 
@@ -58,14 +85,11 @@ const getSellerDashboard = async (userId) => {
         throw new Error("Seller profile not found.");
     }
 
+    const stats = await orderRepository.getSellerDashboardStats(seller._id);
+
     return {
         seller,
-        stats: {
-            products: 0,
-            orders: 0,
-            customers: 0,
-            revenue: 0,
-        },
+        stats,
     };
 };
 
@@ -82,6 +106,60 @@ const getCurrentSellerService = async (userId) => {
 };
 
 
+const listSellersService = async (status) => {
+    const sellers = await sellerRepository.findAllSellers(status);
+
+    return sellers;
+};
+
+
+const updateSellerStatusService = async (sellerId, status) => {
+    if (!["approved", "rejected"].includes(status)) {
+        throw new AppError("Invalid seller status.", 400);
+    }
+
+    const seller = await sellerRepository.findSellerById(sellerId);
+
+    if (!seller) {
+        throw new AppError("Seller not found.", 404);
+    }
+
+    const updatedSeller = await sellerRepository.updateSeller(sellerId, {
+        status,
+    });
+
+    await userRepository.updateUserById(seller.user, {
+        sellerStatus: status,
+    });
+
+    return updatedSeller;
+};
+
+
+const deleteSellerService = async (sellerId) => {
+    const seller = await sellerRepository.findSellerById(sellerId);
+
+    if (!seller) {
+        throw new AppError("Seller not found.", 404);
+    }
+
+    await sellerRepository.deleteSeller(sellerId);
+
+    await userRepository.updateUserById(seller.user, {
+        sellerStatus: "none",
+    });
+
+    return { success: true };
+};
+
+
 module.exports = {
-    registerSeller,getSellerProfile, getSellerDashboard, getCurrentSellerService
+    registerSeller,
+    getSellerProfile,
+    updateSellerProfileService,
+    getSellerDashboard,
+    getCurrentSellerService,
+    listSellersService,
+    updateSellerStatusService,
+    deleteSellerService,
 };

@@ -1,6 +1,5 @@
-import React from "react";
-import Modal from "../../../shared/components/ui/Modal";
-import Button from "../../../shared/components/ui/button";
+﻿import Modal from "./Modal";
+import Button from "./button";
 
 const DeleteProductModal = ({
   open,

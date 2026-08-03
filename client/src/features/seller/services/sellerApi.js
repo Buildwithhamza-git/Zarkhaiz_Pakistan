@@ -17,3 +17,11 @@ export const getCurrentSeller = async () => {
 export const getSellerDashboard = async () => {
   return await authFetch("/seller/dashboard");
 };
+
+// Update Seller Profile Settings
+export const updateSellerProfile = async (formData) => {
+  return await authFetch("/seller/profile", {
+    method: "PATCH",
+    body: formData,
+  });
+};

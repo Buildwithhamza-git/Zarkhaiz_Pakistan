@@ -11,12 +11,6 @@ export default function ReviewSubmit({
 
   const data = watch();
 
-  const getPreview = (file) => {
-    if (!file) return null;
-    if (file instanceof File) return URL.createObjectURL(file);
-    return file;
-  };
-
   return (
     <div>
 

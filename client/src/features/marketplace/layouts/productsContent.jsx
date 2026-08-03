@@ -5,7 +5,6 @@ import { AlertCircle, RefreshCw } from "lucide-react";
 
 import ProductGrid from "../components/ProductGrid";
 import ProductDetails from "../components/ProductDetails";
-import LoadingProducts from "../components/LoadingProducts";
 
 import useMarketplaceProducts from "../hooks/useMarketplaceProducts";
 import { useCartContext } from "../../../context/cartContext";

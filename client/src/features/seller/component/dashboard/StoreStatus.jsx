@@ -1,5 +1,4 @@
-import React from "react";
-
+﻿
 import Badge from "../../../../shared/components/Badge";
 import DonutChart from "../../../../shared/components/DonutChart";
 
@@ -115,7 +114,7 @@ const StoreStatus = ({ seller }) => {
                   : "bg-gray-200 text-gray-500"
               }`}
             >
-              {item.completed ? "✓" : "•"}
+              {item.completed ? "âœ“" : "â€¢"}
             </span>
           </li>
         ))}

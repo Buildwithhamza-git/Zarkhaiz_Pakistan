@@ -115,7 +115,7 @@ const verifyResetOtpService = async (otpDetail) => {
         throw new Error("No OTP found. Please request a new OTP.");
     }
 
-    if (new Date() > user.otpExpiry) {
+    if (new Date() > user.otpExpire) {
         throw new Error("OTP has expired");
     }
 
@@ -210,7 +210,7 @@ const resendOtpService = async (Resenddata)=>{
         otpExpire : otpExpire
     })
 
-    const SendOtp = await sendResetPasswordEmail(email, otp)
+    const SendOtp = await sendVerificationEmail(email, otp)
 
     if(!SendOtp){
         throw new Error ("Email sending failed to"+ email)

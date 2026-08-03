@@ -1,5 +1,4 @@
-import React from "react";
-import { Pencil, Trash2, Package, Sparkles } from "lucide-react";
+﻿import { Pencil, Trash2, Package, Sparkles } from "lucide-react";
 
 const statusStyles = {
   Active: "bg-emerald-50 text-emerald-700",
