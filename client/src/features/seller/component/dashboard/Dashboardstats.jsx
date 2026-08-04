@@ -1,5 +1,4 @@
-import React from "react";
-import {
+﻿import {
   ShoppingBag,
   ClipboardList,
   Package,
@@ -8,12 +7,13 @@ import {
 } from "lucide-react";
 
 import StatCard from "../../../../shared/components/Statcard";
+import { formatMoney } from "../../../order/utils/orderDisplay";
 
 const DashboardStats = ({ stats }) => {
   const dashboardStats = [
     {
-      label: "Total Sales",
-      value: `Rs. ${stats?.revenue || 0}`,
+      label: "Revenue",
+      value: formatMoney(stats?.revenue),
       icon: ShoppingBag,
       iconBg: "bg-green-100",
       iconColor: "text-green-600",

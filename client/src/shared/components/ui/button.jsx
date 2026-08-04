@@ -1,5 +1,4 @@
-import React from "react";
-
+﻿
 const variants = {
   primary:
     "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500",

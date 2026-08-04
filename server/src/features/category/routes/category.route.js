@@ -1,6 +1,7 @@
 const router = require("express").Router();
 
 const authenticate = require("../../../middlewares/authenticate");
+const requireAdmin = require("../../../middlewares/requireAdmin");
 const validateRequest = require("../../../middlewares/validateRequest");
 
 const {
@@ -21,6 +22,7 @@ const {
 router.post(
     "/",
     authenticate,
+    requireAdmin,
     validateRequest(CreateCategorySchema),
     createCategory
 );
@@ -45,6 +47,7 @@ router.get(
 router.patch(
     "/:id",
     authenticate,
+    requireAdmin,
     validateRequest(UpdateCategorySchema),
     updateCategory
 );

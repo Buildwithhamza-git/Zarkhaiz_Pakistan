@@ -1,10 +1,10 @@
 import { authFetch } from "../../../utlis/authFetch";
 
 // ======================================
-// PRODUCTS
+// GET ALL PRODUCTS (FILTERED / PAGINATED)
 // ======================================
 
-export const getProducts = async (params = {}) => {
+export const getProducts = async (params = {}, signal) => {
   const query = new URLSearchParams();
 
   Object.entries(params).forEach(([key, value]) => {
@@ -17,34 +17,52 @@ export const getProducts = async (params = {}) => {
     }
   });
 
-  return await authFetch(`/products?${query.toString()}`);
+  const queryString = query.toString();
+  const endpoint = `/products${queryString ? `?${queryString}` : ""}`;
+
+  return await authFetch(endpoint, { signal });
 };
 
-export const getProduct = async (id) => {
-  return await authFetch(`/products/${id}`);
+// ======================================
+// GET SINGLE PRODUCT BY ID
+// ======================================
+
+export const getProduct = async (id, signal) => {
+  if (!id) {
+    throw new Error("Product ID is required.");
+  }
+
+  return await authFetch(`/products/${id}`, { signal });
 };
 
-
 // ======================================
-// CATEGORIES
+// GET CATEGORIES
 // ======================================
 
-// ✅ Get all categories (tree)
-export const getCategories = async () => {
-  return await authFetch("/categories");
+export const getCategories = async (signal) => {
+  return await authFetch("/categories", { signal });
 };
 
-// 🔥 NEW: Get category by slug
-export const getCategoryBySlug = async (slug) => {
-  return await authFetch(`/categories/slug/${slug}`);
+// ======================================
+// GET CATEGORY BY SLUG
+// ======================================
+
+export const getCategoryBySlug = async (slug, signal) => {
+  if (!slug) {
+    throw new Error("Category slug is required.");
+  }
+
+  return await authFetch(`/categories/slug/${slug}`, { signal });
 };
 
-
 // ======================================
-// OPTIONAL HELPERS (VERY USEFUL)
+// HELPERS
 // ======================================
 
-// 🔥 Build category URL
 export const getCategoryUrl = (slug) => {
-  return `/category/${slug}`;
+  if (!slug) {
+    return "/products";
+  }
+
+  return `/products?category=${encodeURIComponent(slug)}`;
 };

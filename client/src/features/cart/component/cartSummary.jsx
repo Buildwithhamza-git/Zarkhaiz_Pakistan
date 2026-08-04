@@ -1,5 +1,4 @@
-import React from "react";
-import { ArrowRight, Trash2 } from "lucide-react";
+﻿import { ArrowRight, Trash2 } from "lucide-react";
 
 export default function CartSummary({
   totalItems,

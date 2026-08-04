@@ -112,11 +112,10 @@ const forgotPasswordController = async (req, res) => {
         const email = req.body;
         const result = await forgotPasswordService(email)
 
-        console.log(result);
         return res.status(200).json({
             success: true,
             message: "OTP sent to email",
-            email: result.email,
+            email: result.normalemail,
         });
     } catch (err) {
         return res.status(400).json({ success: false, message: err.message, field: "email", });

@@ -1,4 +1,5 @@
 const marketplaceRepository = require("../repository/marketplace.repository");
+const AppError = require("../../../shared/utils/AppError");
 
 // ======================================
 // Get Marketplace Products
@@ -77,10 +78,12 @@ const getMarketplaceProducts = async (query) => {
       break;
 
     case "price_low":
+    case "price-low":
       sortOption = { price: 1 };
       break;
 
     case "price_high":
+    case "price-high":
       sortOption = { price: -1 };
       break;
 
@@ -140,7 +143,7 @@ const getProductDetails = async (id) => {
   const product = await marketplaceRepository.findProductById(id);
 
   if (!product) {
-    throw new Error("Product not found.");
+    throw new AppError("Product not found.", 404);
   }
 
   return product;

@@ -1,9 +1,7 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
+﻿import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
   Package,
-  PlusCircle,
   ClipboardList,
   Users,
   Star,
@@ -18,28 +16,38 @@ import {
   ChevronRight,
   Crown,
   X,
+  Sprout,
 } from "lucide-react";
 
 import Logo from "../../../../shared/components/ui/logo";
 import Button from "../../../../shared/components/ui/button";
 import heroImg from "../../../../assets/images/hero/img1.png";
+import { useSellerContext } from "../../../../context/sellerContext";
+import { useChat } from "../../../chat/context/chatContext";
 
 const menuItems = [
-  { label: "Dashboard", to: "/seller/dashboard", icon: LayoutDashboard },
+  { label: "Dashboard", to: "/seller/dashboard", icon: LayoutDashboard, end: true },
   { label: "Products", to: "/seller/products", icon: Package },
-  { label: "Orders", to: "/seller/orders", icon: ClipboardList, badge: 8 },
+  { label: "Orders", to: "/seller/orders", icon: ClipboardList },
+  { label: "Messages", to: "/seller/messages", icon: MessageSquare },
   { label: "Customers", to: "/seller/customers", icon: Users },
   { label: "Reviews", to: "/seller/reviews", icon: Star },
   { label: "Earnings", to: "/seller/earnings", icon: Wallet },
   { label: "Payouts", to: "/seller/payouts", icon: Banknote },
   { label: "Analytics", to: "/seller/analytics", icon: BarChart3 },
   { label: "Coupons & Discounts", to: "/seller/coupons", icon: Tag },
-  { label: "Messages", to: "/seller/messages", icon: MessageSquare, badge: 3 },
   { label: "Shop Settings", to: "/seller/settings/shop", icon: Store },
   { label: "Profile Settings", to: "/seller/settings/profile", icon: UserCog },
 ];
 
 const Sidebar = ({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile }) => {
+  const { stats } = useSellerContext();
+  const { unreadTotal } = useChat();
+
+  const badges = {
+    "/seller/orders": stats?.pendingOrders || 0,
+    "/seller/messages": unreadTotal,
+  };
   return (
     <>
       {/* Mobile backdrop */}
@@ -67,7 +75,9 @@ const Sidebar = ({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile }) => 
           {!collapsed ? (
             <Logo size="sm" />
           ) : (
-            <div className="mx-auto text-2xl">🌾</div>
+            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
+              <Sprout size={20} className="text-green-700" />
+            </div>
           )}
 
           <button
@@ -80,10 +90,14 @@ const Sidebar = ({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile }) => 
 
         {/* Menu */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-          {menuItems.map(({ label, to, icon: Icon, badge }) => (
+          {menuItems.map(({ label, to, icon: Icon, end }) => {
+            const badge = badges[to];
+
+            return (
             <NavLink
               key={to}
               to={to}
+              end={end}
               className={({ isActive }) => `
                 group relative flex items-center gap-3 rounded-xl px-3 py-2.5
                 text-sm font-medium transition-all duration-200
@@ -122,7 +136,8 @@ const Sidebar = ({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile }) => 
                 </>
               )}
             </NavLink>
-          ))}
+            );
+          })}
         </nav>
 
         {/* Become Premium Seller */}
