@@ -1,7 +1,18 @@
-import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+﻿import { useEffect, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Camera, Package, Sparkles, UploadCloud } from "lucide-react";
+import {
+  AlertCircle,
+  ChevronDown,
+  ImagePlus,
+  Info,
+  Package,
+  Save,
+  Sparkles,
+  Tag,
+  Trash2,
+  X,
+} from "lucide-react";
 
 import Button from "../../../../shared/components/ui/button";
 import { productSchema } from "../../validations/product.form.schema";
@@ -9,20 +20,93 @@ import { getCategories } from "../../services/categoryApi";
 
 const units = ["kg", "g", "ton", "litre", "ml", "bag", "packet", "piece", "dozen"];
 const statuses = ["Active", "Inactive", "Out of Stock"];
+const MAX_IMAGES = 5;
 
-// 🔥 BACKEND ERROR MAPPER
+// =============================
+// Backend error mapper
+// =============================
+
 const mapBackendErrors = (errorResponse) => {
   const fieldErrors = {};
 
   if (errorResponse?.errors) {
     errorResponse.errors.forEach((err) => {
-      const field = err.path?.[0];
+      const field = err.field || err.path?.[0];
       if (field) fieldErrors[field] = err.message;
     });
   }
 
   return fieldErrors;
 };
+
+// =============================
+// Small presentational helpers
+// =============================
+
+const Field = ({ label, required, hint, error, children }) => (
+  <div className="space-y-1.5">
+    <div className="flex items-baseline justify-between">
+      <label className="text-sm font-medium text-gray-700">
+        {label}
+        {required && <span className="ml-0.5 text-red-500">*</span>}
+      </label>
+      {hint && <span className="text-xs text-gray-400">{hint}</span>}
+    </div>
+    {children}
+    {error && (
+      <p className="flex items-center gap-1 text-xs font-medium text-red-500">
+        <AlertCircle size={13} />
+        {error}
+      </p>
+    )}
+  </div>
+);
+
+const inputClass = (hasError) => `
+  w-full
+  rounded-xl
+  border
+  bg-white
+  px-4
+  py-2.5
+  text-sm
+  text-gray-900
+  outline-none
+  transition
+  duration-200
+  placeholder:text-gray-400
+  ${
+    hasError
+      ? "border-red-300 focus:border-red-500 focus:ring-4 focus:ring-red-100"
+      : "border-gray-200 hover:border-gray-300 focus:border-green-600 focus:ring-4 focus:ring-green-100"
+  }
+`;
+
+const selectClass = (hasError) => `
+  ${inputClass(hasError)}
+  appearance-none
+  pr-10
+  cursor-pointer
+`;
+
+const SectionHeader = ({ step, icon: Icon, title, subtitle }) => (
+  <div className="flex items-center gap-3">
+    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-sm shadow-green-600/25">
+      <Icon size={18} />
+    </span>
+    <div>
+      <h3 className="text-sm font-semibold text-gray-900">
+        <span className="mr-1.5 text-gray-400">{step}.</span>
+        {title}
+      </h3>
+      <p className="text-xs text-gray-500">{subtitle}</p>
+    </div>
+  </div>
+);
+
+// =============================
+// Main form
+// =============================
 
 const ProductForm = ({ product, onSubmit, onCancel }) => {
   const [categories, setCategories] = useState([]);
@@ -36,6 +120,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
     reset,
     setError,
     setFocus,
+    control,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(productSchema),
@@ -52,7 +137,11 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
     },
   });
 
-  // 🔥 AUTO SCROLL + FOCUS FIRST ERROR
+  const nameCount = useWatch({ control, name: "name" })?.trim().length || 0;
+  const descriptionCount =
+    useWatch({ control, name: "description" })?.trim().length || 0;
+
+  // Auto scroll + focus first error
   useEffect(() => {
     const firstError = Object.keys(errors)[0];
     if (firstError) {
@@ -123,7 +212,12 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
   };
 
   const handleImageChange = (e) => {
-    const selectedFiles = Array.from(e.target.files);
+    const selectedFiles = Array.from(e.target.files).slice(
+      0,
+      Math.max(0, MAX_IMAGES - imagePreviews.length)
+    );
+
+    if (selectedFiles.length === 0) return;
 
     const newFiles = [...files, ...selectedFiles];
     setFiles(newFiles);
@@ -133,6 +227,8 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
     );
 
     setImagePreviews((prev) => [...prev, ...newPreviews]);
+
+    e.target.value = "";
   };
 
   const submitHandler = async (data) => {
@@ -150,6 +246,18 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
       formData.append("status", data.status);
       formData.append("featured", data.featured);
 
+      // Preserve existing images (only the ones still shown, i.e. non-blob URLs)
+      const existingImages = imagePreviews.filter(
+        (img) => !img.startsWith("blob:")
+      );
+
+      if (existingImages.length > 0) {
+        formData.append(
+          "existingImages",
+          JSON.stringify(existingImages)
+        );
+      }
+
       if (files.length > 0) {
         files.forEach((file) => formData.append("images", file));
       }
@@ -159,7 +267,8 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
     } catch (err) {
       console.log(err);
 
-      const backendErrors = mapBackendErrors(err.response?.data);
+      // authFetch throws the response body directly
+      const backendErrors = mapBackendErrors(err);
 
       Object.entries(backendErrors).forEach(([field, message]) => {
         setError(field, {
@@ -168,8 +277,8 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
         });
       });
 
-      if (!err.response?.data?.errors) {
-        alert(err.response?.data?.message || "Something went wrong");
+      if (!err?.errors) {
+        alert(err?.message || "Something went wrong");
       }
 
     } finally {
@@ -177,162 +286,296 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
     }
   };
 
+  const isFull = imagePreviews.length >= MAX_IMAGES;
+
   return (
-    <form onSubmit={handleSubmit(submitHandler)} className="bg-white">
-      {/* UI untouched */}
-      <div className="grid gap-6 p-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="space-y-6">
-          <div className="rounded-3xl border border-gray-200 bg-linear-to-br from-green-50 to-emerald-50 p-5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-green-700">
-              <Package size={20} />
-              Product essentials
-            </div>
-            <p className="mt-2 text-sm text-gray-600">
-              Add the core details buyers need to trust and discover your listing.
+    <form
+      onSubmit={handleSubmit(submitHandler)}
+      noValidate
+      className="bg-white"
+    >
+      {/* ============================
+          Form intro
+      ============================ */}
+
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-1 pb-5">
+        <div className="flex items-center gap-3">
+          <span className="grid h-11 w-11 place-items-center rounded-2xl bg-green-50 text-green-700">
+            <Package size={22} />
+          </span>
+          <div>
+            <h3 className="text-base font-semibold text-gray-900">
+              {product ? "Update your product" : "Create a new product"}
+            </h3>
+            <p className="text-xs text-gray-500">
+              Fill in the details below. Fields marked{" "}
+              <span className="font-medium text-red-500">*</span> are required.
             </p>
           </div>
+        </div>
+      </div>
 
-          <div className="space-y-4 rounded-3xl border border-gray-200 p-5">
-            <div className="flex items-center justify-between ">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Basic information</h3>
-                <p className="text-sm text-gray-500">Name, category, and short description.</p>
-              </div>
-            </div>
+      {/* ============================
+          1. Basic information
+      ============================ */}
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700">Product name</label>
-              <input
-                {...register("name")}
-                className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-green-600"
-                placeholder="e.g. Premium organic fertilizer"
-              />
-              {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
-            </div>
+      <section className="mt-6 space-y-5">
+        <SectionHeader
+          step={1}
+          icon={Tag}
+          title="Basic information"
+          subtitle="What are you selling?"
+        />
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700">Description</label>
-              <textarea
-                rows={5}
-                {...register("description")}
-                className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-green-600"
-                placeholder="Tell buyers about quality, delivery, usage, and benefits."
-              />
-              {errors.description && <p className="text-sm text-red-500">{errors.description.message}</p>}
-            </div>
+        <div className="grid gap-5">
+          <Field
+            label="Product name"
+            required
+            error={errors.name?.message}
+            hint={`${nameCount}/100`}
+          >
+            <input
+              {...register("name")}
+              className={inputClass(!!errors.name)}
+              placeholder="e.g. Premium organic fertilizer"
+              maxLength={100}
+            />
+          </Field>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Category</label>
-                <select {...register("category")} className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-green-600">
-                  <option value="">Select Category</option>
+          <div className="grid gap-5 md:grid-cols-2">
+            <Field label="Category" required error={errors.category?.message}>
+              <div className="relative">
+                <select
+                  {...register("category")}
+                  className={selectClass(!!errors.category)}
+                >
+                  <option value="">Select a category</option>
                   {categories.map((cat) => (
                     <option key={cat._id} value={cat._id}>
                       {cat.name}
                     </option>
                   ))}
                 </select>
-                {errors.category && <p className="text-sm text-red-500">{errors.category.message}</p>}
+                <ChevronDown
+                  size={16}
+                  className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+                />
               </div>
+            </Field>
 
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Status</label>
-                <select {...register("status")} className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-green-600">
-                  {statuses.map((s) => <option key={s}>{s}</option>)}
+            <Field label="Status">
+              <div className="relative">
+                <select {...register("status")} className={selectClass(false)}>
+                  {statuses.map((s) => (
+                    <option key={s}>{s}</option>
+                  ))}
                 </select>
+                <ChevronDown
+                  size={16}
+                  className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+                />
               </div>
-            </div>
+            </Field>
           </div>
+
+          <Field
+            label="Description"
+            required
+            error={errors.description?.message}
+            hint={`${descriptionCount}/3000`}
+          >
+            <textarea
+              rows={4}
+              {...register("description")}
+              className={`${inputClass(!!errors.description)} resize-none`}
+              placeholder="Tell buyers about quality, delivery, usage, and benefits."
+              maxLength={3000}
+            />
+          </Field>
         </div>
+      </section>
 
-        <div className="space-y-6">
-          <div className="rounded-2xl border border-gray-200 p-5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
-              <Camera size={16} className="text-green-600" />
-              Product images
+      {/* ============================
+          2. Pricing & stock
+      ============================ */}
+
+      <section className="mt-8 space-y-5">
+        <SectionHeader
+          step={2}
+          icon={Sparkles}
+          title="Pricing & stock"
+          subtitle="Set the price, quantity and availability."
+        />
+
+        <div className="grid gap-5 md:grid-cols-2">
+          <Field label="Price" required error={errors.price?.message}>
+            <div className="relative">
+              <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm font-medium text-gray-400">
+                Rs.
+              </span>
+              <input
+                type="number"
+                min="1"
+                step="any"
+                {...register("price")}
+                className={`${inputClass(!!errors.price)} pl-12`}
+                placeholder="0"
+              />
             </div>
-            <p className="mt-2 text-sm text-gray-500">Upload clear visuals that help shoppers make faster decisions.</p>
+          </Field>
 
-            <label className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed border-gray-300 bg-gray-50 px-4 py-8 text-center transition hover:border-green-500 hover:bg-green-50">
-              <UploadCloud size={24} className="text-green-600" />
-              <span className="mt-3 text-sm font-semibold text-gray-700">Click to upload images</span>
-              <span className="mt-1 text-xs text-gray-500">PNG, JPG, WEBP up to 5 images</span>
-              <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageChange} />
-            </label>
+          <Field label="Stock" required error={errors.stock?.message}>
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                step="1"
+                {...register("stock")}
+                className={`${inputClass(!!errors.stock)} pr-12`}
+                placeholder="0"
+              />
+              <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-sm font-medium text-gray-400">
+                qty
+              </span>
+            </div>
+          </Field>
 
-            {imagePreviews.length > 0 && (
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                {imagePreviews.map((img, index) => (
-                  <div
-                    key={`${img}-${index}`}
-                    className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white group"
-                  >
-                    <img
-                      src={img}
-                      alt={`preview-${index}`}
-                      className="h-32 w-full object-cover transition-transform duration-200 group-hover:scale-105"
-                    />
-
-                    {/* REMOVE BUTTON */}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage(index)}
-                      className="absolute top-2 right-2 rounded-full bg-red-500 px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition"
-                    >
-                      ✕
-                    </button>
-                  </div>
+          <Field label="Unit" error={errors.unit?.message}>
+            <div className="relative">
+              <select {...register("unit")} className={selectClass(!!errors.unit)}>
+                {units.map((u) => (
+                  <option key={u}>{u}</option>
                 ))}
-              </div>
-            )}
-          </div>
-
-          <div className="rounded-3xl border border-gray-200 p-5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
-              <Sparkles size={16} className="text-yellow-500" />
-              Pricing & stock
+              </select>
+              <ChevronDown
+                size={16}
+                className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+              />
             </div>
+          </Field>
 
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Price</label>
-                <input type="number" {...register("price")} className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-green-600" />
-                {errors.price && <p className="text-sm text-red-500">{errors.price.message}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Stock</label>
-                <input type="number" {...register("stock")} className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-green-600" />
-                {errors.stock && <p className="text-sm text-red-500">{errors.stock.message}</p>}
-              </div>
-            </div>
-
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Unit</label>
-                <select {...register("unit")} className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-green-600">
-                  {units.map((u) => <option key={u}>{u}</option>)}
-                </select>
-              </div>
-
-              <div className="space-y-2 rounded-2xl border border-gray-100 bg-gray-50 p-3">
-                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                  <input type="checkbox" {...register("featured")} className="h-4 w-4 rounded border-gray-300 text-green-600" />
+          <Field label="Visibility">
+            <label className="flex h-full min-h-[42px] cursor-pointer items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 transition hover:border-green-300">
+              <div>
+                <span className="block text-sm font-medium text-gray-700">
                   Feature this product
-                </label>
-                <p className="text-xs text-gray-500">Highlight your product for more visibility in the marketplace.</p>
+                </span>
+                <span className="block text-xs text-gray-500">
+                  More visibility in the marketplace.
+                </span>
               </div>
-            </div>
-          </div>
+              <input
+                type="checkbox"
+                {...register("featured")}
+                className="peer sr-only"
+              />
+              <span className="relative h-6 w-11 shrink-0 rounded-full bg-gray-300 transition-colors duration-200 peer-checked:bg-green-600">
+                <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200 peer-checked:translate-x-5" />
+              </span>
+            </label>
+          </Field>
         </div>
-      </div>
+      </section>
 
-      <div className="flex flex-col-reverse gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 sm:flex-row sm:justify-end">
-        <Button type="button" onClick={onCancel}>
+      {/* ============================
+          3. Product images
+      ============================ */}
+
+      <section className="mt-8 space-y-5">
+        <div className="flex items-center justify-between gap-3">
+          <SectionHeader
+            step={3}
+            icon={ImagePlus}
+            title="Product images"
+            subtitle="Show your product clearly to build trust."
+          />
+          <span
+            className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
+              isFull
+                ? "bg-green-100 text-green-700"
+                : "bg-gray-100 text-gray-500"
+            }`}
+          >
+            {imagePreviews.length}/{MAX_IMAGES}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {imagePreviews.map((img, index) => (
+            <div
+              key={`${img}-${index}`}
+              className="group relative aspect-square overflow-hidden rounded-2xl border border-gray-200 bg-gray-50"
+            >
+              <img
+                src={img}
+                alt={`preview-${index}`}
+                className="h-full w-full object-cover"
+              />
+
+              <button
+                type="button"
+                onClick={() => handleRemoveImage(index)}
+                aria-label={`Remove image ${index + 1}`}
+                className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-red-500 text-white shadow-sm transition hover:bg-red-600"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
+
+          {!isFull && (
+            <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 text-center transition hover:border-green-500 hover:bg-green-50">
+              <span className="grid h-10 w-10 place-items-center rounded-full bg-green-100 text-green-700">
+                <ImagePlus size={20} />
+              </span>
+              <span className="text-xs font-semibold text-gray-700">
+                Add more
+              </span>
+              <span className="px-3 text-[11px] text-gray-500">
+                PNG, JPG or WEBP
+              </span>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageChange}
+              />
+            </label>
+          )}
+        </div>
+
+        {isFull && (
+          <p className="flex items-center gap-1.5 text-xs font-medium text-green-700">
+            <Info size={14} />
+            Maximum {MAX_IMAGES} images reached. Remove one to add another.
+          </p>
+        )}
+      </section>
+
+      {/* ============================
+          Footer actions
+      ============================ */}
+
+      <div className="sticky bottom-0 z-10 -mx-6 mt-8 flex flex-col-reverse gap-3 border-t border-gray-100 bg-white/95 px-6 py-4 backdrop-blur sm:flex-row sm:justify-end">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          leftIcon={<X size={16} />}
+        >
           Cancel
         </Button>
-        <Button type="submit" disabled={loading}>
-          {loading ? "Saving..." : product ? "Update product" : "Save product"}
+        <Button
+          type="submit"
+          disabled={loading}
+          leftIcon={loading ? null : <Save size={16} />}
+        >
+          {loading
+            ? "Saving..."
+            : product
+              ? "Update product"
+              : "Save product"}
         </Button>
       </div>
     </form>

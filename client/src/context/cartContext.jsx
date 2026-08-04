@@ -265,23 +265,17 @@ export default function CartContextProvider({
             quantity
           );
 
-        const cartData =
-          extractCart(response);
+                // Always refetch so Navbar badge updates immediately
+                await fetchCart();
 
-        if (cartData) {
-          setCart(
-            normalizeCart(cartData)
-          );
-        } else {
-          await fetchCart();
-        }
+                return response;
 
-        return response;
-      } catch (err) {
-        console.error(
-          "Add to cart error:",
-          err
-        );
+            } catch (err) {
+
+                console.error(
+                    "Add to cart error:",
+                    err
+                );
 
         setError(
           err?.message ||
@@ -408,23 +402,17 @@ export default function CartContextProvider({
             productId
           );
 
-        const cartData =
-          extractCart(response);
+                // Always refetch so Navbar badge updates immediately
+                await fetchCart();
 
-        if (cartData) {
-          setCart(
-            normalizeCart(cartData)
-          );
-        } else {
-          await fetchCart();
-        }
+                return response;
 
-        return response;
-      } catch (err) {
-        console.error(
-          "Remove cart item error:",
-          err
-        );
+            } catch (err) {
+
+                console.error(
+                    "Remove cart item error:",
+                    err
+                );
 
         setError(
           err?.message ||
@@ -460,9 +448,9 @@ export default function CartContextProvider({
         const response =
           await clearCartApi();
 
-        // Cart is definitely empty
-        // after successful DELETE
-        setCart(EMPTY_CART);
+                // Reset to empty and refetch
+                setCart(EMPTY_CART);
+                await fetchCart();
 
         return response;
       } catch (err) {

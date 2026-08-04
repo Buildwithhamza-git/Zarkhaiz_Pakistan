@@ -11,7 +11,6 @@ import {
     MapPinned,
     ShieldCheck,
     Sprout,
-    Store,
     Target,
     Tractor,
     UsersRound,

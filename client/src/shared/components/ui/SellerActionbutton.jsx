@@ -2,14 +2,14 @@ import { useNavigate } from "react-router-dom";
 
 import Button from "./button";
 
-import { useAuth } from "../../../context/authContext"
+import { useAuthContext } from "../../../context/authContext"
 import { useSellerContext } from "../../../context/sellerContext";
 
 const SellerActionButton = () => {
 
     const navigate = useNavigate();
 
-    const { user } = useAuth();
+    const { user } = useAuthContext();
 
     const {
         seller,

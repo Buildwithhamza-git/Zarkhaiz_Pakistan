@@ -1,44 +1,34 @@
-export default function FeaturedFilter({
-  filters,
-  setFilters,
-}) {
-  return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+import { Star } from "lucide-react";
 
-      <h3 className="font-bold text-lg mb-5">
-        Featured
+export default function FeaturedFilter({ filters, setFilters }) {
+  const isFeatured = filters.featured === "true";
+
+  return (
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <h3 className="mb-4 text-base font-bold tracking-tight text-gray-900">
+        Product Type
       </h3>
 
-      <label className="flex items-center justify-between cursor-pointer">
-
+      <label className="flex cursor-pointer items-center justify-between rounded-xl border border-gray-100 bg-gray-50/50 p-3 transition hover:bg-gray-50">
         <div className="flex items-center gap-3">
-
           <input
             type="checkbox"
-            checked={filters.featured === "Featured"}
+            checked={isFeatured}
             onChange={(e) =>
               setFilters((prev) => ({
                 ...prev,
-                featured: e.target.checked
-                  ? "Featured"
-                  : "",
+                featured: e.target.checked ? "true" : "",
               }))
             }
-            className="h-4 w-4 accent-green-600"
+            className="h-4 w-4 rounded border-gray-300 accent-green-600 focus:ring-green-500"
           />
 
-          <span className="text-sm">
-            Featured Products
+          <span className="flex items-center gap-2 text-sm font-medium text-gray-700">
+            <Star size={15} className="text-yellow-500 fill-yellow-500" />
+            Featured Products Only
           </span>
-
         </div>
-
-        <span className="text-xs text-gray-500">
-          (45)
-        </span>
-
       </label>
-
     </div>
   );
 }

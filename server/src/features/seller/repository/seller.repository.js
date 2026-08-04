@@ -45,6 +45,19 @@ const findSellerDashboardByUserId = async (userId) => {
     );
 };
 
+const findAllSellers = async (status) => {
+    const filter = status && ["pending", "approved", "rejected"].includes(status)
+        ? { status }
+        : {};
+
+    return await Seller.find(filter)
+        .populate(
+            "user",
+            "firstname lastname email profilePicture phone"
+        )
+        .sort({ createdAt: -1 });
+};
+
 module.exports = {
     createSeller,
     findSellerByUserId,
@@ -52,5 +65,6 @@ module.exports = {
     findSellerByCNIC,
     updateSeller,
     deleteSeller,
-    findSellerDashboardByUserId
+    findSellerDashboardByUserId,
+    findAllSellers
 };

@@ -3,7 +3,6 @@ const validateRequest = (schema) => {
         try {
 
             const result = await schema.safeParseAsync(req.body);
-            console.log(result);
 
             if (!result.success) {
 

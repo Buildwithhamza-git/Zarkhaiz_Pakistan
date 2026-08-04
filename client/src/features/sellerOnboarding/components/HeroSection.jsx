@@ -1,4 +1,4 @@
-import { ArrowRight, BadgeCheck, BarChart3, Headphones, Play, ShieldCheck, Store, Users } from "lucide-react";
+import { ArrowRight, BadgeCheck, BarChart3, Headphones, ShieldCheck, Store, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import farmerImage from "../assets/img.png";
 const highlights = [
@@ -12,10 +12,6 @@ export default function HeroSection() {
   const navigate = useNavigate();
   
 
-
-  const scrollToHowItWorks = () => {
-    document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
-  };
 
   return (
     <section className="relative overflow-hidden bg-[#f7faF2]">

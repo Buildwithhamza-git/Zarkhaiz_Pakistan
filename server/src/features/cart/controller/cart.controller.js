@@ -27,7 +27,7 @@ const getCart = async (req, res) => {
     } catch (error) {
         console.error("Get cart error:", error);
 
-        return res.status(500).json({
+        return res.status(400).json({
             success: false,
             message:
                 error.message ||
@@ -207,7 +207,7 @@ const clearCart = async (req, res) => {
             error
         );
 
-        return res.status(500).json({
+        return res.status(400).json({
             success: false,
             message:
                 error.message ||

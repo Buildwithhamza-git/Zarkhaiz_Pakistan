@@ -126,7 +126,7 @@ export default function VerifyOtpForm() {
         otpInputsRef.current[nextIndex]?.focus();
     };
 
-    const onSubmit = async (data) => {
+    const onSubmit = async () => {
         clearErrors();
         setNotice("");
 

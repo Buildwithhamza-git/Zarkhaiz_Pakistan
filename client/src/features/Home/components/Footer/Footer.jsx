@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
     Store,
@@ -8,6 +8,14 @@ import {
     Mail,
     Phone,
     MapPin,
+    Sprout,
+    ThumbsUp,
+    Camera,
+    Play,
+    Share2,
+    Check,
+    ChevronRight,
+    ArrowUp,
 } from "lucide-react";
 
 import { useAuthContext } from "../../../../context/authContext";
@@ -33,22 +41,22 @@ const SOCIAL_LINKS = [
     {
         name: "Facebook",
         href: "https://facebook.com",
-        icon: "f",
+        icon: ThumbsUp,
     },
     {
         name: "Instagram",
         href: "https://instagram.com",
-        icon: "◎",
+        icon: Camera,
     },
     {
         name: "YouTube",
         href: "https://youtube.com",
-        icon: "▶",
+        icon: Play,
     },
     {
         name: "Twitter",
         href: "https://twitter.com",
-        icon: "𝕏",
+        icon: Share2,
     },
 ];
 
@@ -58,7 +66,7 @@ export default function Footer() {
     const [email, setEmail] = useState("");
     const [subscribed, setSubscribed] = useState(false);
 
-    const { user, seller } = useAuthContext();
+    const { seller } = useAuthContext();
 
     // ==========================================
     // SELLER STATUS
@@ -314,197 +322,7 @@ export default function Footer() {
                 "
             />
 
-            {/* ==========================================
-                MAIN FOOTER
-            ========================================== */}
-
             <div className="relative mx-auto max-w-7xl px-5 py-14 sm:px-6 lg:px-8">
-
-                {/* BRAND + NEWSLETTER */}
-
-                <div
-                    className="
-                        mb-14
-                        grid
-                        gap-8
-                        rounded-3xl
-                        border
-                        border-white/10
-                        bg-white/[0.04]
-                        p-6
-                        sm:p-8
-                        lg:grid-cols-[1fr_1.2fr]
-                        lg:items-center
-                    "
-                >
-
-                    {/* BRAND */}
-
-                    <div className="flex items-start gap-4">
-
-                        <div
-                            className="
-                                flex
-                                h-14
-                                w-14
-                                shrink-0
-                                items-center
-                                justify-center
-                                rounded-2xl
-                                bg-lime-400
-                                text-3xl
-                                text-[#092014]
-                                shadow-lg
-                            "
-                        >
-                            🌱
-                        </div>
-
-                        <div>
-
-                            <div className="flex flex-wrap items-center gap-2">
-
-                                <h2 className="text-2xl font-extrabold">
-                                    Zarkhaiz
-                                </h2>
-
-                                <span
-                                    className="
-                                        rounded-full
-                                        bg-lime-400/10
-                                        px-3
-                                        py-1
-                                        text-xs
-                                        font-bold
-                                        text-lime-300
-                                    "
-                                >
-                                    Pakistan
-                                </span>
-
-                            </div>
-
-                            <p className="mt-1 text-sm text-gray-400">
-                                Grow Together 🌾
-                            </p>
-
-                            <p
-                                className="
-                                    mt-3
-                                    max-w-md
-                                    text-sm
-                                    leading-6
-                                    text-gray-300
-                                "
-                            >
-                                An AI-powered agriculture marketplace
-                                connecting farmers, buyers and sellers
-                                across Pakistan.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                    {/* NEWSLETTER */}
-
-                    <div>
-
-                        <p
-                            className="
-                                mb-2
-                                text-sm
-                                font-semibold
-                                uppercase
-                                tracking-wider
-                                text-lime-300
-                            "
-                        >
-                            Stay connected
-                        </p>
-
-                        <h3 className="text-xl font-bold">
-                            Get agriculture updates in your inbox
-                        </h3>
-
-                        <p className="mt-1 text-sm text-gray-400">
-                            Get farming tips, marketplace updates and
-                            new product announcements.
-                        </p>
-
-                        <form
-                            onSubmit={handleSubscribe}
-                            className="mt-4 flex flex-col gap-3 sm:flex-row"
-                        >
-
-                            <div
-                                className="
-                                    flex
-                                    flex-1
-                                    items-center
-                                    rounded-xl
-                                    border
-                                    border-white/10
-                                    bg-black/20
-                                "
-                            >
-
-                                <span className="pl-4 text-lg text-lime-400">
-                                    @
-                                </span>
-
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) =>
-                                        setEmail(e.target.value)
-                                    }
-                                    placeholder="Enter your email"
-                                    required
-                                    className="
-                                        w-full
-                                        bg-transparent
-                                        px-3
-                                        py-3
-                                        text-sm
-                                        text-white
-                                        outline-none
-                                        placeholder:text-gray-500
-                                    "
-                                />
-
-                            </div>
-
-                            <button
-                                type="submit"
-                                className="
-                                    rounded-xl
-                                    bg-lime-400
-                                    px-6
-                                    py-3
-                                    text-sm
-                                    font-bold
-                                    text-[#092014]
-                                    transition
-                                    hover:bg-lime-300
-                                    active:scale-95
-                                "
-                            >
-                                Subscribe
-                            </button>
-
-                        </form>
-
-                        {subscribed && (
-                            <p className="mt-3 text-sm font-medium text-lime-300">
-                                ✓ Thanks! You have been subscribed.
-                            </p>
-                        )}
-
-                    </div>
-
-                </div>
-
                 {/* ==========================================
                     FOOTER COLUMNS
                 ========================================== */}
@@ -526,10 +344,9 @@ export default function Footer() {
                                     justify-center
                                     rounded-xl
                                     bg-green-700
-                                    text-xl
                                 "
                             >
-                                🌿
+                                <Sprout size={20} />
                             </div>
 
                             <div>
@@ -665,7 +482,7 @@ export default function Footer() {
                                                 group-hover:translate-x-1
                                             "
                                         >
-                                            ›
+                                            <ChevronRight size={14} />
                                         </span>
 
                                         {link.label}
@@ -723,7 +540,7 @@ export default function Footer() {
                                                 group-hover:translate-x-1
                                             "
                                         >
-                                            ›
+                                            <ChevronRight size={14} />
                                         </span>
 
                                         {category.label}
@@ -870,9 +687,9 @@ export default function Footer() {
                                             hover:bg-lime-400
                                             hover:text-[#092014]
                                         "
-                                    >
-                                        {social.icon}
-                                    </a>
+                                        >
+                                            <social.icon size={16} />
+                                        </a>
 
                                 ))}
 
@@ -919,10 +736,10 @@ export default function Footer() {
                         "
                     >
                         <span className="text-lime-400">
-                            🌱
+                            <Sprout size={16} />
                         </span>
 
-                        © {currentYear} Zarkhaiz Pakistan.
+                        &copy; {currentYear} Zarkhaiz Pakistan.
                         All rights reserved.
                     </p>
 
@@ -979,7 +796,7 @@ export default function Footer() {
                                 hover:text-[#092014]
                             "
                         >
-                            ↑
+                            <ArrowUp size={16} />
                         </button>
 
                     </div>
