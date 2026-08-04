@@ -1,6 +1,9 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
+// Global floating chat (badge + widget on every page)
+import ChatWidget from "../features/chat/components/ChatWidget";
+
 // Home
 import HomePage from "../features/Home/pages/Homepage";
 
@@ -37,6 +40,8 @@ import AdminOrdersPage from "../features/order/pages/AdminOrdersPage";
 // Seller orders
 import SellerOrdersPage from "../features/seller/component/orders/SellerOrdersPage";
 import SellerProfileSettings from "../features/seller/component/settings/SellerProfileSettings";
+import SellerMessagesPage from "../features/seller/component/messages/SellerMessagesPage";
+import SellerCustomersPage from "../features/seller/component/customers/SellerCustomersPage";
 
 // Routes
 import ProtectedRoute from "../routes/Protectedroutes";
@@ -85,6 +90,11 @@ export default function App() {
           },
         }}
       />
+
+      {/* ===================== */}
+      {/* Global Floating Chat  */}
+      {/* ===================== */}
+      <ChatWidget />
 
       <Routes>
         {/* ===================== */}
@@ -139,6 +149,8 @@ export default function App() {
             <Route path="products" element={<ProductsPage />} />
             <Route path="products/add" element={<AddProductPage />} />
             <Route path="orders" element={<SellerOrdersPage />} />
+            <Route path="messages" element={<SellerMessagesPage />} />
+            <Route path="customers" element={<SellerCustomersPage />} />
             <Route
               path="settings/profile"
               element={<SellerProfileSettings />}

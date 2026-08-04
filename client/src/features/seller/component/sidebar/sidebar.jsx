@@ -23,27 +23,30 @@ import Logo from "../../../../shared/components/ui/logo";
 import Button from "../../../../shared/components/ui/button";
 import heroImg from "../../../../assets/images/hero/img1.png";
 import { useSellerContext } from "../../../../context/sellerContext";
+import { useChat } from "../../../chat/context/chatContext";
 
 const menuItems = [
   { label: "Dashboard", to: "/seller/dashboard", icon: LayoutDashboard, end: true },
   { label: "Products", to: "/seller/products", icon: Package },
   { label: "Orders", to: "/seller/orders", icon: ClipboardList },
+  { label: "Messages", to: "/seller/messages", icon: MessageSquare },
   { label: "Customers", to: "/seller/customers", icon: Users },
   { label: "Reviews", to: "/seller/reviews", icon: Star },
   { label: "Earnings", to: "/seller/earnings", icon: Wallet },
   { label: "Payouts", to: "/seller/payouts", icon: Banknote },
   { label: "Analytics", to: "/seller/analytics", icon: BarChart3 },
   { label: "Coupons & Discounts", to: "/seller/coupons", icon: Tag },
-  { label: "Messages", to: "/seller/messages", icon: MessageSquare },
   { label: "Shop Settings", to: "/seller/settings/shop", icon: Store },
   { label: "Profile Settings", to: "/seller/settings/profile", icon: UserCog },
 ];
 
 const Sidebar = ({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile }) => {
   const { stats } = useSellerContext();
+  const { unreadTotal } = useChat();
 
   const badges = {
-    "/seller/orders": stats?.pendingOrders  ,
+    "/seller/orders": stats?.pendingOrders || 0,
+    "/seller/messages": unreadTotal,
   };
   return (
     <>

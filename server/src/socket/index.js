@@ -3,6 +3,54 @@ const { verifyToken } = require("../shared/utils/jwtToken");
 
 let io = null;
 
+// Users currently connected (user id -> number of active sockets).
+// A user may have several tabs/sockets open, so use a counter.
+const onlineUserSockets = new Map();
+
+const isUserOnline = (userId) => {
+    const id = String(userId || "");
+
+    return Boolean(id && (onlineUserSockets.get(id) || 0) > 0);
+};
+
+const getOnlineUserIds = () => [...onlineUserSockets.keys()];
+
+/**
+ * Broadcast a presence update to every conversation partner of `userId`.
+ */
+const notifyPresence = async (userId, online) => {
+    if (!io || !userId) {
+        return;
+    }
+
+    try {
+        const chatService = require("../features/chat/chat.service");
+        const partnerIds = await chatService.getConversationPartnerIds(userId);
+
+        for (const partnerId of partnerIds) {
+            io.to(`user:${partnerId}`).emit("presence:update", {
+                userId,
+                online,
+            });
+        }
+    } catch (error) {
+        console.error("presence broadcast error:", error);
+    }
+};
+
+/**
+ * Mark every message sent to this user as delivered (they are online now)
+ * and notify the senders so their ticks turn to double-grey.
+ */
+const markMessagesDeliveredOnConnect = async (userId) => {
+    try {
+        const chatService = require("../features/chat/chat.service");
+        await chatService.markDeliveredOnConnectService(userId);
+    } catch (error) {
+        console.error("delivered-on-connect error:", error);
+    }
+};
+
 /**
  * Attach Socket.IO to the HTTP server.
  * Clients authenticate via `socket.handshake.auth.token` and are joined
@@ -39,12 +87,36 @@ const initSocket = (server) => {
 
     io.on("connection", (socket) => {
         if (socket.userId) {
-            socket.join(`user:${socket.userId}`);
+            const id = String(socket.userId);
+
+            socket.join(`user:${id}`);
+
+            onlineUserSockets.set(id, (onlineUserSockets.get(id) || 0) + 1);
+
+            // Mark messages that arrived while this user was offline as
+            // delivered (online -> double grey tick) and broadcast presence.
+            markMessagesDeliveredOnConnect(id);
+            notifyPresence(id, true);
         }
+
+        // Chat events (lazy require avoids circular deps at boot)
+        const { registerChatHandlers } = require("../features/chat/chat.socket");
+        registerChatHandlers(socket);
 
         socket.on("disconnect", () => {
             if (socket.userId) {
-                socket.leave(`user:${socket.userId}`);
+                const id = String(socket.userId);
+
+                socket.leave(`user:${id}`);
+
+                const remaining = (onlineUserSockets.get(id) || 1) - 1;
+
+                if (remaining <= 0) {
+                    onlineUserSockets.delete(id);
+                    notifyPresence(id, false);
+                } else {
+                    onlineUserSockets.set(id, remaining);
+                }
             }
         });
     });
@@ -81,4 +153,6 @@ module.exports = {
     emitToUser,
     emitToUsers,
     getIO: () => io,
+    isUserOnline,
+    getOnlineUserIds,
 };

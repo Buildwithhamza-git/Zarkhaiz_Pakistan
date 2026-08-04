@@ -2,16 +2,20 @@ import { useState } from "react";
 import {
   ArrowLeft,
   MapPin,
+  MessageCircle,
   Minus,
   PackageCheck,
   Plus,
   ShoppingCart,
   Store,
 } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import ProductRating from "./ProductRating";
 import ProductBadge from "./ProductBadge";
 import Button from "../../../shared/components/ui/button";
+import { useAuthContext } from "../../../context/authContext";
+import { useChat } from "../../chat/context/chatContext";
 import {
   formatPKR,
   getProductDisplayData,
@@ -24,6 +28,11 @@ export default function ProductDetails({
   onAddToCart,
   addingToCart = false,
 }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuthContext();
+  const { startConversation } = useChat();
+
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
 
@@ -50,6 +59,29 @@ export default function ProductDetails({
     if (!isNaN(val) && val >= 1 && val <= (maxQty || 1)) {
       setQuantity(val);
     }
+  };
+
+  const handleChatWithSeller = async () => {
+    const seller = product?.seller;
+
+    if (!seller?._id) return;
+
+    if (!user) {
+      navigate("/login", {
+        state: {
+          from: location.pathname + location.search,
+          message: "Please login to chat with the seller.",
+        },
+      });
+      return;
+    }
+
+    await startConversation({
+      sellerId: seller._id,
+      productId: product._id,
+      productName: product.name,
+      initialMessage: `Hi, I'm interested in ${product.name}. Is it available?`,
+    });
   };
 
   return (
@@ -220,6 +252,15 @@ export default function ProductDetails({
                 </p>
               </div>
             </div>
+
+            <button
+              type="button"
+              onClick={handleChatWithSeller}
+              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-green-200 bg-green-50 px-4 py-2.5 text-sm font-semibold text-green-700 transition hover:bg-green-100 hover:text-green-800"
+            >
+              <MessageCircle size={17} />
+              Chat with Seller
+            </button>
           </div>
 
           {/* ACTION BUTTONS */}
