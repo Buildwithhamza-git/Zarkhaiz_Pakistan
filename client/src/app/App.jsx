@@ -43,6 +43,15 @@ import SellerProfileSettings from "../features/seller/component/settings/SellerP
 import SellerMessagesPage from "../features/seller/component/messages/SellerMessagesPage";
 import SellerCustomersPage from "../features/seller/component/customers/SellerCustomersPage";
 
+// Seller earnings & analytics
+import EarningsPage from "../features/seller/component/earnings/EarningsPage";
+import PayoutsPage from "../features/seller/component/payouts/PayoutsPage";
+import AnalyticsPage from "../features/seller/component/analytics/AnalyticsPage";
+
+// Seller shop settings & coupons
+import ShopSettings from "../features/seller/component/settings/ShopSettings";
+import CouponsPage from "../features/seller/component/coupons/CouponsPage";
+
 // Routes
 import ProtectedRoute from "../routes/Protectedroutes";
 import SellerRoute from "../routes/SellerRoutes";
@@ -151,10 +160,15 @@ export default function App() {
             <Route path="orders" element={<SellerOrdersPage />} />
             <Route path="messages" element={<SellerMessagesPage />} />
             <Route path="customers" element={<SellerCustomersPage />} />
+            <Route path="earnings" element={<EarningsPage />} />
+            <Route path="payouts" element={<PayoutsPage />} />
+            <Route path="analytics" element={<AnalyticsPage />} />
+            <Route path="coupons" element={<CouponsPage />} />
             <Route
               path="settings/profile"
               element={<SellerProfileSettings />}
             />
+            <Route path="settings/shop" element={<ShopSettings />} />
           </Route>
         </Route>
       </Routes>
