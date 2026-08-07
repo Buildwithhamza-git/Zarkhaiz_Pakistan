@@ -61,7 +61,7 @@ const markNotificationRead = async (notificationId, recipientId) => {
             recipient: recipientId,
         },
         { read: true },
-        { new: true }
+        { returnDocument: "after" }
     );
 };
 

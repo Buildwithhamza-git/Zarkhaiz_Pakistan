@@ -57,7 +57,7 @@ const updateNotifySeller = async (userId, productId, notifySeller) => {
     return await Wishlist.findOneAndUpdate(
         { user: userId, product: productId },
         { notifySeller },
-        { new: true }
+        { returnDocument: "after" }
     );
 };
 

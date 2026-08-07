@@ -10,7 +10,7 @@ const updateUserProfile = async (userId, data) => {
         userId,
         data,
         {
-            new: true,
+            returnDocument: "after",
             runValidators: true,
         }
     ).select("-password -otp -refreshToken");

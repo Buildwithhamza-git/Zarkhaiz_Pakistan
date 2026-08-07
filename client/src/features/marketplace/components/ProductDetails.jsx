@@ -7,6 +7,7 @@ import {
   PackageCheck,
   Plus,
   ShoppingCart,
+  Star,
   Store,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -14,6 +15,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ProductRating from "./ProductRating";
 import ProductBadge from "./ProductBadge";
 import WishlistButton from "../../wishlist/components/WishlistButton";
+import ReviewSection from "../../review/components/ReviewSection";
 import Button from "../../../shared/components/ui/button";
 import { useAuthContext } from "../../../context/authContext";
 import { useChat } from "../../chat/context/chatContext";
@@ -84,6 +86,12 @@ export default function ProductDetails({
       productName: product.name,
       initialMessage: `Hi, I'm interested in ${product.name}. Is it available?`,
     });
+  };
+
+  const scrollToReviews = () => {
+    document
+      .getElementById("reviews")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
@@ -163,11 +171,21 @@ export default function ProductDetails({
             {display.productName}
           </h1>
 
-          <div className="mt-3">
+          <div className="mt-3 flex flex-wrap items-center gap-3">
             <ProductRating
               rating={display.averageRating}
               reviews={display.totalReviews}
+              onClick={scrollToReviews}
             />
+
+            <button
+              type="button"
+              onClick={scrollToReviews}
+              className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-3.5 py-1.5 text-xs font-semibold text-green-700 transition hover:bg-green-100"
+            >
+              <Star size={14} className="fill-yellow-400 text-yellow-400" />
+              Write a Review
+            </button>
           </div>
 
           <div className="mt-5 flex flex-wrap items-end gap-3">
@@ -297,6 +315,13 @@ export default function ProductDetails({
           </div>
         </div>
       </div>
+
+      {/* ================= REVIEWS SECTION ================= */}
+      <ReviewSection
+        productId={productId}
+        productName={display.productName}
+        productImage={imageList[0]}
+      />
     </div>
   );
 }

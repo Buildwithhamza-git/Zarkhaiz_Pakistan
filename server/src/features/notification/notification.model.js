@@ -14,6 +14,7 @@ const notificationSchema = new mongoose.Schema(
             enum: [
                 "order",
                 "order_status",
+                "review",
                 "seller",
                 "system",
             ],

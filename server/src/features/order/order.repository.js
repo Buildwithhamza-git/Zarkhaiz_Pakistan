@@ -119,7 +119,7 @@ const updateOrderStatus = async (orderId, orderStatus) => {
     return await Order.findByIdAndUpdate(
         orderId,
         { orderStatus },
-        { new: true, runValidators: true }
+        { returnDocument: "after", runValidators: true }
     );
 };
 
@@ -130,7 +130,7 @@ const updatePaymentStatus = async (orderId, paymentStatus) => {
     return await Order.findByIdAndUpdate(
         orderId,
         { paymentStatus },
-        { new: true, runValidators: true }
+        { returnDocument: "after", runValidators: true }
     );
 };
 

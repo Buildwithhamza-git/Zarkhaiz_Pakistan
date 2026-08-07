@@ -168,7 +168,7 @@ const createOrderService = async (userId, payload) => {
             {
                 $inc: { stock: -requestedQty, totalSold: requestedQty },
             },
-            { new: true }
+            { returnDocument: "after" }
         );
 
         if (!updated) {
