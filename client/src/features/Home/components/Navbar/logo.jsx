@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import Logo from "../../../../shared/components/ui/logo";
 import { Sprout } from "lucide-react";
 
 export default function Logo() {

@@ -56,13 +56,15 @@ export default function ReviewForm({
   }, [open, initialData]);
 
   // ==========================================
-  // Revoke object URLs on unmount
+  // Revoke object URLs when previews change or
+  // the component unmounts
   // ==========================================
 
   useEffect(() => {
-    return () => previews.forEach((url) => URL.revokeObjectURL(url));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const createdUrls = previews.filter((url) => url?.startsWith("blob:"));
+
+    return () => createdUrls.forEach((url) => URL.revokeObjectURL(url));
+  }, [previews]);
 
   // ==========================================
   // Add photos

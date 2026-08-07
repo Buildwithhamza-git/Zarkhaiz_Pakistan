@@ -38,6 +38,18 @@ const messageSchema = new mongoose.Schema(
             type: Date,
             default: null,
         },
+
+        // When the message text was last edited by the sender
+        editedAt: {
+            type: Date,
+            default: null,
+        },
+
+        // When the message was deleted for everyone by the sender
+        deletedAt: {
+            type: Date,
+            default: null,
+        },
     },
     {
         timestamps: true,

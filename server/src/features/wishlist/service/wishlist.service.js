@@ -7,6 +7,7 @@ const {
     deleteWishlistItem,
     updateNotifySeller,
     countWishlistByUser,
+    aggregateWishlistBySeller,
 } = require("../repository/wishlist.repository");
 
 const Product = require("../../product/product.model");
@@ -224,6 +225,30 @@ const getWishlistCount = async (userId) => {
 };
 
 // ==========================================
+// Seller Wishlist Stats (buyer interest)
+// ==========================================
+
+const getSellerWishlistStatsService = async (userId, query = {}) => {
+    if (!userId) {
+        throw new Error("User ID is required.");
+    }
+
+    const seller = await Seller.findOne({ user: userId }).select("_id");
+
+    if (!seller) {
+        throw new Error("Seller profile not found.");
+    }
+
+    const page = Math.max(1, parseInt(query.page, 10) || 1);
+    const limit = Math.min(
+        100,
+        Math.max(1, parseInt(query.limit, 10) || 20)
+    );
+
+    return await aggregateWishlistBySeller(seller._id, { page, limit });
+};
+
+// ==========================================
 // Exports
 // ==========================================
 
@@ -233,4 +258,5 @@ module.exports = {
     removeProductFromWishlist,
     notifySellerAboutWishlist,
     getWishlistCount,
+    getSellerWishlistStatsService,
 };

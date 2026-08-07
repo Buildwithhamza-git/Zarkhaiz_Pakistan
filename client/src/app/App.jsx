@@ -49,6 +49,7 @@ import SellerOrdersPage from "../features/seller/component/orders/SellerOrdersPa
 import SellerProfileSettings from "../features/seller/component/settings/SellerProfileSettings";
 import SellerMessagesPage from "../features/seller/component/messages/SellerMessagesPage";
 import SellerCustomersPage from "../features/seller/component/customers/SellerCustomersPage";
+import SellerWishlistPage from "../features/seller/component/wishlist/SellerWishlistPage";
 
 // Routes
 import ProtectedRoute from "../routes/Protectedroutes";
@@ -165,6 +166,7 @@ export default function App() {
             <Route path="orders" element={<SellerOrdersPage />} />
             <Route path="messages" element={<SellerMessagesPage />} />
             <Route path="customers" element={<SellerCustomersPage />} />
+            <Route path="wishlist" element={<SellerWishlistPage />} />
             <Route path="reviews" element={<SellerReviewsPage />} />
             <Route
               path="settings/profile"

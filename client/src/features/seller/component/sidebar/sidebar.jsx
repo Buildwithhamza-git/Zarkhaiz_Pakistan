@@ -8,7 +8,6 @@ import {
   Wallet,
   Banknote,
   BarChart3,
-  Tag,
   MessageSquare,
   Store,
   UserCog,
@@ -17,6 +16,7 @@ import {
   Crown,
   X,
   Sprout,
+  Heart,
 } from "lucide-react";
 
 import Logo from "../../../../shared/components/ui/logo";
@@ -24,6 +24,7 @@ import Button from "../../../../shared/components/ui/button";
 import heroImg from "../../../../assets/images/hero/img1.png";
 import { useSellerContext } from "../../../../context/sellerContext";
 import { useChat } from "../../../chat/context/chatContext";
+import { useSellerWishlistStats } from "../../../wishlist/hooks/useSellerWishlistStats";
 
 const menuItems = [
   { label: "Dashboard", to: "/seller/dashboard", icon: LayoutDashboard, end: true },
@@ -35,7 +36,7 @@ const menuItems = [
   { label: "Earnings", to: "/seller/earnings", icon: Wallet },
   { label: "Payouts", to: "/seller/payouts", icon: Banknote },
   { label: "Analytics", to: "/seller/analytics", icon: BarChart3 },
-  { label: "Coupons & Discounts", to: "/seller/coupons", icon: Tag },
+  { label: "Wishlist", to: "/seller/wishlist", icon: Heart },
   { label: "Shop Settings", to: "/seller/settings/shop", icon: Store },
   { label: "Profile Settings", to: "/seller/settings/profile", icon: UserCog },
 ];
@@ -43,10 +44,12 @@ const menuItems = [
 const Sidebar = ({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile }) => {
   const { stats } = useSellerContext();
   const { unreadTotal } = useChat();
+  const { total: wishlistTotal } = useSellerWishlistStats();
 
   const badges = {
     "/seller/orders": stats?.pendingOrders || 0,
     "/seller/messages": unreadTotal,
+    "/seller/wishlist": wishlistTotal,
   };
   return (
     <>

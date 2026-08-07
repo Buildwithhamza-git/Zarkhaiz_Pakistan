@@ -34,6 +34,8 @@ export default function ReviewSection({
 }) {
   const { token, user } = useAuthContext();
 
+  const currentUserId = user?._id || user?.id;
+
   const {
     reviews,
     stats,
@@ -54,14 +56,12 @@ export default function ReviewSection({
     removeReview,
     toggleHelpfulLocal,
     reportLocal,
-  } = useProductReviews(productId);
+  } = useProductReviews(productId, currentUserId);
 
   const [editTarget, setEditTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [writeOpen, setWriteOpen] = useState(false);
-
-  const currentUserId = user?._id || user?.id;
 
   // ==========================================
   // Fetch review eligibility for logged-in users

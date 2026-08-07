@@ -63,6 +63,25 @@ export const sendMessageApi = async (conversationId, payload) => {
   });
 };
 
+export const updateMessageApi = async (conversationId, messageId, text) => {
+  return await authFetch(
+    `/chats/conversations/${conversationId}/messages/${messageId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ text }),
+    }
+  );
+};
+
+export const deleteMessageApi = async (conversationId, messageId) => {
+  return await authFetch(
+    `/chats/conversations/${conversationId}/messages/${messageId}`,
+    {
+      method: "DELETE",
+    }
+  );
+};
+
 export const markConversationRead = async (conversationId) => {
   return await authFetch(`/chats/conversations/${conversationId}/read`, {
     method: "POST",

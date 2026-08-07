@@ -12,10 +12,14 @@ const {
     addWishlistItem,
     removeWishlistItem,
     notifySeller,
+    getSellerWishlistStats,
 } = require("../controller/wishlist.controller");
 
 // Get current user's wishlist
 router.get("/", authenticate, getWishlist);
+
+// Get seller's wishlist stats (products buyers wishlisted + notified about)
+router.get("/seller-stats", authenticate, getSellerWishlistStats);
 
 // Add product to wishlist
 router.post(

@@ -5,8 +5,6 @@ import { Bell, CheckCheck, Loader2 } from "lucide-react";
 import { useNotifications } from "../../../notification/hooks/useNotifications";
 import { formatDateTime } from "../../../order/utils/orderDisplay";
 
-const ORDER_TYPES = ["order", "order_status"];
-
 export default function SellerNotificationButton() {
   const navigate = useNavigate();
 
@@ -17,9 +15,7 @@ export default function SellerNotificationButton() {
 
   const containerRef = useRef(null);
 
-  const orderNotifications = (items || []).filter((notification) =>
-    ORDER_TYPES.includes(notification.type)
-  );
+  const notifications = items || [];
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -50,6 +46,8 @@ export default function SellerNotificationButton() {
 
     if (notification.data?.orderId) {
       navigate("/seller/orders");
+    } else if (notification.data?.productId) {
+      navigate("/seller/wishlist");
     }
   };
 
@@ -88,19 +86,19 @@ export default function SellerNotificationButton() {
           </div>
 
           <div className="max-h-96 overflow-y-auto">
-            {loading && orderNotifications.length === 0 ? (
+            {loading && notifications.length === 0 ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 size={24} className="animate-spin text-green-700" />
               </div>
-            ) : orderNotifications.length === 0 ? (
+            ) : notifications.length === 0 ? (
               <div className="px-4 py-12 text-center">
                 <p className="text-sm text-gray-500">
-                  No order notifications yet.
+                  No notifications yet.
                 </p>
               </div>
             ) : (
               <ul className="divide-y divide-gray-50">
-                {orderNotifications.map((notification) => (
+                {notifications.map((notification) => (
                   <li key={notification._id}>
                     <button
                       type="button"

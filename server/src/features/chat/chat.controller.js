@@ -153,6 +153,53 @@ const createMessage = async (req, res, next) => {
 };
 
 // ==========================================
+// PATCH /chats/conversations/:id/messages/:messageId
+// ==========================================
+
+const updateMessage = async (req, res, next) => {
+    try {
+        const message = await chatService.updateMessageService(
+            req.user.userId,
+            {
+                messageId: req.params.messageId,
+                text: req.body.text,
+            }
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Message edited.",
+            data: message,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ==========================================
+// DELETE /chats/conversations/:id/messages/:messageId
+// ==========================================
+
+const deleteMessage = async (req, res, next) => {
+    try {
+        const message = await chatService.deleteMessageService(
+            req.user.userId,
+            {
+                messageId: req.params.messageId,
+            }
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Message deleted for everyone.",
+            data: message,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ==========================================
 // POST /chats/conversations/:id/read
 // ==========================================
 
@@ -181,5 +228,7 @@ module.exports = {
     getConversation,
     getMessages,
     createMessage,
+    updateMessage,
+    deleteMessage,
     markConversationRead,
 };

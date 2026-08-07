@@ -41,6 +41,14 @@ export const addToWishlist = async (
 };
 
 // ==========================================
+// SELLER WISHLIST STATS (buyer interest)
+// ==========================================
+
+export const getSellerWishlistStats = async () => {
+  return await authFetch("/wishlist/seller-stats");
+};
+
+// ==========================================
 // REMOVE FROM WISHLIST
 // ==========================================
 

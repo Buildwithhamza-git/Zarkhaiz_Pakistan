@@ -56,7 +56,7 @@ export default function ReviewCard({
 
     setHelpfulBusy(true);
 
-    const result = await onHelpful(review, isHelpful);
+    const result = await onHelpful(review._id, isHelpful);
 
     setHelpfulBusy(false);
 
@@ -70,7 +70,7 @@ export default function ReviewCard({
 
     setReporting(true);
 
-    const result = await onReport(review, reportReason.trim());
+    const result = await onReport(review._id, reportReason.trim());
 
     setReporting(false);
     setReportOpen(false);
@@ -139,7 +139,7 @@ export default function ReviewCard({
       <div className="mt-3 flex items-center gap-2">
         <StarRating rating={review.rating} />
         <span className="text-sm font-semibold text-gray-700">
-          {review.rating}.0
+          {Number(review.rating).toFixed(1)}
         </span>
       </div>
 

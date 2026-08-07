@@ -6,6 +6,7 @@ const validateRequest = require("../../middlewares/validateRequest");
 const {
     startConversationSchema,
     createMessageSchema,
+    updateMessageSchema,
 } = require("./chat.validation");
 
 const {
@@ -16,6 +17,8 @@ const {
     getConversation,
     getMessages,
     createMessage,
+    updateMessage,
+    deleteMessage,
     markConversationRead,
 } = require("./chat.controller");
 
@@ -48,6 +51,21 @@ router.post(
     authenticate,
     validateRequest(createMessageSchema),
     createMessage
+);
+
+// Edit a message (REST fallback when socket is unavailable)
+router.patch(
+    "/conversations/:id/messages/:messageId",
+    authenticate,
+    validateRequest(updateMessageSchema),
+    updateMessage
+);
+
+// Delete a message for everyone (REST fallback when socket is unavailable)
+router.delete(
+    "/conversations/:id/messages/:messageId",
+    authenticate,
+    deleteMessage
 );
 
 // Mark a conversation as read

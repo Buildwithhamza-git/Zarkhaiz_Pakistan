@@ -111,6 +111,7 @@ export default function OrderReviewModal({
       {editing ? (
         <ReviewForm
           inline
+          open
           mode="edit"
           productName={editing.item.name || "Product"}
           productImage={getItemImage(editing.item)}
@@ -222,6 +223,7 @@ export default function OrderReviewModal({
       ) : (
         <ReviewForm
           inline
+          open
           productName={selectedItem.name || "Product"}
           productImage={getItemImage(selectedItem)}
           submitting={submitting}

@@ -17,7 +17,7 @@ const EMPTY_STATS = {
   distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
 };
 
-export default function useProductReviews(productId) {
+export default function useProductReviews(productId, currentUserId = null) {
   const [reviews, setReviews] = useState([]);
   const [stats, setStats] = useState(EMPTY_STATS);
   const [photos, setPhotos] = useState([]);
@@ -224,6 +224,22 @@ export default function useProductReviews(productId) {
   // Toggle helpful on a review (local update)
   // ==========================================
 
+  const applyHelpfulUsers = (review, makeHelpful) => {
+    if (!currentUserId) return review.helpfulUsers || [];
+
+    const currentUserIdStr = String(currentUserId);
+
+    if (makeHelpful) {
+      return Array.from(
+        new Set([...(review.helpfulUsers || []), currentUserIdStr])
+      );
+    }
+
+    return (review.helpfulUsers || []).filter(
+      (id) => id?.toString() !== currentUserIdStr
+    );
+  };
+
   const toggleHelpfulLocal = async (reviewId, currentHelpful) => {
     const optimistic = currentHelpful ? -1 : 1;
 
@@ -236,6 +252,7 @@ export default function useProductReviews(productId) {
                 0,
                 (review.helpfulCount || 0) + optimistic
               ),
+              helpfulUsers: applyHelpfulUsers(review, !currentHelpful),
             }
           : review
       )
@@ -252,6 +269,10 @@ export default function useProductReviews(productId) {
             ? {
                 ...review,
                 helpfulCount: data.helpfulCount ?? review.helpfulCount,
+                helpfulUsers: applyHelpfulUsers(
+                  review,
+                  Boolean(data.helpful)
+                ),
               }
             : review
         )
@@ -268,6 +289,7 @@ export default function useProductReviews(productId) {
                   0,
                   (review.helpfulCount || 0) - optimistic
                 ),
+                helpfulUsers: applyHelpfulUsers(review, currentHelpful),
               }
             : review
         )

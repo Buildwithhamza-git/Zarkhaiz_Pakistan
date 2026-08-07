@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Heart, X } from "lucide-react";
 
 export default function WishlistConfirmModal({
@@ -9,11 +10,17 @@ export default function WishlistConfirmModal({
     onSaveOnly,
     onCancel,
 }) {
+    const onCancelRef = useRef(onCancel);
+
+    useEffect(() => {
+        onCancelRef.current = onCancel;
+    }, [onCancel]);
+
     useEffect(() => {
         if (!open) return;
 
         const handleKeyDown = (e) => {
-            if (e.key === "Escape") onCancel?.();
+            if (e.key === "Escape") onCancelRef.current?.();
         };
 
         document.addEventListener("keydown", handleKeyDown);
@@ -23,7 +30,7 @@ export default function WishlistConfirmModal({
             document.removeEventListener("keydown", handleKeyDown);
             document.body.style.overflow = "";
         };
-    }, [open, onCancel]);
+    }, [open]);
 
     if (!open) return null;
 
@@ -31,7 +38,7 @@ export default function WishlistConfirmModal({
         if (e.target === e.currentTarget) onCancel?.();
     };
 
-    return (
+    return createPortal(
         <div
             role="presentation"
             onClick={handleBackdropClick}
@@ -152,6 +159,7 @@ export default function WishlistConfirmModal({
                     to { opacity: 1; transform: scale(1) translateY(0); }
                 }
             `}</style>
-        </div>
+        </div>,
+        document.body
     );
 }

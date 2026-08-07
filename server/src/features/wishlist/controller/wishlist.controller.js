@@ -3,6 +3,7 @@ const {
     addProductToWishlist,
     removeProductFromWishlist,
     notifySellerAboutWishlist,
+    getSellerWishlistStatsService,
 } = require("../service/wishlist.service");
 
 // ==========================================
@@ -171,9 +172,40 @@ const notifySeller = async (req, res) => {
     }
 };
 
+// ==========================================
+// GET /api/wishlist/seller-stats
+// ==========================================
+
+const getSellerWishlistStats = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        const result = await getSellerWishlistStatsService(
+            userId,
+            req.query
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Wishlist stats fetched successfully.",
+            data: result,
+        });
+    } catch (error) {
+        console.error("Get seller wishlist stats error:", error);
+
+        return res.status(400).json({
+            success: false,
+            message:
+                error.message ||
+                "Failed to fetch wishlist stats.",
+        });
+    }
+};
+
 module.exports = {
     getWishlist,
     addWishlistItem,
     removeWishlistItem,
     notifySeller,
+    getSellerWishlistStats,
 };

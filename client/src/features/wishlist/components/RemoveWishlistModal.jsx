@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { AlertTriangle, X } from "lucide-react";
 
 export default function RemoveWishlistModal({
@@ -8,11 +9,17 @@ export default function RemoveWishlistModal({
     onConfirm,
     onCancel,
 }) {
+    const onCancelRef = useRef(onCancel);
+
+    useEffect(() => {
+        onCancelRef.current = onCancel;
+    }, [onCancel]);
+
     useEffect(() => {
         if (!open) return;
 
         const handleKeyDown = (e) => {
-            if (e.key === "Escape") onCancel?.();
+            if (e.key === "Escape") onCancelRef.current?.();
         };
 
         document.addEventListener("keydown", handleKeyDown);
@@ -22,7 +29,7 @@ export default function RemoveWishlistModal({
             document.removeEventListener("keydown", handleKeyDown);
             document.body.style.overflow = "";
         };
-    }, [open, onCancel]);
+    }, [open]);
 
     if (!open) return null;
 
@@ -30,7 +37,7 @@ export default function RemoveWishlistModal({
         if (e.target === e.currentTarget) onCancel?.();
     };
 
-    return (
+    return createPortal(
         <div
             role="presentation"
             onClick={handleBackdropClick}
@@ -130,6 +137,7 @@ export default function RemoveWishlistModal({
                     to { opacity: 1; transform: scale(1) translateY(0); }
                 }
             `}</style>
-        </div>
+        </div>,
+        document.body
     );
 }
