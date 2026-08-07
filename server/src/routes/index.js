@@ -10,6 +10,7 @@ router.use("/cart", require("../features/cart/routes/cart.routes"));
 router.use("/wishlist", require("../features/wishlist/routes/wishlist.routes"));
 router.use("/orders", require("../features/order/order.routes"));
 router.use("/notifications", require("../features/notification/notification.routes"));
+router.use("/reviews", require("../features/review"));
 // Later
 // router.use("/categories", require("../features/categories/category.routes"));
 // router.use("/admin", require("../features/admin/admin.routes"));

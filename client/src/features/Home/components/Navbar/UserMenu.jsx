@@ -9,6 +9,7 @@ import {
     Clock3,
     LayoutDashboard,
     RefreshCcw,
+    Star,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -297,6 +298,30 @@ export default function UserMenu() {
                         >
                             <Package size={18} />
                             My Orders
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() =>
+                                goTo("/profile/my-reviews")
+                            }
+                            className="
+                                flex
+                                w-full
+                                items-center
+                                gap-3
+                                px-5
+                                py-3
+                                text-left
+                                text-sm
+                                text-gray-700
+                                transition
+                                hover:bg-green-50
+                                hover:text-green-700
+                            "
+                        >
+                            <Star size={18} />
+                            My Reviews
                         </button>
 
                         <button

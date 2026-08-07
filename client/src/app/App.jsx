@@ -29,12 +29,17 @@ import ProductsPages from "../features/marketplace/pages/productspage";
 import CartPage from "../features/cart/component/CartPage";
 import WishlistPage from "../features/wishlist/pages/WishlistPage";
 
+// Reviews
+import MyReviewsPage from "../features/review/pages/MyReviewsPage";
+import SellerReviewsPage from "../features/review/pages/SellerReviewsPage";
+
 // Orders
 import CheckoutPage from "../features/order/pages/CheckoutPage";
 import OrderSuccessPage from "../features/order/pages/OrderSuccessPage";
 import MyOrdersPage from "../features/order/pages/MyOrdersPage";
 import OrderDetailsPage from "../features/order/pages/OrderDetailsPage";
 import AdminOrdersPage from "../features/order/pages/AdminOrdersPage";
+import AdminReviewsPage from "../features/admin/pages/AdminReviewsPage";
 
 // Seller orders
 import SellerOrdersPage from "../features/seller/component/orders/SellerOrdersPage";
@@ -120,6 +125,7 @@ export default function App() {
 
   <Route path="/cart" element={<CartPage />} />
   <Route path="/wishlist" element={<WishlistPage />} />
+  <Route path="/profile/my-reviews" element={<MyReviewsPage />} />
 
   <Route path="/checkout" element={<CheckoutPage />} />
   <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
@@ -133,6 +139,7 @@ export default function App() {
 
         <Route element={<AdminRoute />}>
           <Route path="/admin/orders" element={<AdminOrdersPage />} />
+          <Route path="/admin/reviews" element={<AdminReviewsPage />} />
         </Route>
 
         {/* ===================== */}
@@ -146,6 +153,7 @@ export default function App() {
             <Route path="products" element={<ProductsPage />} />
             <Route path="products/add" element={<AddProductPage />} />
             <Route path="orders" element={<SellerOrdersPage />} />
+            <Route path="reviews" element={<SellerReviewsPage />} />
             <Route
               path="settings/profile"
               element={<SellerProfileSettings />}

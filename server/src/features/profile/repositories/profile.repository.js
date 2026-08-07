@@ -48,7 +48,7 @@ const updateUserProfile = async (userId, data) => {
         userId,
         data,
         {
-            new: true,
+            returnDocument: "after",
             runValidators: true,
         }
     ).select("-password -otp -refreshToken");
@@ -62,7 +62,7 @@ const updateUserPassword = async (userId, hashedPassword) => {
     return await User.findByIdAndUpdate(
         userId,
         { password: hashedPassword },
-        { new: true }
+        { returnDocument: "after" }
     );
 };
 

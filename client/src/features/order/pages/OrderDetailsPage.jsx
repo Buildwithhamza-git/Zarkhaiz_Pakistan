@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   Loader2,
   MapPin,
+  Star,
   XCircle,
 } from "lucide-react";
 
@@ -15,6 +16,8 @@ import Modal from "../../../shared/components/ui/Modal";
 import { useAuthContext } from "../../../context/authContext";
 
 import { cancelOrder, getOrderDetail } from "../api/orderApi";
+import { getReviewEligibility } from "../../review/api/reviewApi";
+import OrderReviewModal from "../../review/components/OrderReviewModal";
 import OrderItemsList from "../components/OrderItemsList";
 import {
   OrderStatusBadge,
@@ -34,6 +37,8 @@ export default function OrderDetailsPage() {
   const [error, setError] = useState("");
   const [cancelling, setCancelling] = useState(false);
   const [confirmCancel, setConfirmCancel] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [reviewMap, setReviewMap] = useState({});
 
   useEffect(() => {
     let mounted = true;
@@ -68,6 +73,58 @@ export default function OrderDetailsPage() {
     order?.user?._id?.toString() === user?.id?.toString();
 
   const canCancel = isOwner && order?.orderStatus === "pending";
+
+  // ==========================================
+  // Load review eligibility for delivered
+  // products so "Reviewed" state persists
+  // ==========================================
+
+  useEffect(() => {
+    if (order?.orderStatus !== "delivered") return;
+
+    let mounted = true;
+
+    const productIds = (order.items || [])
+      .map((item) => item?.product?.toString())
+      .filter(Boolean);
+
+    const uniqueIds = [...new Set(productIds)];
+
+    if (uniqueIds.length === 0) return;
+
+    const loadReviewStatus = async () => {
+      const results = await Promise.allSettled(
+        uniqueIds.map((productId) => getReviewEligibility(productId))
+      );
+
+      if (!mounted) return;
+
+      const next = {};
+
+      results.forEach((result, index) => {
+        if (result.status === "fulfilled") {
+          next[uniqueIds[index]] = result.value?.data || {
+            alreadyReviewed: false,
+          };
+        }
+      });
+
+      setReviewMap((prev) => ({ ...prev, ...next }));
+    };
+
+    loadReviewStatus();
+
+    return () => {
+      mounted = false;
+    };
+  }, [order]);
+
+  const handleReviewed = (productId) => {
+    setReviewMap((prev) => ({
+      ...prev,
+      [productId]: { alreadyReviewed: true },
+    }));
+  };
 
   const handleCancel = async () => {
     setCancelling(true);
@@ -143,6 +200,35 @@ export default function OrderDetailsPage() {
               <PaymentStatusBadge status={order.paymentStatus} />
             </div>
           </div>
+
+          {order.orderStatus === "delivered" && (
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-green-200 bg-green-50 p-5">
+              <div className="flex items-center gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-700">
+                  <Star size={18} />
+                </span>
+
+                <div>
+                  <p className="text-sm font-bold text-gray-900">
+                    Your order has been delivered!
+                  </p>
+                  <p className="mt-0.5 text-xs text-gray-600">
+                    Share your feedback to help other farmers make better
+                    choices.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setReviewOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-green-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-800"
+              >
+                <Star size={16} />
+                Write a Review
+              </button>
+            </div>
+          )}
 
           <div className="mt-8 grid items-start gap-6 lg:grid-cols-[1fr_380px]">
             <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -285,6 +371,18 @@ export default function OrderDetailsPage() {
           </div>
         </div>
       </Modal>
+
+      {/* ==================================
+          REVIEW ORDER MODAL
+      ================================== */}
+
+      <OrderReviewModal
+        open={reviewOpen}
+        onClose={() => setReviewOpen(false)}
+        order={order}
+        reviewMap={reviewMap}
+        onReviewed={handleReviewed}
+      />
     </div>
   );
 }

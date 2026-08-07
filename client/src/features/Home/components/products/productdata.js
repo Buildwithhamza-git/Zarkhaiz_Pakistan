@@ -88,8 +88,9 @@ const normalizeProduct = (product) => ({
     id: product._id ?? product.id,
     name: product.name,
     image: product.image,
-    rating: product.rating ?? 0,
-    reviewCount: product.reviewCount ?? 0,
+    rating: product.averageRating ?? product.rating ?? 0,
+    reviewCount:
+        product.totalReviews ?? product.reviewCount ?? 0,
     price: product.price,
     unit: product.unit ?? "kg",
     seller: product.sellerName ?? product.seller,
