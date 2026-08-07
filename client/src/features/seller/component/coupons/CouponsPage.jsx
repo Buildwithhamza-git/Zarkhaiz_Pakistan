@@ -19,75 +19,6 @@ import Card from "../../../../shared/components/ui/Card";
 import Modal from "../../../../shared/components/ui/Modal";
 import { formatMoney } from "../../../order/utils/orderDisplay";
 
-const initialCoupons = [
-  {
-    id: "1",
-    code: "WELCOME10",
-    type: "percent",
-    value: 10,
-    minOrder: 1000,
-    used: 214,
-    limit: 500,
-    expires: "Aug 31, 2026",
-    status: "Active",
-  },
-  {
-    id: "2",
-    code: "EIDSAVE50",
-    type: "flat",
-    value: 500,
-    minOrder: 5000,
-    used: 86,
-    limit: 200,
-    expires: "Sep 15, 2026",
-    status: "Active",
-  },
-  {
-    id: "3",
-    code: "FRESH20",
-    type: "percent",
-    value: 20,
-    minOrder: 2000,
-    used: 143,
-    limit: 300,
-    expires: "Jul 10, 2026",
-    status: "Expired",
-  },
-  {
-    id: "4",
-    code: "FREESHIP",
-    type: "shipping",
-    value: 0,
-    minOrder: 3000,
-    used: 0,
-    limit: 100,
-    expires: "Sep 30, 2026",
-    status: "Active",
-  },
-  {
-    id: "5",
-    code: "SPRING15",
-    type: "percent",
-    value: 15,
-    minOrder: 1500,
-    used: 57,
-    limit: 250,
-    expires: "Aug 05, 2026",
-    status: "Expired",
-  },
-  {
-    id: "6",
-    code: "FARMFRESH",
-    type: "flat",
-    value: 300,
-    minOrder: 2500,
-    used: 12,
-    limit: 150,
-    expires: "Oct 01, 2026",
-    status: "Scheduled",
-  },
-];
-
 const FILTERS = [
   { label: "All", value: "all" },
   { label: "Active", value: "Active" },
@@ -114,7 +45,7 @@ const discountLabel = (coupon) => {
 };
 
 const CouponsPage = () => {
-  const [coupons, setCoupons] = useState(initialCoupons);
+  const [coupons, setCoupons] = useState([]);
   const [filter, setFilter] = useState("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState("");
@@ -219,7 +150,7 @@ const CouponsPage = () => {
           icon={BadgePercent}
           iconBg="bg-green-100"
           iconColor="text-green-600"
-          trend={25}
+          trend={0}
         />
 
         <StatCard
@@ -228,25 +159,25 @@ const CouponsPage = () => {
           icon={ShoppingCart}
           iconBg="bg-blue-100"
           iconColor="text-blue-600"
-          trend={18.2}
+          trend={0}
         />
 
         <StatCard
           label="Discount Given"
-          value={formatMoney(86450)}
+          value={formatMoney(0)}
           icon={Percent}
           iconBg="bg-yellow-100"
           iconColor="text-yellow-600"
-          trend={12.5}
+          trend={0}
         />
 
         <StatCard
           label="Avg. Discount Used"
-          value="14.5%"
+          value="0%"
           icon={Gauge}
           iconBg="bg-purple-100"
           iconColor="text-purple-600"
-          trend={4.1}
+          trend={0}
         />
       </div>
 
