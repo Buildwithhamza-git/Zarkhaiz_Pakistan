@@ -37,10 +37,13 @@ export default function ChatProvider({ children }) {
 
   // Inside the seller dashboard we must only show conversations that belong
   // to the logged-in seller's own store (never their buyer-side chats with
-  // other sellers).
-  const chatScope = location.pathname.startsWith("/seller")
-    ? "seller"
-    : "buyer";
+  // other sellers). Note: `/seller-registration` is a buyer-flow page, so it
+  // must NOT count as the seller area.
+  const isSellerArea =
+    location.pathname === "/seller" ||
+    location.pathname.startsWith("/seller/");
+
+  const chatScope = isSellerArea ? "seller" : "buyer";
 
   const [conversations, setConversations] = useState([]);
   const [activeConversationId, setActiveConversationId] = useState(null);

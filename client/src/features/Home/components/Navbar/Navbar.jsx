@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { useAuthContext } from "../../../../context/authContext";
 import CartButton from "./cartButton";
+import WishlistNavButton from "./wishlistButton";
 import Logo from "./logo";
 import NavLinks from "./navlinks";
 import NotificationButton from "./NotificationButton";
@@ -94,6 +95,7 @@ export default function Navbar() {
 
                         <div className="hidden shrink-0 items-center gap-3 lg:flex xl:gap-4">
                             {user && <CartButton />}
+                            {user && <WishlistNavButton />}
                             {user && <NotificationButton />}
                             <UserMenu />
                         </div>
@@ -134,6 +136,7 @@ export default function Navbar() {
 
                             <div className="flex flex-wrap items-center gap-3 border-t border-gray-100 px-4 pt-4">
                                 {user && <CartButton />}
+                                {user && <WishlistNavButton />}
                                 {user && <NotificationButton />}
                                 <UserMenu />
                             </div>

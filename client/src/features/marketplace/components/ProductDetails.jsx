@@ -13,6 +13,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import ProductRating from "./ProductRating";
 import ProductBadge from "./ProductBadge";
+import WishlistButton from "../../wishlist/components/WishlistButton";
 import Button from "../../../shared/components/ui/button";
 import { useAuthContext } from "../../../context/authContext";
 import { useChat } from "../../chat/context/chatContext";
@@ -41,6 +42,7 @@ export default function ProductDetails({
   const display = getProductDisplayData(product);
   const stockMeta = getStockMeta(display.quantity, display.unit);
   const maxQty = display.quantity; // available stock
+  const productId = product?._id || product?.id;
 
   const gallery =
     product?.images
@@ -110,6 +112,15 @@ export default function ProductDetails({
                 <ProductBadge type="featured" />
               </div>
             )}
+
+            <div className="absolute right-4 top-4">
+              <WishlistButton
+                productId={productId}
+                productName={display.productName}
+                size={20}
+                className="h-11 w-11"
+              />
+            </div>
           </div>
 
           {imageList.length > 1 && (

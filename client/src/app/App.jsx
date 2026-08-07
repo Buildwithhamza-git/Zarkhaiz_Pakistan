@@ -29,6 +29,8 @@ import ProfilePage from "../features/profile/pages/ProfilePage";
 
 // Marketplace
 import ProductsPages from "../features/marketplace/pages/productspage";
+import CartPage from "../features/cart/component/CartPage";
+import WishlistPage from "../features/wishlist/pages/WishlistPage";
 
 // Orders
 import CheckoutPage from "../features/order/pages/CheckoutPage";
@@ -47,8 +49,10 @@ import SellerCustomersPage from "../features/seller/component/customers/SellerCu
 import ProtectedRoute from "../routes/Protectedroutes";
 import SellerRoute from "../routes/SellerRoutes";
 import AdminRoute from "../routes/AdminRoutes";
+// {/* <Route path="/cart" element={<CartPage />} />
+// <Route path="/wishlist" element={<WishlistPage />} /> */}
 
-import CartPage from "../features/cart/component/CartPage";
+// import CartPage from "../features/cart/component/CartPage";
 
 export default function App() {
   return (
@@ -119,16 +123,19 @@ export default function App() {
         {/* ===================== */}
 
         <Route element={<ProtectedRoute />}>
-          <Route path="/become-seller" element={<BecomeSellerPage />} />
-          <Route path="/seller-registration" element={<SellerRegistrationPage />} />
-          <Route path="/seller/pending" element={<SellerPendingApproval />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
-          <Route path="/orders" element={<MyOrdersPage />} />
-          <Route path="/orders/:orderId" element={<OrderDetailsPage />} />
-        </Route>
+  <Route path="/become-seller" element={<BecomeSellerPage />} />
+  <Route path="/seller-registration" element={<SellerRegistrationPage />} />
+  <Route path="/seller/pending" element={<SellerPendingApproval />} />
+  <Route path="/profile" element={<ProfilePage />} />
+
+  <Route path="/cart" element={<CartPage />} />
+  <Route path="/wishlist" element={<WishlistPage />} />
+
+  <Route path="/checkout" element={<CheckoutPage />} />
+  <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
+  <Route path="/orders" element={<MyOrdersPage />} />
+  <Route path="/orders/:orderId" element={<OrderDetailsPage />} />
+</Route>
 
         {/* ===================== */}
         {/* Admin Routes          */}

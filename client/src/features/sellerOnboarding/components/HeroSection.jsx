@@ -10,6 +10,8 @@ const highlights = [
 
 export default function HeroSection() {
   const navigate = useNavigate();
+  
+
 
   return (
     <section className="relative overflow-hidden bg-[#f7faF2]">
