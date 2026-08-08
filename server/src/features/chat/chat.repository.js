@@ -53,13 +53,20 @@ const createConversation = async (data) => {
     return await Conversation.create(data);
 };
 
-const findConversationsForUser = async (userId) => {
-    // All conversations the user participates in, including conversations of
-    // their own store (customer inquiries) so those are visible in the
-    // marketplace floating chat as well as the seller dashboard.
-    return await Conversation.find({
+const findConversationsForUser = async (userId, excludeSellerId = null) => {
+    // All conversations the user participates in. When the user owns a store,
+    // pass their own seller id so their store's customer inquiries are
+    // excluded from the marketplace floating chat (those belong to the seller
+    // dashboard only).
+    const filter = {
         "participants.user": new mongoose.Types.ObjectId(userId),
-    })
+    };
+
+    if (excludeSellerId) {
+        filter.seller = { $ne: new mongoose.Types.ObjectId(excludeSellerId) };
+    }
+
+    return await Conversation.find(filter)
         .sort({ lastMessageAt: -1 })
         .populate("participants.user", USER_SELECT)
         .populate(SELLER_POPULATE)
@@ -155,10 +162,14 @@ const resetUnreadCount = async (conversationId, userId, readAt) => {
     );
 };
 
-const sumUnreadForUser = async (userId) => {
+const sumUnreadForUser = async (userId, excludeSellerId = null) => {
     const match = {
         "participants.user": new mongoose.Types.ObjectId(userId),
     };
+
+    if (excludeSellerId) {
+        match.seller = { $ne: new mongoose.Types.ObjectId(excludeSellerId) };
+    }
 
     const rows = await Conversation.aggregate([
         {

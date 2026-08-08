@@ -205,7 +205,7 @@ export default function MyReviewsPage() {
               </div>
             ) : (
               <>
-                <div className="space-y-4">
+                <div className="review-scroll max-h-[600px] space-y-4 overflow-y-auto overscroll-contain pr-1">
                   {reviews.map((review) => (
                     <div
                       key={review._id}

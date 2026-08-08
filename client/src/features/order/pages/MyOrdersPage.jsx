@@ -130,6 +130,25 @@ export default function MyOrdersPage() {
       0
     );
 
+  const resolveImage = (image) => {
+    if (!image) return null;
+
+    if (/^(https?:|data:)/i.test(image)) return image;
+
+    return `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/${String(
+      image
+    )
+      .replace(/\\/g, "/")
+      .replace(/^\/+/, "")}`;
+  };
+
+  const orderThumbnail = (order) => {
+    const items = order?.items || [];
+    const first = items.find((item) => item?.image);
+
+    return first ? resolveImage(first.image) : null;
+  };
+
   const deliveredItemStatus = (order) => {
     const items = (order?.items || []).filter(
       (item) => item?.product
@@ -249,13 +268,36 @@ export default function MyOrdersPage() {
                       className="block rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:border-green-300 hover:shadow-md"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-4">
-                        <div>
-                          <p className="text-sm font-bold text-gray-900">
-                            {order.orderNumber}
-                          </p>
-                          <p className="mt-1 text-xs text-gray-500">
-                            {formatDateTime(order.createdAt)}
-                          </p>
+                        <div className="flex items-center gap-3">
+                          {(() => {
+                            const thumb = orderThumbnail(order);
+                            const distinctItems = (order?.items || []).length;
+
+                            return thumb ? (
+                              <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
+                                <img
+                                  src={thumb}
+                                  alt={order.orderNumber}
+                                  className="h-full w-full object-cover"
+                                />
+
+                                {distinctItems > 1 && (
+                                  <span className="absolute -bottom-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-green-700 px-1 text-[10px] font-bold text-white shadow-sm">
+                                    {distinctItems}
+                                  </span>
+                                )}
+                              </div>
+                            ) : null;
+                          })()}
+
+                          <div>
+                            <p className="text-sm font-bold text-gray-900">
+                              {order.orderNumber}
+                            </p>
+                            <p className="mt-1 text-xs text-gray-500">
+                              {formatDateTime(order.createdAt)}
+                            </p>
+                          </div>
                         </div>
 
                         <OrderStatusBadge status={order.orderStatus} />

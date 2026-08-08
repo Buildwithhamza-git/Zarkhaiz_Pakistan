@@ -1,15 +1,47 @@
-﻿
-import AreaLineChart from "../../../../shared/components/AreaLineChart";
+﻿import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 
-const salesOverview = [
-  { name: "May 17", value: 12 },
-  { name: "May 24", value: 22 },
-  { name: "May 31", value: 15 },
-  { name: "Jun 7", value: 24 },
-  { name: "Jun 14", value: 40 },
-];
+import AreaLineChart from "../../../../shared/components/AreaLineChart";
+import { getAnalytics } from "../../api/financeApi";
+
+const toChartData = (series) =>
+  (series || []).map((item) => ({
+    name: item.label,
+    value: item.revenue,
+  }));
 
 const SalesOverview = () => {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [range, setRange] = useState("12m");
+
+  useEffect(() => {
+    let mounted = true;
+
+    const load = async () => {
+      setLoading(true);
+
+      try {
+        const res = await getAnalytics();
+
+        if (mounted) setData(toChartData(res?.data?.monthly));
+      } catch (err) {
+        console.error("Failed to load sales overview:", err);
+        if (mounted) setData([]);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    load();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const visible = range === "6m" ? data.slice(-6) : data;
+
   return (
     <div className="rounded-2xl border border-gray-100 bg-white p-5">
       <div className="mb-4 flex items-center justify-between">
@@ -17,16 +49,33 @@ const SalesOverview = () => {
           Sales Overview
         </h3>
 
-        <select className="rounded-lg border border-gray-200 px-2 py-1 text-xs text-gray-500 outline-none">
-          <option>This Month</option>
-          <option>Last Month</option>
+        <select
+          value={range}
+          onChange={(event) => setRange(event.target.value)}
+          className="rounded-lg border border-gray-200 px-2 py-1 text-xs text-gray-500 outline-none"
+        >
+          <option value="12m">Last 12 months</option>
+          <option value="6m">Last 6 months</option>
         </select>
       </div>
 
-      <AreaLineChart
-        data={salesOverview}
-        height={200}
-      />
+      {loading ? (
+        <div className="flex items-center justify-center" style={{ height: 200 }}>
+          <Loader2 size={24} className="animate-spin text-green-700" />
+        </div>
+      ) : visible.length === 0 ? (
+        <div
+          className="flex items-center justify-center text-sm text-gray-400"
+          style={{ height: 200 }}
+        >
+          No sales data yet.
+        </div>
+      ) : (
+        <AreaLineChart
+          data={visible}
+          height={200}
+        />
+      )}
     </div>
   );
 };

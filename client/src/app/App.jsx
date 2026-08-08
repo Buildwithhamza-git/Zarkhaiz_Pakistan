@@ -50,6 +50,9 @@ import SellerProfileSettings from "../features/seller/component/settings/SellerP
 import SellerMessagesPage from "../features/seller/component/messages/SellerMessagesPage";
 import SellerCustomersPage from "../features/seller/component/customers/SellerCustomersPage";
 import SellerWishlistPage from "../features/seller/component/wishlist/SellerWishlistPage";
+import EarningsPage from "../features/seller/component/earnings/EarningsPage";
+import PayoutsPage from "../features/seller/component/payouts/PayoutsPage";
+import AnalyticsPage from "../features/seller/component/analytics/AnalyticsPage";
 
 // Routes
 import ProtectedRoute from "../routes/Protectedroutes";
@@ -168,6 +171,9 @@ export default function App() {
             <Route path="customers" element={<SellerCustomersPage />} />
             <Route path="wishlist" element={<SellerWishlistPage />} />
             <Route path="reviews" element={<SellerReviewsPage />} />
+            <Route path="earnings" element={<EarningsPage />} />
+            <Route path="payouts" element={<PayoutsPage />} />
+            <Route path="analytics" element={<AnalyticsPage />} />
             <Route
               path="settings/profile"
               element={<SellerProfileSettings />}

@@ -295,17 +295,19 @@ export default function ReviewSection({
       </div>
 
       {/* ============ REVIEWS ============ */}
-      <ReviewList
-        reviews={reviews}
-        loading={loading}
-        error={error}
-        currentUserId={currentUserId}
-        onHelpful={toggleHelpfulLocal}
-        onReport={reportLocal}
-        onEdit={setEditTarget}
-        onDelete={setDeleteTarget}
-        deletingId={deletingId}
-      />
+      <div className="review-scroll max-h-[600px] space-y-4 overflow-y-auto overscroll-contain pr-1">
+        <ReviewList
+          reviews={reviews}
+          loading={loading}
+          error={error}
+          currentUserId={currentUserId}
+          onHelpful={toggleHelpfulLocal}
+          onReport={reportLocal}
+          onEdit={setEditTarget}
+          onDelete={setDeleteTarget}
+          deletingId={deletingId}
+        />
+      </div>
 
       {/* ============ PAGINATION ============ */}
       {pagination.totalPages > 1 && (

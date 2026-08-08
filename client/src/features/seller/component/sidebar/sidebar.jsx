@@ -37,8 +37,8 @@ const menuItems = [
   { label: "Payouts", to: "/seller/payouts", icon: Banknote },
   { label: "Analytics", to: "/seller/analytics", icon: BarChart3 },
   { label: "Wishlist", to: "/seller/wishlist", icon: Heart },
-  { label: "Shop Settings", to: "/seller/settings/shop", icon: Store },
-  { label: "Profile Settings", to: "/seller/settings/profile", icon: UserCog },
+  { label: "Shop Settings", to: "/seller/settings/profile", icon: Store },
+  // { label: "Profile Settings", to: "/seller/settings/profile", icon: UserCog },
 ];
 
 const Sidebar = ({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile }) => {

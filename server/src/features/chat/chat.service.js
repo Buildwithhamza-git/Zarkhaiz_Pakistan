@@ -359,10 +359,12 @@ const listConversationsService = async (userId, { scope = "buyer" } = {}) => {
         );
     } else {
         // Buyer / marketplace view: all conversations where the user is a
-        // participant, INCLUDING their own store's conversations, so that a
-        // seller browsing the marketplace sees customer inquiries in the
-        // floating chat (not just inside the seller dashboard).
-        conversations = await chatRepository.findConversationsForUser(userId);
+        // participant — except, when the user also owns a store, that store's
+        // customer inquiries, which belong to the seller dashboard only.
+        conversations = await chatRepository.findConversationsForUser(
+            userId,
+            seller ? seller._id : null
+        );
     }
 
     return conversations.map((conversation) =>
@@ -575,7 +577,10 @@ const getUnreadTotalService = async (userId, { scope = "buyer" } = {}) => {
         return await chatRepository.sumUnreadForSeller(seller._id, String(userId));
     }
 
-    return await chatRepository.sumUnreadForUser(userId);
+    return await chatRepository.sumUnreadForUser(
+        userId,
+        seller ? seller._id : null
+    );
 };
 
 // =======================================
