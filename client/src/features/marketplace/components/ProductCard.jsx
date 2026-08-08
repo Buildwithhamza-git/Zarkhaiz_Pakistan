@@ -2,6 +2,8 @@ import { Eye, ShoppingCart, Package } from "lucide-react";
 
 import ProductBadge from "./ProductBadge";
 import ProductRating from "./ProductRating";
+import WishlistButton from "../../wishlist/components/WishlistButton";
+import { useAuthContext } from "../../../context/authContext";
 
 import {
   formatPKR,
@@ -16,9 +18,17 @@ export default function ProductCard({
   onAddToCart,
   addingToCart = null,
 }) {
+  const { user } = useAuthContext();
+
   const display = getProductDisplayData(product, { apiUrl: API_URL });
 
   const productId = product?._id || product?.id;
+
+  const currentUserId = user?._id?.toString() || user?.id?.toString();
+  const sellerUserId = product?.seller?.user?._id?.toString();
+  const isOwnProduct = Boolean(
+    currentUserId && sellerUserId && currentUserId === sellerUserId
+  );
 
   // addingToCart is the product ID string currently being added
   const isAddingToCart =
@@ -78,25 +88,31 @@ export default function ProductCard({
           {display.featured && <ProductBadge type="featured" />}
         </div>
 
-        {/* Product Status */}
-        <div
-          className="
-            absolute
-            right-3
-            top-3
-            rounded-full
-            bg-white/90
-            px-2.5
-            py-1
-            text-[11px]
-            font-semibold
-            uppercase
-            tracking-wide
-            text-gray-700
-            shadow-sm
-          "
-        >
-          {display.status}
+        {/* Wishlist + Product Status */}
+        <div className="absolute right-3 top-3 flex flex-col items-end gap-2">
+          {!isOwnProduct && (
+            <WishlistButton
+              productId={productId}
+              productName={display.productName}
+            />
+          )}
+
+          <div
+            className="
+              rounded-full
+              bg-white/90
+              px-2.5
+              py-1
+              text-[11px]
+              font-semibold
+              uppercase
+              tracking-wide
+              text-gray-700
+              shadow-sm
+            "
+          >
+            {display.status}
+          </div>
         </div>
       </div>
 

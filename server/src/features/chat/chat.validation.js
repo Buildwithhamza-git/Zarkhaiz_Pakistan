@@ -41,6 +41,27 @@ const sendMessageSocketSchema = z.object({
         .max(2000, "Message is too long."),
 });
 
+const updateMessageSchema = z.object({
+    text: z
+        .string()
+        .trim()
+        .min(1, "Message cannot be empty.")
+        .max(2000, "Message is too long."),
+});
+
+const editMessageSocketSchema = z.object({
+    messageId: objectId,
+    text: z
+        .string()
+        .trim()
+        .min(1, "Message cannot be empty.")
+        .max(2000, "Message is too long."),
+});
+
+const deleteMessageSocketSchema = z.object({
+    messageId: objectId,
+});
+
 const markReadSocketSchema = z.object({
     conversationId: objectId,
 });
@@ -54,6 +75,9 @@ module.exports = {
     startConversationSchema,
     createMessageSchema,
     sendMessageSocketSchema,
+    updateMessageSchema,
+    editMessageSocketSchema,
+    deleteMessageSocketSchema,
     markReadSocketSchema,
     deliveredSocketSchema,
 };

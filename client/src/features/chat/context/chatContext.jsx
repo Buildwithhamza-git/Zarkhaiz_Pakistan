@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { useLocation } from "react-router-dom";
+import toast from "react-hot-toast";
 
 import { useAuthContext } from "../../../context/authContext";
 import {
@@ -20,6 +21,8 @@ import {
   getConversationMessages,
   startConversationApi,
   sendMessageApi,
+  updateMessageApi,
+  deleteMessageApi,
   markConversationRead,
 } from "../api/chatApi";
 
@@ -37,10 +40,13 @@ export default function ChatProvider({ children }) {
 
   // Inside the seller dashboard we must only show conversations that belong
   // to the logged-in seller's own store (never their buyer-side chats with
-  // other sellers).
-  const chatScope = location.pathname.startsWith("/seller")
-    ? "seller"
-    : "buyer";
+  // other sellers). Note: `/seller-registration` is a buyer-flow page, so it
+  // must NOT count as the seller area.
+  const isSellerArea =
+    location.pathname === "/seller" ||
+    location.pathname.startsWith("/seller/");
+
+  const chatScope = isSellerArea ? "seller" : "buyer";
 
   const [conversations, setConversations] = useState([]);
   const [activeConversationId, setActiveConversationId] = useState(null);
@@ -210,6 +216,81 @@ export default function ChatProvider({ children }) {
     });
   }, []);
 
+  // Update the conversation list preview when the newest message changes
+  const syncConversationLastMessage = (convId, message, newText) => {
+    setConversations((prev) =>
+      prev.map((c) => {
+        if (c._id !== convId) return c;
+
+        const lm = c.lastMessage;
+
+        const isLatest =
+          lm &&
+          new Date(message?.createdAt).getTime() >=
+            new Date(c.lastMessageAt).getTime();
+
+        if (!isLatest) return c;
+
+        return { ...c, lastMessage: { ...lm, text: newText } };
+      })
+    );
+  };
+
+  const handleMessageEdited = useCallback((payload = {}) => {
+    const message = payload?.message;
+    const convId = payload?.conversationId || message?.conversation;
+
+    if (!message || !convId) return;
+
+    setMessagesMap((prev) => {
+      const list = prev[convId];
+      if (!list) return prev;
+
+      const index = list.findIndex(
+        (m) => String(m._id) === String(message._id)
+      );
+
+      if (index === -1) return prev;
+
+      const next = [...list];
+      next[index] = { ...toMessage(message) };
+
+      return { ...prev, [convId]: next };
+    });
+
+    syncConversationLastMessage(convId, message, message.text || "");
+  }, []);
+
+  const handleMessageDeleted = useCallback((payload = {}) => {
+    const message = payload?.message;
+    const convId = payload?.conversationId || message?.conversation;
+
+    if (!message || !convId) return;
+
+    setMessagesMap((prev) => {
+      const list = prev[convId];
+      if (!list) return prev;
+
+      const index = list.findIndex(
+        (m) => String(m._id) === String(message._id)
+      );
+
+      if (index === -1) return prev;
+
+      const next = [...list];
+      next[index] = {
+        ...next[index],
+        text: "",
+        editedAt: message.editedAt || null,
+        deletedAt: message.deletedAt,
+      };
+
+      return { ...prev, [convId]: next };
+    });
+
+    syncConversationLastMessage(convId, message, "Message deleted");
+  }, []);
+
   const handleDelivered = useCallback((payload = {}) => {
     const convId = payload?.conversationId;
     const ids = new Set(payload?.messageIds || []);
@@ -290,9 +371,15 @@ export default function ChatProvider({ children }) {
 
   const handleChatError = useCallback((payload = {}) => {
     const tempId = payload?.tempId;
+    const messageId = payload?.messageId;
     const error = payload?.error;
 
     console.error("Chat error:", error);
+
+    if (messageId) {
+      toast.error(error || "Could not update the message.");
+      return;
+    }
 
     if (!tempId) return;
 
@@ -335,6 +422,8 @@ export default function ChatProvider({ children }) {
     socket.on("disconnect", () => setConnected(false));
     socket.on("chat:new_message", handleNewMessage);
     socket.on("chat:message_saved", handleMessageSaved);
+    socket.on("chat:message_edited", handleMessageEdited);
+    socket.on("chat:message_deleted", handleMessageDeleted);
     socket.on("chat:delivered", handleDelivered);
     socket.on("chat:read", handleRead);
     socket.on("chat:typing", handleTyping);
@@ -348,6 +437,8 @@ export default function ChatProvider({ children }) {
       socket.off("disconnect");
       socket.off("chat:new_message", handleNewMessage);
       socket.off("chat:message_saved", handleMessageSaved);
+      socket.off("chat:message_edited", handleMessageEdited);
+      socket.off("chat:message_deleted", handleMessageDeleted);
       socket.off("chat:delivered", handleDelivered);
       socket.off("chat:read", handleRead);
       socket.off("chat:typing", handleTyping);
@@ -363,6 +454,8 @@ export default function ChatProvider({ children }) {
     fetchConversations,
     handleNewMessage,
     handleMessageSaved,
+    handleMessageEdited,
+    handleMessageDeleted,
     handleDelivered,
     handleRead,
     handleTyping,
@@ -554,6 +647,145 @@ export default function ChatProvider({ children }) {
     });
   }, []);
 
+  const editMessage = useCallback(async (messageId, text) => {
+    const convId = activeConversationIdRef.current;
+    const trimmed = String(text || "").trim();
+
+    if (!convId || !messageId || !trimmed) return;
+
+    const list = messagesMapRef.current[convId] || [];
+    const message = list.find((m) => String(m._id) === String(messageId));
+
+    if (!message || message.pending || message.deletedAt) return;
+
+    const previousText = message.text;
+
+    setMessagesMap((prev) => {
+      const current = prev[convId] || [];
+      return {
+        ...prev,
+        [convId]: current.map((m) =>
+          String(m._id) === String(messageId)
+            ? { ...m, text: trimmed, editedAt: new Date().toISOString() }
+            : m
+        ),
+      };
+    });
+
+    syncConversationLastMessage(convId, message, trimmed);
+
+    const socket = socketRef.current;
+
+    if (socket?.connected) {
+      socket.emit("chat:edit_message", { messageId, text: trimmed });
+      return;
+    }
+
+    // REST fallback (socket unavailable)
+    try {
+      const response = await updateMessageApi(convId, messageId, trimmed);
+
+      if (response?.data) {
+        setMessagesMap((prev) => {
+          const current = prev[convId] || [];
+          return {
+            ...prev,
+            [convId]: current.map((m) =>
+              String(m._id) === String(messageId) ? { ...response.data } : m
+            ),
+          };
+        });
+      }
+    } catch (err) {
+      console.error("Edit message fallback error:", err);
+
+      setMessagesMap((prev) => {
+        const current = prev[convId] || [];
+        return {
+          ...prev,
+          [convId]: current.map((m) =>
+            String(m._id) === String(messageId)
+              ? { ...m, text: previousText, editedAt: null }
+              : m
+          ),
+        };
+      });
+
+      toast.error(err?.message || "Failed to edit message.");
+    }
+  }, []);
+
+  const deleteMessage = useCallback(async (messageId) => {
+    const convId = activeConversationIdRef.current;
+
+    if (!convId || !messageId) return;
+
+    const list = messagesMapRef.current[convId] || [];
+    const message = list.find((m) => String(m._id) === String(messageId));
+
+    if (!message || message.pending || message.deletedAt) return;
+
+    setMessagesMap((prev) => {
+      const current = prev[convId] || [];
+      return {
+        ...prev,
+        [convId]: current.map((m) =>
+          String(m._id) === String(messageId)
+            ? { ...m, text: "", deletedAt: new Date().toISOString() }
+            : m
+        ),
+      };
+    });
+
+    syncConversationLastMessage(convId, message, "Message deleted");
+
+    const socket = socketRef.current;
+
+    if (socket?.connected) {
+      socket.emit("chat:delete_message", { messageId });
+      return;
+    }
+
+    // REST fallback (socket unavailable)
+    try {
+      const response = await deleteMessageApi(convId, messageId);
+
+      if (response?.data) {
+        setMessagesMap((prev) => {
+          const current = prev[convId] || [];
+          return {
+            ...prev,
+            [convId]: current.map((m) =>
+              String(m._id) === String(messageId) ? { ...response.data } : m
+            ),
+          };
+        });
+      }
+    } catch (err) {
+      console.error("Delete message fallback error:", err);
+
+      setMessagesMap((prev) => {
+        const current = prev[convId] || [];
+        return {
+          ...prev,
+          [convId]: current.map((m) =>
+            String(m._id) === String(messageId)
+              ? { ...m, text: message.text, deletedAt: null }
+              : m
+          ),
+        };
+      });
+
+      syncConversationLastMessage(
+        convId,
+        message,
+        message.text || "Message deleted"
+      );
+
+      toast.error(err?.message || "Failed to delete message.");
+    }
+  }, []);
+
   const prependOlderMessages = useCallback((conversationId, older = []) => {
     setMessagesMap((prev) => {
       const list = prev[conversationId] || [];
@@ -587,6 +819,8 @@ export default function ChatProvider({ children }) {
     clearActiveConversation,
     startConversation,
     sendMessage,
+    editMessage,
+    deleteMessage,
     emitTyping,
     prependOlderMessages,
     openWidget,

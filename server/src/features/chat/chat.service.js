@@ -15,6 +15,8 @@ const serializeMessage = (message) => ({
     text: message.text,
     deliveredAt: message.deliveredAt,
     readAt: message.readAt,
+    editedAt: message.editedAt,
+    deletedAt: message.deletedAt,
     createdAt: message.createdAt,
 });
 
@@ -214,6 +216,126 @@ const createMessageService = async (userId, { conversationId, text }) => {
 };
 
 // =======================================
+// Edit a message (sender only)
+// =======================================
+
+const updateMessageService = async (userId, { messageId, text }) => {
+    if (!mongoose.Types.ObjectId.isValid(messageId)) {
+        throw new AppError("Invalid message id.", 400);
+    }
+
+    const trimmed = String(text || "").trim();
+
+    if (!trimmed) {
+        throw new AppError("Message cannot be empty.", 400);
+    }
+
+    const message = await chatRepository.findMessageById(messageId);
+
+    if (!message) {
+        throw new AppError("Message not found.", 404);
+    }
+
+    if (String(message.sender) !== String(userId)) {
+        throw new AppError("You can only edit your own messages.", 403);
+    }
+
+    if (message.deletedAt) {
+        throw new AppError("This message was deleted and cannot be edited.", 400);
+    }
+
+    message.text = trimmed;
+    message.editedAt = new Date();
+
+    await message.save();
+
+    await refreshConversationLastMessage(message.conversation);
+
+    const serialized = serializeMessage({
+        ...message.toObject(),
+        conversation: message.conversation,
+    });
+
+    const receiverId = String(message.receiver);
+
+    if (receiverId && receiverId !== String(userId)) {
+        emitToUser(receiverId, "chat:message_edited", {
+            message: serialized,
+            conversationId: String(message.conversation),
+        });
+    }
+
+    return serialized;
+};
+
+// =======================================
+// Delete a message for everyone (sender only)
+// =======================================
+
+const deleteMessageService = async (userId, { messageId }) => {
+    if (!mongoose.Types.ObjectId.isValid(messageId)) {
+        throw new AppError("Invalid message id.", 400);
+    }
+
+    const message = await chatRepository.findMessageById(messageId);
+
+    if (!message) {
+        throw new AppError("Message not found.", 404);
+    }
+
+    if (String(message.sender) !== String(userId)) {
+        throw new AppError("You can only delete your own messages.", 403);
+    }
+
+    if (message.deletedAt) {
+        throw new AppError("This message is already deleted.", 400);
+    }
+
+    await chatRepository.softDeleteMessage(messageId);
+
+    await refreshConversationLastMessage(message.conversation);
+
+    const serialized = serializeMessage({
+        ...message.toObject(),
+        text: "",
+        deletedAt: new Date(),
+        conversation: message.conversation,
+    });
+
+    const receiverId = String(message.receiver);
+
+    if (receiverId && receiverId !== String(userId)) {
+        emitToUser(receiverId, "chat:message_deleted", {
+            message: serialized,
+            conversationId: String(message.conversation),
+        });
+    }
+
+    return serialized;
+};
+
+// =======================================
+// Keep the conversation list preview in sync
+// when the latest message is edited or deleted
+// =======================================
+
+const refreshConversationLastMessage = async (conversationId) => {
+    try {
+        const latest = await chatRepository.getLatestMessage(conversationId);
+
+        if (!latest) return;
+
+        await chatRepository.updateConversationAfterMessage(conversationId, {
+            senderId: latest.sender,
+            text: latest.text || "Message deleted",
+            createdAt: latest.createdAt,
+        });
+    } catch (err) {
+        console.error("refreshConversationLastMessage error:", err);
+    }
+};
+
+// =======================================
 // List conversations
 // =======================================
 
@@ -236,14 +358,12 @@ const listConversationsService = async (userId, { scope = "buyer" } = {}) => {
             String(userId)
         );
     } else {
-        // Buyer view: all conversations where the user is a participant EXCEPT
-        // those that belong to their own store (those belong to the seller
-        // dashboard only).
-        const excludeSellerIds = seller ? [seller._id] : [];
-
+        // Buyer / marketplace view: all conversations where the user is a
+        // participant — except, when the user also owns a store, that store's
+        // customer inquiries, which belong to the seller dashboard only.
         conversations = await chatRepository.findConversationsForUser(
             userId,
-            excludeSellerIds
+            seller ? seller._id : null
         );
     }
 
@@ -457,9 +577,10 @@ const getUnreadTotalService = async (userId, { scope = "buyer" } = {}) => {
         return await chatRepository.sumUnreadForSeller(seller._id, String(userId));
     }
 
-    const excludeSellerIds = seller ? [seller._id] : [];
-
-    return await chatRepository.sumUnreadForUser(userId, excludeSellerIds);
+    return await chatRepository.sumUnreadForUser(
+        userId,
+        seller ? seller._id : null
+    );
 };
 
 // =======================================
@@ -482,6 +603,8 @@ const getCustomersService = async (userId) => {
 module.exports = {
     startConversationService,
     createMessageService,
+    updateMessageService,
+    deleteMessageService,
     listConversationsService,
     getConversationService,
     getMessagesService,

@@ -29,6 +29,12 @@ import ProfilePage from "../features/profile/pages/ProfilePage";
 
 // Marketplace
 import ProductsPages from "../features/marketplace/pages/productspage";
+import CartPage from "../features/cart/component/CartPage";
+import WishlistPage from "../features/wishlist/pages/WishlistPage";
+
+// Reviews
+import MyReviewsPage from "../features/review/pages/MyReviewsPage";
+import SellerReviewsPage from "../features/review/pages/SellerReviewsPage";
 
 // Orders
 import CheckoutPage from "../features/order/pages/CheckoutPage";
@@ -36,19 +42,26 @@ import OrderSuccessPage from "../features/order/pages/OrderSuccessPage";
 import MyOrdersPage from "../features/order/pages/MyOrdersPage";
 import OrderDetailsPage from "../features/order/pages/OrderDetailsPage";
 import AdminOrdersPage from "../features/order/pages/AdminOrdersPage";
+import AdminReviewsPage from "../features/admin/pages/AdminReviewsPage";
 
 // Seller orders
 import SellerOrdersPage from "../features/seller/component/orders/SellerOrdersPage";
 import SellerProfileSettings from "../features/seller/component/settings/SellerProfileSettings";
 import SellerMessagesPage from "../features/seller/component/messages/SellerMessagesPage";
 import SellerCustomersPage from "../features/seller/component/customers/SellerCustomersPage";
+import SellerWishlistPage from "../features/seller/component/wishlist/SellerWishlistPage";
+import EarningsPage from "../features/seller/component/earnings/EarningsPage";
+import PayoutsPage from "../features/seller/component/payouts/PayoutsPage";
+import AnalyticsPage from "../features/seller/component/analytics/AnalyticsPage";
 
 // Routes
 import ProtectedRoute from "../routes/Protectedroutes";
 import SellerRoute from "../routes/SellerRoutes";
 import AdminRoute from "../routes/AdminRoutes";
+// {/* <Route path="/cart" element={<CartPage />} />
+// <Route path="/wishlist" element={<WishlistPage />} /> */}
 
-import CartPage from "../features/cart/component/CartPage";
+// import CartPage from "../features/cart/component/CartPage";
 
 export default function App() {
   return (
@@ -119,16 +132,20 @@ export default function App() {
         {/* ===================== */}
 
         <Route element={<ProtectedRoute />}>
-          <Route path="/become-seller" element={<BecomeSellerPage />} />
-          <Route path="/seller-registration" element={<SellerRegistrationPage />} />
-          <Route path="/seller/pending" element={<SellerPendingApproval />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
-          <Route path="/orders" element={<MyOrdersPage />} />
-          <Route path="/orders/:orderId" element={<OrderDetailsPage />} />
-        </Route>
+  <Route path="/become-seller" element={<BecomeSellerPage />} />
+  <Route path="/seller-registration" element={<SellerRegistrationPage />} />
+  <Route path="/seller/pending" element={<SellerPendingApproval />} />
+  <Route path="/profile" element={<ProfilePage />} />
+
+  <Route path="/cart" element={<CartPage />} />
+  <Route path="/wishlist" element={<WishlistPage />} />
+  <Route path="/profile/my-reviews" element={<MyReviewsPage />} />
+
+  <Route path="/checkout" element={<CheckoutPage />} />
+  <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
+  <Route path="/orders" element={<MyOrdersPage />} />
+  <Route path="/orders/:orderId" element={<OrderDetailsPage />} />
+</Route>
 
         {/* ===================== */}
         {/* Admin Routes          */}
@@ -136,6 +153,7 @@ export default function App() {
 
         <Route element={<AdminRoute />}>
           <Route path="/admin/orders" element={<AdminOrdersPage />} />
+          <Route path="/admin/reviews" element={<AdminReviewsPage />} />
         </Route>
 
         {/* ===================== */}
@@ -151,6 +169,11 @@ export default function App() {
             <Route path="orders" element={<SellerOrdersPage />} />
             <Route path="messages" element={<SellerMessagesPage />} />
             <Route path="customers" element={<SellerCustomersPage />} />
+            <Route path="wishlist" element={<SellerWishlistPage />} />
+            <Route path="reviews" element={<SellerReviewsPage />} />
+            <Route path="earnings" element={<EarningsPage />} />
+            <Route path="payouts" element={<PayoutsPage />} />
+            <Route path="analytics" element={<AnalyticsPage />} />
             <Route
               path="settings/profile"
               element={<SellerProfileSettings />}

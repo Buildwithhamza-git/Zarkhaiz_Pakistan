@@ -53,15 +53,17 @@ const createConversation = async (data) => {
     return await Conversation.create(data);
 };
 
-const findConversationsForUser = async (userId, excludeSellerIds = []) => {
+const findConversationsForUser = async (userId, excludeSellerId = null) => {
+    // All conversations the user participates in. When the user owns a store,
+    // pass their own seller id so their store's customer inquiries are
+    // excluded from the marketplace floating chat (those belong to the seller
+    // dashboard only).
     const filter = {
         "participants.user": new mongoose.Types.ObjectId(userId),
     };
 
-    // Buyer view: a user who is also a seller must not see conversations of
-    // their own store (those belong to the seller dashboard only).
-    if (excludeSellerIds.length) {
-        filter.seller = { $nin: excludeSellerIds };
+    if (excludeSellerId) {
+        filter.seller = { $ne: new mongoose.Types.ObjectId(excludeSellerId) };
     }
 
     return await Conversation.find(filter)
@@ -160,13 +162,13 @@ const resetUnreadCount = async (conversationId, userId, readAt) => {
     );
 };
 
-const sumUnreadForUser = async (userId, excludeSellerIds = []) => {
+const sumUnreadForUser = async (userId, excludeSellerId = null) => {
     const match = {
         "participants.user": new mongoose.Types.ObjectId(userId),
     };
 
-    if (excludeSellerIds.length) {
-        match.seller = { $nin: excludeSellerIds };
+    if (excludeSellerId) {
+        match.seller = { $ne: new mongoose.Types.ObjectId(excludeSellerId) };
     }
 
     const rows = await Conversation.aggregate([
@@ -313,6 +315,40 @@ const createMessage = async (data) => {
     return await Message.create(data);
 };
 
+const findMessageById = async (messageId) => {
+    return await Message.findById(messageId);
+};
+
+const updateMessageText = async (messageId, text) => {
+    return await Message.updateOne(
+        { _id: messageId },
+        {
+            $set: {
+                text,
+                editedAt: new Date(),
+            },
+        }
+    );
+};
+
+const softDeleteMessage = async (messageId) => {
+    return await Message.updateOne(
+        { _id: messageId },
+        {
+            $set: {
+                text: "",
+                deletedAt: new Date(),
+            },
+        }
+    );
+};
+
+const getLatestMessage = async (conversationId) => {
+    return await Message.findOne({ conversation: conversationId })
+        .sort({ createdAt: -1 })
+        .lean();
+};
+
 const findMessagesByConversation = async (conversationId, { before = null, limit = 30 }) => {
     const filter = { conversation: conversationId };
 
@@ -453,6 +489,10 @@ module.exports = {
     sumUnreadForSeller,
     findCustomersForSeller,
     createMessage,
+    findMessageById,
+    updateMessageText,
+    softDeleteMessage,
+    getLatestMessage,
     findMessagesByConversation,
     markMessagesDelivered,
     findDeliveredMessageIds,

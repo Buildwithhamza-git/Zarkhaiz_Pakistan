@@ -5,6 +5,8 @@ const { emitToUser } = require("../../socket");
 
 const {
     sendMessageSocketSchema,
+    editMessageSocketSchema,
+    deleteMessageSocketSchema,
     deliveredSocketSchema,
     markReadSocketSchema,
 } = require("./chat.validation");
@@ -52,6 +54,69 @@ const registerChatHandlers = (socket) => {
             socket.emit("chat:error", {
                 error: err?.message || "Failed to send message.",
                 tempId: payload.tempId,
+            });
+        }
+    });
+
+    // ======================================
+    // Edit a message (sender only)
+    // ======================================
+    socket.on("chat:edit_message", async (payload = {}) => {
+        const { data, error } = safeParse(editMessageSocketSchema, payload);
+
+        if (error) {
+            socket.emit("chat:error", {
+                error,
+                messageId: payload?.messageId,
+            });
+            return;
+        }
+
+        try {
+            const message = await chatService.updateMessageService(userId, {
+                messageId: data.messageId,
+                text: data.text,
+            });
+
+            socket.emit("chat:message_edited", {
+                message,
+                conversationId: String(message.conversation),
+            });
+        } catch (err) {
+            socket.emit("chat:error", {
+                error: err?.message || "Failed to edit message.",
+                messageId: payload?.messageId,
+            });
+        }
+    });
+
+    // ======================================
+    // Delete a message for everyone (sender only)
+    // ======================================
+    socket.on("chat:delete_message", async (payload = {}) => {
+        const { data, error } = safeParse(deleteMessageSocketSchema, payload);
+
+        if (error) {
+            socket.emit("chat:error", {
+                error,
+                messageId: payload?.messageId,
+            });
+            return;
+        }
+
+        try {
+            const message = await chatService.deleteMessageService(userId, {
+                messageId: data.messageId,
+            });
+
+            socket.emit("chat:message_deleted", {
+                message,
+                conversationId: String(message.conversation),
+            });
+        } catch (err) {
+            socket.emit("chat:error", {
+                error: err?.message || "Failed to delete message.",
+                messageId: payload?.messageId,
             });
         }
     });

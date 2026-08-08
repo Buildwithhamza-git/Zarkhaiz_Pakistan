@@ -103,15 +103,20 @@ const productSchema = new mongoose.Schema(
     },
 
     averageRating: {
-      type: Number,
-      default: 0,
-      min: 0,
-      max: 5,
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 5,
     },
 
     totalReviews: {
-      type: Number,
-      default: 0,
+        type: Number,
+        default: 0,
+    },
+
+    ratingDistribution: {
+        type: Object,
+        default: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
     },
 
     totalSold: {

@@ -42,9 +42,22 @@ const orderItemSchema = new mongoose.Schema(
             type: String,
             default: "",
         },
+
+        reviewed: {
+            type: Boolean,
+            default: false,
+        },
+
+        reviewId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Review",
+            default: null,
+        },
     },
     {
-        _id: false,
+        // Embedded order items get an _id so reviews can reference
+        // the exact item that was purchased.
+        _id: true,
     }
 );
 

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Package, Send } from "lucide-react";
+import { ArrowLeft, Check, Package, Send, X } from "lucide-react";
 
 import { useAuthContext } from "../../../context/authContext";
 import { useChat } from "../context/chatContext";
@@ -40,6 +40,8 @@ export default function ChatThread({
   const {
     messagesMap,
     sendMessage,
+    editMessage,
+    deleteMessage,
     emitTyping,
     typingState,
     prependOlderMessages,
@@ -48,6 +50,8 @@ export default function ChatThread({
   const [draft, setDraft] = useState("");
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [hasOlder, setHasOlder] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [editDraft, setEditDraft] = useState("");
 
   const bottomRef = useRef(null);
   const typingTimerRef = useRef(null);
@@ -67,12 +71,15 @@ export default function ChatThread({
 
   // Hide typing indicator when switching conversation
   useEffect(() => {
+    setEditingId(null);
+    setEditDraft("");
+
     return () => {
       if (typingTimerRef.current) {
         clearTimeout(typingTimerRef.current);
       }
     };
-  }, []);
+  }, [conversationId]);
 
   // Detect older messages on first load
   useEffect(() => {
@@ -134,6 +141,37 @@ export default function ChatThread({
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
+    }
+  };
+
+  const handleStartEdit = (message) => {
+    setEditingId(message._id);
+    setEditDraft(message.text);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditDraft("");
+  };
+
+  const handleSaveEdit = () => {
+    const text = editDraft.trim();
+
+    if (!editingId || !text) return;
+
+    editMessage(editingId, text);
+    handleCancelEdit();
+  };
+
+  const handleEditKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSaveEdit();
+    }
+
+    if (e.key === "Escape") {
+      e.preventDefault();
+      handleCancelEdit();
     }
   };
 
@@ -289,10 +327,56 @@ export default function ChatThread({
 
           const message = item.message;
           const isMine = String(message.sender) === String(myId);
+          const isEditing = editingId === message._id;
 
           return (
             <div key={message._id} className="mb-2">
-              <MessageBubble message={message} isMine={isMine} />
+              {isMine && isEditing ? (
+                <div className="flex justify-end">
+                  <div className="w-full max-w-[85%] rounded-2xl border border-green-200 bg-white p-2 shadow-sm">
+                    <p className="px-1 pb-1.5 text-[10px] font-semibold uppercase tracking-wide text-green-700">
+                      Edit message
+                    </p>
+
+                    <textarea
+                      rows={2}
+                      autoFocus
+                      value={editDraft}
+                      onChange={(e) => setEditDraft(e.target.value)}
+                      onKeyDown={handleEditKeyDown}
+                      className="w-full resize-none rounded-lg bg-gray-50 px-3 py-2 text-sm text-gray-800 outline-none ring-1 ring-gray-200 focus:ring-green-400"
+                    />
+
+                    <div className="mt-1.5 flex items-center justify-end gap-1.5">
+                      <button
+                        type="button"
+                        onClick={handleCancelEdit}
+                        aria-label="Cancel edit"
+                        className="grid h-8 w-8 place-items-center rounded-lg text-gray-500 transition hover:bg-gray-100"
+                      >
+                        <X size={15} />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleSaveEdit}
+                        disabled={!editDraft.trim()}
+                        aria-label="Save edit"
+                        className="grid h-8 w-8 place-items-center rounded-lg bg-green-600 text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        <Check size={15} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <MessageBubble
+                  message={message}
+                  isMine={isMine}
+                  onEdit={handleStartEdit}
+                  onDelete={(msg) => deleteMessage(msg._id)}
+                />
+              )}
             </div>
           );
         })}

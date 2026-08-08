@@ -7,9 +7,12 @@ router.use("/products", require("../features/product/routes/product.route"));
 router.use("/marketplace",require("../features/marketplace/routes/marketplace.routes"));
 router.use("/profile",require("../features/profile/routes/profile.route"));
 router.use("/cart", require("../features/cart/routes/cart.routes"));
+router.use("/wishlist", require("../features/wishlist/routes/wishlist.routes"));
 router.use("/orders", require("../features/order/order.routes"));
 router.use("/notifications", require("../features/notification/notification.routes"));
 router.use("/chats", require("../features/chat/chat.routes"));
+router.use("/reviews", require("../features/review"));
+router.use("/payouts", require("../features/payout/routes/payout.routes"));
 // Later
 // router.use("/categories", require("../features/categories/category.routes"));
 // router.use("/admin", require("../features/admin/admin.routes"));

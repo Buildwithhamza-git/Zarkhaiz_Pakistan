@@ -8,9 +8,9 @@ import AuthProvider from "./context/authContext";
 import SellerProvider from "./context/sellerContext";
 import CartContextProvider from "./context/cartContext";
 import ChatProvider from "./features/chat/context/chatContext";
-
 import MarketplaceProvider from "./context/MarketplaceContext";
 import { ProductsProvider } from "./context/productsContext";
+import WishlistContextProvider from "./context/wishlistContext";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <BrowserRouter>
@@ -20,7 +20,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           <CartContextProvider>
             <MarketplaceProvider>
               <ProductsProvider>
-                <App />
+                <WishlistContextProvider>
+                  <App />
+                </WishlistContextProvider>
               </ProductsProvider>
             </MarketplaceProvider>
           </CartContextProvider>

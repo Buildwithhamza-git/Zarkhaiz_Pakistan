@@ -69,10 +69,15 @@ const loginService = async (logindata) => {
     if (!User) {
         throw new Error("The Email Doesnot Registered")
     }
-    const isMatch = await comparePassword(password, User.password)
-    if (!isMatch) {
-        throw new Error("Invalid Password or Email")
-    }
+   const isMatch = await comparePassword(password, User.password);
+
+if (!isMatch) {
+    throw new Error("Invalid Password or Email");
+}
+
+if (!User.isVerified) {
+    throw new Error("Please verify your email first.");
+}
     const token = await generateToken(User)
 
     return { User, token }
@@ -105,7 +110,9 @@ const forgotPasswordService = async (forgotData) => {
 const verifyResetOtpService = async (otpDetail) => {
     const { email, otp } = otpDetail;
 
-    const user = await findUserByEmail(email);
+    const normalemail = normalizeEmail(email);
+
+    const user = await findUserByEmail(normalemail);
 
     if (!user) {
         throw new Error("Email is not registered");
@@ -119,13 +126,20 @@ const verifyResetOtpService = async (otpDetail) => {
         throw new Error("OTP has expired");
     }
 
-    if (user.otp !== otp) {
+    // Debug Logs (remove after testing)
+    console.log("Received OTP:", otp);
+    console.log("Stored OTP:", user.otp);
+    console.log("Received Type:", typeof otp);
+    console.log("Stored Type:", typeof user.otp);
+
+    if (String(user.otp).trim() !== String(otp).trim()) {
         throw new Error("Invalid OTP");
     }
 
     user.isResetOtpVerified = true;
 
     await user.save();
+
     return {
         success: true,
         message: "OTP verified successfully.",
@@ -210,7 +224,7 @@ const resendOtpService = async (Resenddata)=>{
         otpExpire : otpExpire
     })
 
-    const SendOtp = await sendVerificationEmail(email, otp)
+    const SendOtp = await sendResetPasswordEmail(email, otp)
 
     if(!SendOtp){
         throw new Error ("Email sending failed to"+ email)

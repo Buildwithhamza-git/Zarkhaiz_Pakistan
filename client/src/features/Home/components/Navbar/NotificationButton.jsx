@@ -2,11 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, CheckCheck, Loader2 } from "lucide-react";
 
+import { useAuthContext } from "../../../../context/authContext";
 import { useNotifications } from "../../../notification/hooks/useNotifications";
 import { formatDateTime } from "../../../order/utils/orderDisplay";
 
 export default function NotificationButton() {
   const navigate = useNavigate();
+
+  const { seller } = useAuthContext();
 
   const { items, unreadCount, loading, markRead, markAllRead } =
     useNotifications();
@@ -46,6 +49,18 @@ export default function NotificationButton() {
 
     if (orderId) {
       navigate(`/orders/${orderId}`);
+      return;
+    }
+
+    const productId = notification.data?.productId;
+
+    if (notification.type === "review") {
+      if (seller) {
+        navigate("/seller/reviews");
+      } else if (productId) {
+        navigate(`/products/${productId}`);
+      }
+      return;
     }
   };
 

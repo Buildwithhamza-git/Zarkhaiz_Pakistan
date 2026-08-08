@@ -26,7 +26,7 @@ const updateSeller = async (sellerId, updateData) => {
         sellerId,
         updateData,
         {
-            new: true,
+            returnDocument: "after",
             runValidators: true,
         }
     );
