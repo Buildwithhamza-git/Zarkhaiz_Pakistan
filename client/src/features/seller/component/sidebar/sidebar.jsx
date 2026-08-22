@@ -19,7 +19,6 @@ import {
   Heart,
 } from "lucide-react";
 
-import Logo from "../../../../shared/components/ui/logo";
 import Button from "../../../../shared/components/ui/button";
 import heroImg from "../../../../assets/images/hero/img1.png";
 import { useSellerContext } from "../../../../context/sellerContext";
@@ -76,7 +75,21 @@ const Sidebar = ({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile }) => 
         {/* Logo / Header */}
         <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100">
           {!collapsed ? (
-            <Logo size="sm" />
+            <div className="flex items-center gap-3 cursor-pointer">
+              <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                <Sprout size={24} className="text-green-700" />
+              </div>
+
+              <div>
+                <h1 className="text-lg font-bold text-green-800">
+                  Zarkhaiz
+                </h1>
+
+                <h2 className="text-[11px] font-bold text-yellow-600">
+                  Pakistan
+                </h2>
+              </div>
+            </div>
           ) : (
             <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
               <Sprout size={20} className="text-green-700" />

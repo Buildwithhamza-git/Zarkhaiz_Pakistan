@@ -117,7 +117,14 @@ const notifyAdminsOfOrderService = async (order) => {
         );
 
         for (const admin of admins) {
-            await sendAdminOrderNotificationEmail(admin.email, order);
+            sendAdminOrderNotificationEmail(admin.email, order).catch(
+                (error) => {
+                    console.error(
+                        "Admin order notification email error:",
+                        error
+                    );
+                }
+            );
         }
 
         if (!admins.length) {

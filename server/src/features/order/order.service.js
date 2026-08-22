@@ -47,16 +47,6 @@ const generateOrderNumber = () => {
     return `ZK-${datePart}-${randomPart}`;
 };
 
-const isSellerOwner = async (product, userId) => {
-    if (!product.seller) {
-        return false;
-    }
-
-    const seller = await Seller.findById(product.seller).select("user");
-
-    return seller?.user?.toString() === userId.toString();
-};
-
 const getEffectiveImage = (product) => {
     const images = Array.isArray(product.images)
         ? product.images
@@ -103,10 +93,51 @@ const createOrderService = async (userId, payload) => {
     }
 
     // ==========================================
-    // Snapshot Items
+    // Load all products + their sellers
+    // in 2 batched queries (avoids N+1 lookups)
+    // ==========================================
+
+    const productIds = cart.items
+        .map(getCartProductId)
+        .filter(Boolean);
+
+    if (!productIds.length) {
+        throw new AppError("A product in your cart no longer exists.", 400);
+    }
+
+    const products = await Product.find({
+        _id: { $in: productIds },
+    });
+
+    const productMap = new Map(
+        products.map((product) => [product._id.toString(), product])
+    );
+
+    const sellerIds = [
+        ...new Set(
+            products
+                .map((product) => product.seller?.toString())
+                .filter(Boolean)
+        ),
+    ];
+
+    const sellers = sellerIds.length
+        ? await Seller.find({ _id: { $in: sellerIds } }).select("user")
+        : [];
+
+    const sellerUserMap = new Map(
+        sellers.map((seller) => [
+            seller._id.toString(),
+            seller.user?.toString(),
+        ])
+    );
+
+    // ==========================================
+    // Validate + Snapshot Items (in memory)
     // ==========================================
 
     const orderItems = [];
+    const stockUpdates = [];
 
     for (const cartItem of cart.items) {
         const productId = getCartProductId(cartItem);
@@ -115,10 +146,13 @@ const createOrderService = async (userId, payload) => {
             continue;
         }
 
-        const product = await Product.findById(productId);
+        const product = productMap.get(productId);
 
         if (!product) {
-            throw new AppError("A product in your cart no longer exists.", 400);
+            throw new AppError(
+                "A product in your cart no longer exists.",
+                400
+            );
         }
 
         // ==========================================
@@ -146,37 +180,31 @@ const createOrderService = async (userId, payload) => {
         }
 
         // ==========================================
-        // Ownership
+        // Ownership (single batched seller lookup)
         // ==========================================
 
-        if (await isSellerOwner(product, userId)) {
+        const ownerUserId = product.seller
+            ? sellerUserMap.get(product.seller.toString())
+            : null;
+
+        if (ownerUserId && ownerUserId === userId.toString()) {
             throw new AppError(
                 "You cannot purchase your own product.",
                 403
             );
         }
 
-        // ==========================================
-        // Atomic Stock Decrement
-        // ==========================================
-
-        const updated = await Product.findOneAndUpdate(
-            {
-                _id: product._id,
-                stock: { $gte: requestedQty },
+        stockUpdates.push({
+            updateOne: {
+                filter: {
+                    _id: product._id,
+                    stock: { $gte: requestedQty },
+                },
+                update: {
+                    $inc: { stock: -requestedQty, totalSold: requestedQty },
+                },
             },
-            {
-                $inc: { stock: -requestedQty, totalSold: requestedQty },
-            },
-            { returnDocument: "after" }
-        );
-
-        if (!updated) {
-            throw new AppError(
-                `${product.name} stock changed. Please review your cart.`,
-                409
-            );
-        }
+        });
 
         const unitPrice = Number(product.price || 0);
 
@@ -189,6 +217,23 @@ const createOrderService = async (userId, payload) => {
             unit: product.unit || "piece",
             image: getEffectiveImage(product),
         });
+    }
+
+    // ==========================================
+    // Atomic Stock Decrement (single bulk round trip)
+    // ==========================================
+
+    if (stockUpdates.length) {
+        const result = await Product.bulkWrite(stockUpdates, {
+            ordered: true,
+        });
+
+        if (result.matchedCount !== stockUpdates.length) {
+            throw new AppError(
+                "Some product stock changed. Please review your cart and try again.",
+                409
+            );
+        }
     }
 
     // ==========================================
@@ -228,37 +273,36 @@ const createOrderService = async (userId, payload) => {
     await cartRepository.deleteCartByUser(userId);
 
     // ==========================================
-    // Notify Admin
+    // Notifications (run in parallel)
     // ==========================================
 
-    await notificationService.notifyAdminsOfOrderService(order);
+    await Promise.all([
+        notificationService.notifyAdminsOfOrderService(order),
+        notifySellersOfOrderEventService(order, {
+            title: "New order",
+            message: `You have a new order ${order.orderNumber}.`,
+        }),
+        notifyBuyerOfOrderPlacedService(order, userId),
+    ]);
 
     // ==========================================
-    // Notify Sellers
-    // ==========================================
-
-    await notifySellersOfOrderEventService(order, {
-        title: "New order",
-        message: `You have a new order ${order.orderNumber}.`,
-    });
-
-    // ==========================================
-    // Notify Buyer (order placed)
-    // ==========================================
-
-    await notifyBuyerOfOrderPlacedService(order, userId);
-
-    // ==========================================
-    // Order Confirmation Email
+    // Order Confirmation Email (non-blocking)
     // ==========================================
 
     try {
-        const customer = await require("../users/user.model").User.findById(
-            userId
-        );
+        const customer = await require("../users/user.model")
+            .User.findById(userId)
+            .select("email");
 
         if (customer?.email) {
-            await sendOrderConfirmationEmail(customer.email, order);
+            sendOrderConfirmationEmail(customer.email, order).catch(
+                (error) => {
+                    console.error(
+                        "Order confirmation email error:",
+                        error
+                    );
+                }
+            );
         }
     } catch (error) {
         console.error("Order confirmation email error:", error);
