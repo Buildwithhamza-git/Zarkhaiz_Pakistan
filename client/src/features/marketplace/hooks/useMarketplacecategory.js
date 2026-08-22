@@ -1,42 +1,5 @@
-import { useEffect, useState } from "react";
+import useMarketplaceCategories from "./useMarketplaceCategories";
+import useMarketplaceProducts from "./useMarketplaceProducts";
 
-import { getCategories } from "../services/marketplaceApi";
-
-export default function useMarketplaceCategories() {
-
-    const [categories, setCategories] = useState([]);
-
-    const [loading, setLoading] = useState(true);
-
-    const [error, setError] = useState("");
-
-    useEffect(() => {
-        loadCategories();
-    }, []);
-
-    async function loadCategories() {
-        try {
-
-            setLoading(true);
-
-            const response = await getCategories();
-
-            setCategories(response.data);
-
-        } catch (err) {
-
-            setError(err.message);
-
-        } finally {
-
-            setLoading(false);
-
-        }
-    }
-
-    return {
-        categories,
-        loading,
-        error,
-    };
-}
+export default useMarketplaceCategories;
+export { useMarketplaceCategories, useMarketplaceProducts };

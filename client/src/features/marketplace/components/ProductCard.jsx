@@ -8,44 +8,35 @@ import {
   getProductDisplayData,
 } from "../utils/productDisplay";
 
-const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export default function ProductCard({
   product,
   onViewDetails,
   onAddToCart,
-  addingToCart = false,
+  addingToCart = null,
 }) {
-  const display = getProductDisplayData(product, {
-    apiUrl: API_URL,
-  });
+  const display = getProductDisplayData(product, { apiUrl: API_URL });
 
+  const productId = product?._id || product?.id;
 
-  const productId =
-    product?._id ||
-    product?.id;
+  // addingToCart is the product ID string currently being added
+  const isAddingToCart =
+    typeof addingToCart === "string"
+      ? addingToCart === productId
+      : Boolean(addingToCart);
 
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
 
-  const handleAddToCart = () => {
     if (!productId) {
-      console.error(
-        "Cannot add product to cart: Product ID is missing.",
-        product
-      );
-
+      console.error("Cannot add product to cart: Product ID is missing.", product);
       return;
     }
 
-    if (display.outOfStock) {
-      return;
-    }
+    if (display.outOfStock || isAddingToCart) return;
 
-    if (addingToCart) {
-      return;
-    }
-
-    onAddToCart?.(product);
+    onAddToCart?.(product, 1);
   };
 
   return (
@@ -67,10 +58,8 @@ export default function ProductCard({
         hover:shadow-xl
       "
     >
-
-
+      {/* =============== IMAGE =============== */}
       <div className="relative h-48 overflow-hidden bg-gray-100">
-
         <img
           src={display.imageUrl}
           alt={display.productName}
@@ -85,15 +74,11 @@ export default function ProductCard({
         />
 
         {/* Featured Badge */}
-
         <div className="absolute left-3 top-3 flex flex-col gap-2">
-          {display.featured && (
-            <ProductBadge type="featured" />
-          )}
+          {display.featured && <ProductBadge type="featured" />}
         </div>
 
         {/* Product Status */}
-
         <div
           className="
             absolute
@@ -113,145 +98,59 @@ export default function ProductCard({
         >
           {display.status}
         </div>
-
       </div>
 
-
+      {/* =============== CONTENT =============== */}
       <div className="flex flex-1 flex-col p-4">
-
         {/* Category + Stock */}
-
         <div className="mb-2 flex items-center justify-between gap-2">
-
-          <span
-            className="
-              text-[11px]
-              font-semibold
-              uppercase
-              tracking-[0.2em]
-              text-green-700
-            "
-          >
+          <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-green-700">
             {display.categoryName}
           </span>
 
           {display.outOfStock ? (
-            <span
-              className="
-                rounded-full
-                bg-red-50
-                px-2.5
-                py-1
-                text-[10px]
-                font-semibold
-                uppercase
-                tracking-wide
-                text-red-600
-              "
-            >
+            <span className="rounded-full bg-red-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-red-600">
               Out of stock
             </span>
           ) : (
-            <span
-              className="
-                rounded-full
-                bg-emerald-50
-                px-2.5
-                py-1
-                text-[10px]
-                font-semibold
-                uppercase
-                tracking-wide
-                text-emerald-600
-              "
-            >
+            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-600">
               In stock
             </span>
           )}
-
         </div>
 
         {/* Product Name */}
-
-        <h3
-          className="
-            min-h-[48px]
-            line-clamp-2
-            text-lg
-            font-semibold
-            text-gray-900
-          "
-        >
+        <h3 className="min-h-[48px] line-clamp-2 text-lg font-semibold text-gray-900">
           {display.productName}
         </h3>
 
         {/* Description */}
-
-        <p
-          className="
-            mt-2
-            line-clamp-2
-            text-sm
-            leading-6
-            text-gray-600
-          "
-        >
+        <p className="mt-2 line-clamp-2 text-sm leading-6 text-gray-600">
           {display.description}
         </p>
 
-        {/* ==========================================
-            Price + Quantity
-        ========================================== */}
-
+        {/* Price + Quantity */}
         <div className="mt-3 flex items-center justify-between">
-
           <div>
-
             <p className="text-2xl font-bold text-green-700">
               Rs. {formatPKR(display.price)}
             </p>
-
-            <p className="text-xs text-gray-500">
-              Per {display.unit}
-            </p>
-
+            <p className="text-xs text-gray-500">Per {display.unit}</p>
           </div>
 
-          <div
-            className="
-              rounded-full
-              bg-gray-100
-              px-2.5
-              py-1
-              text-xs
-              font-medium
-              text-gray-600
-            "
-          >
+          <div className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600">
             {display.quantity} {display.unit}
           </div>
-
         </div>
 
         {/* Rating */}
-
         <div className="mt-3">
-
-          <ProductRating
-            rating={display.averageRating}
-            reviews={display.totalReviews}
-          />
-
+          <ProductRating rating={display.averageRating} reviews={display.totalReviews} />
         </div>
 
-        {/* ==========================================
-            Actions
-        ========================================== */}
-
+        {/* Actions */}
         <div className="mt-auto flex items-center gap-2 pt-4">
-
           {/* View Details */}
-
           <button
             type="button"
             onClick={() => onViewDetails?.(product)}
@@ -275,23 +174,16 @@ export default function ProductCard({
             "
           >
             <Eye size={16} />
-
             View details
           </button>
 
           {/* Add To Cart */}
-
           <button
             type="button"
             onClick={handleAddToCart}
-            disabled={
-              display.outOfStock ||
-              addingToCart
-            }
+            disabled={display.outOfStock || isAddingToCart}
             aria-label={
-              display.outOfStock
-                ? "Product is out of stock"
-                : "Add product to cart"
+              display.outOfStock ? "Product is out of stock" : "Add product to cart"
             }
             className={`
               flex
@@ -307,65 +199,26 @@ export default function ProductCard({
               ${
                 display.outOfStock
                   ? "cursor-not-allowed bg-gray-400"
-                  : addingToCart
+                  : isAddingToCart
                   ? "cursor-wait bg-green-600"
                   : "bg-green-700 hover:bg-green-800"
               }
             `}
           >
-
-            {addingToCart ? (
-              <span
-                className="
-                  h-5
-                  w-5
-                  animate-spin
-                  rounded-full
-                  border-2
-                  border-white
-                  border-t-transparent
-                "
-              />
+            {isAddingToCart ? (
+              <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
             ) : (
               <ShoppingCart size={18} />
             )}
-
           </button>
-
         </div>
 
-        {/* ==========================================
-            Delivery Information
-        ========================================== */}
-
-        <div
-          className="
-            mt-3
-            flex
-            items-center
-            gap-2
-            rounded-xl
-            border
-            border-gray-100
-            bg-gray-50
-            px-3
-            py-2
-            text-sm
-            text-gray-600
-          "
-        >
-          <Package
-            size={15}
-            className="text-green-600"
-          />
-
-          <span>
-            Fast delivery and secure checkout
-          </span>
+        {/* Delivery Info */}
+        <div className="mt-3 flex items-center gap-2 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2 text-sm text-gray-600">
+          <Package size={15} className="text-green-600" />
+          <span>Fast delivery and secure checkout</span>
         </div>
-
       </div>
-
     </div>
   );
 }

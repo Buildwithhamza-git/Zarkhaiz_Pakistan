@@ -1,65 +1,140 @@
 import { authFetch } from "../../../utlis/authFetch";
 
-/**
- * Get current user's cart
- */
+// ==========================================
+// GET CART
+// ==========================================
+
 export const getCart = async () => {
   return await authFetch("/cart");
 };
 
-/**
- * Add product to cart
- *
- * @param {string} productId
- * @param {number} quantity
- */
-export const addToCart = async (productId, quantity = 1) => {
-  return await authFetch("/cart/items", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      productId,
-      quantity,
-    }),
-  });
+
+// ==========================================
+// ADD ITEM
+// ==========================================
+
+export const addToCart = async (
+  productId,
+  quantity = 1
+) => {
+  if (!productId) {
+    throw new Error(
+      "Product ID is required."
+    );
+  }
+
+  const numericQuantity =
+    Number(quantity);
+
+  if (
+    !Number.isInteger(
+      numericQuantity
+    ) ||
+    numericQuantity < 1
+  ) {
+    throw new Error(
+      "Quantity must be at least 1."
+    );
+  }
+
+  return await authFetch(
+    "/cart/items",
+    {
+      method: "POST",
+
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+
+      body: JSON.stringify({
+        productId,
+        quantity:
+          numericQuantity,
+      }),
+    }
+  );
 };
 
-/**
- * Update cart item quantity
- *
- * @param {string} productId
- * @param {number} quantity
- */
-export const updateCartItem = async (productId, quantity) => {
-  return await authFetch(`/cart/items/${productId}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      quantity,
-    }),
-  });
+
+// ==========================================
+// UPDATE ITEM
+// ==========================================
+
+export const updateCartItem = async (
+  productId,
+  quantity
+) => {
+  if (!productId) {
+    throw new Error(
+      "Product ID is required."
+    );
+  }
+
+  const numericQuantity =
+    Number(quantity);
+
+  if (
+    !Number.isInteger(
+      numericQuantity
+    ) ||
+    numericQuantity < 1
+  ) {
+    throw new Error(
+      "Quantity must be at least 1."
+    );
+  }
+
+  return await authFetch(
+    `/cart/items/${productId}`,
+    {
+      method: "PATCH",
+
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+
+      body: JSON.stringify({
+        quantity:
+          numericQuantity,
+      }),
+    }
+  );
 };
 
-/**
- * Remove product from cart
- *
- * @param {string} productId
- */
-export const removeCartItem = async (productId) => {
-  return await authFetch(`/cart/items/${productId}`, {
-    method: "DELETE",
-  });
+
+// ==========================================
+// REMOVE ITEM
+// ==========================================
+
+export const removeCartItem = async (
+  productId
+) => {
+  if (!productId) {
+    throw new Error(
+      "Product ID is required."
+    );
+  }
+
+  return await authFetch(
+    `/cart/items/${productId}`,
+    {
+      method: "DELETE",
+    }
+  );
 };
 
-/**
- * Clear complete cart
- */
+
+// ==========================================
+// CLEAR CART
+// ==========================================
+
 export const clearCart = async () => {
-  return await authFetch("/cart", {
-    method: "DELETE",
-  });
+  return await authFetch(
+    "/cart",
+    {
+      method: "DELETE",
+    }
+  );
 };

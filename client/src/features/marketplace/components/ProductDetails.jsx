@@ -1,14 +1,12 @@
 import { useState } from "react";
 import {
   ArrowLeft,
-  Heart,
   MapPin,
+  Minus,
   PackageCheck,
-  ShieldCheck,
+  Plus,
   ShoppingCart,
-  Star,
   Store,
-  Truck,
 } from "lucide-react";
 
 import ProductRating from "./ProductRating";
@@ -24,34 +22,42 @@ export default function ProductDetails({
   product,
   onBack,
   onAddToCart,
+  addingToCart = false,
 }) {
   const [selectedImage, setSelectedImage] = useState(0);
-  const [liked, setLiked] = useState(false);
-  
+  const [quantity, setQuantity] = useState(1);
 
   if (!product) return null;
 
   const display = getProductDisplayData(product);
   const stockMeta = getStockMeta(display.quantity, display.unit);
+  const maxQty = display.quantity; // available stock
 
-  
-  // ✅ FIXED IMAGE HANDLING
   const gallery =
-    product?.images?.map((img) => img?.url).filter(Boolean) || [];
+    product?.images
+      ?.map((img) => (typeof img === "string" ? img : img?.url))
+      .filter(Boolean) || [];
 
   const imageList =
     gallery.length > 0
       ? gallery
-      : [
-          display?.imageUrl ||
-            "https://placehold.co/500x500?text=No+Image",
-        ];
+      : [display?.imageUrl || "https://placehold.co/500x500?text=No+Image"];
+
+  const decreaseQty = () => setQuantity((q) => Math.max(1, q - 1));
+  const increaseQty = () => setQuantity((q) => Math.min(maxQty || 1, q + 1));
+  const handleQtyInput = (e) => {
+    const val = Number(e.target.value);
+    if (!isNaN(val) && val >= 1 && val <= (maxQty || 1)) {
+      setQuantity(val);
+    }
+  };
 
   return (
     <div className="rounded-[28px] border border-gray-200 bg-white p-4 shadow-sm sm:p-6 lg:p-8">
       <button
         onClick={onBack}
-        className="mb-6 inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+        type="button"
+        className="mb-6 inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
       >
         <ArrowLeft size={17} />
         Back to Products
@@ -62,7 +68,7 @@ export default function ProductDetails({
         <div className="space-y-3">
           <div className="relative overflow-hidden rounded-3xl border border-gray-200 bg-gray-50">
             <img
-              src={imageList[selectedImage]}
+              src={imageList[selectedImage] || imageList[0]}
               alt={display.productName}
               className="aspect-square w-full object-cover"
             />
@@ -79,11 +85,12 @@ export default function ProductDetails({
               {imageList.map((image, index) => (
                 <button
                   key={`${image}-${index}`}
+                  type="button"
                   onClick={() => setSelectedImage(index)}
-                  className={`overflow-hidden rounded-xl border ${
+                  className={`overflow-hidden rounded-xl border transition ${
                     selectedImage === index
-                      ? "border-green-600"
-                      : "border-gray-200"
+                      ? "border-green-600 ring-2 ring-green-100"
+                      : "border-gray-200 hover:border-green-300"
                   }`}
                 >
                   <img
@@ -124,31 +131,78 @@ export default function ProductDetails({
             <span className="text-3xl font-bold text-green-700">
               Rs. {formatPKR(display.price)}
             </span>
-            <span className="text-sm text-gray-500">
-              Per {display.unit}
-            </span>
+            <span className="text-sm text-gray-500">Per {display.unit}</span>
           </div>
 
-          <p className="mt-5 text-gray-600 leading-7">
-            {display.description}
-          </p>
+          <p className="mt-5 leading-7 text-gray-600">{display.description}</p>
 
           {/* STOCK INFO */}
           <div className="mt-6 rounded-2xl border border-gray-200 bg-gray-50 p-4">
             <div className="flex items-center gap-2">
-              <PackageCheck
-                size={16}
-                className="text-green-600"
-              />
-              <span
-                className={`text-sm font-semibold ${stockMeta.tone}`}
-              >
+              <PackageCheck size={16} className="text-green-600" />
+              <span className={`text-sm font-semibold ${stockMeta.tone}`}>
                 {stockMeta.label}
               </span>
             </div>
           </div>
 
-          {/* SELLER */}
+          {/* QUANTITY SELECTOR */}
+          {!display.outOfStock && (
+            <div className="mt-6">
+              <p className="mb-2 text-sm font-semibold text-gray-700">
+                Quantity
+              </p>
+
+              <div className="flex items-center gap-3">
+                <div className="flex items-center overflow-hidden rounded-xl border border-gray-200">
+                  <button
+                    type="button"
+                    onClick={decreaseQty}
+                    disabled={quantity <= 1}
+                    aria-label="Decrease quantity"
+                    className="flex h-10 w-10 items-center justify-center text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <Minus size={16} />
+                  </button>
+
+                  <input
+                    type="number"
+                    min="1"
+                    max={maxQty || 1}
+                    value={quantity}
+                    onChange={handleQtyInput}
+                    className="h-10 w-14 border-x border-gray-200 text-center text-sm font-semibold text-gray-900 outline-none focus:bg-green-50"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={increaseQty}
+                    disabled={quantity >= (maxQty || 1)}
+                    aria-label="Increase quantity"
+                    className="flex h-10 w-10 items-center justify-center text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+
+                <span className="text-sm text-gray-500">
+                  of {maxQty} {display.unit} available
+                </span>
+              </div>
+
+              {/* Running subtotal */}
+              {quantity > 1 && (
+                <p className="mt-2 text-sm text-gray-500">
+                  Subtotal:{" "}
+                  <span className="font-semibold text-green-700">
+                    Rs. {formatPKR(display.price * quantity)}
+                  </span>
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* SELLER INFO */}
           <div className="mt-6 rounded-2xl border border-gray-200 p-4">
             <div className="flex items-start gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-green-50 text-green-700">
@@ -174,19 +228,19 @@ export default function ProductDetails({
               variant="primary"
               size="lg"
               fullWidth
+              disabled={display.outOfStock || addingToCart}
               leftIcon={<ShoppingCart size={18} />}
-              onClick={() => onAddToCart(product)}
+              onClick={() => onAddToCart(product, quantity)}
             >
-              Add to cart
+              {addingToCart
+                ? "Adding to Cart..."
+                : display.outOfStock
+                ? "Out of Stock"
+                : `Add ${quantity > 1 ? `${quantity} × ` : ""}to Cart`}
             </Button>
 
-            <Button
-              variant="outline"
-              size="lg"
-              fullWidth
-              onClick={onBack}
-            >
-              Continue shopping
+            <Button variant="outline" size="lg" fullWidth onClick={onBack}>
+              Continue Shopping
             </Button>
           </div>
         </div>
