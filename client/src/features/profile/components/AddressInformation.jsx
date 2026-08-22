@@ -3,6 +3,14 @@ import { MapPin } from "lucide-react";
 import Input from "../../../shared/components/ui/input";
 import FormField from "../../../shared/components/ui/Formfield";
 
+const PROVINCES = [
+  "Punjab",
+  "Sindh",
+  "Balochistan",
+  "Khyber Pakhtunkhwa",
+  "Azad Jammu & Kashmir",
+];
+
 export default function AddressInformation({ register, errors }) {
     return (
         <div className="bg-white rounded-2xl border p-6">
@@ -26,7 +34,22 @@ export default function AddressInformation({ register, errors }) {
                 </FormField>
 
                 <FormField label="Province" required error={errors.province?.message}>
-                    <Input placeholder="Province" {...register("province")} />
+                    <select
+                        defaultValue=""
+                        {...register("province")}
+                        className={`w-full rounded-lg border px-4 py-2.5 text-sm text-gray-800 outline-none transition focus:border-green-600 focus:ring-2 focus:ring-green-200 ${
+                            errors.province ? "border-red-300" : "border-gray-300"
+                        }`}
+                    >
+                        <option value="" disabled>
+                            Select province
+                        </option>
+                        {PROVINCES.map((province) => (
+                            <option key={province} value={province}>
+                                {province}
+                            </option>
+                        ))}
+                    </select>
                 </FormField>
 
                 <FormField label="Postal Code" required error={errors.postalCode?.message}>

@@ -10,6 +10,30 @@ const resolveImage = (image) => {
   ).replace(/\\/g, "/").replace(/^\/+/, "")}`;
 };
 
+// Normalizes both order snapshots (flat: { name, price, image }) and
+// cart items (nested: { product: { name, price, images }, quantity }).
+const normalizeItem = (item = {}) => {
+  const product = item.product || item;
+
+  const rawImage =
+    item.image ||
+    product.image ||
+    (Array.isArray(product.images) ? product.images[0] : undefined);
+
+  const image =
+    typeof rawImage === "string"
+      ? rawImage
+      : rawImage?.url || "";
+
+  return {
+    _id: item._id || product._id,
+    name: item.name || product.name || "Product",
+    price: item.price ?? product.price ?? 0,
+    quantity: item.quantity ?? product.quantity ?? 1,
+    image,
+  };
+};
+
 export default function OrderItemsList({ items }) {
   if (!items?.length) {
     return (
@@ -19,9 +43,10 @@ export default function OrderItemsList({ items }) {
 
   return (
     <ul className="divide-y divide-gray-100">
-      {items.map((item, index) => {
+      {items.map((rawItem, index) => {
+        const item = normalizeItem(rawItem);
         const imageUrl = resolveImage(item.image);
-        const key = item._id || item.product?._id || index;
+        const key = item._id || index;
 
         return (
           <li

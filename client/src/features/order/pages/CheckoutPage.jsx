@@ -20,7 +20,7 @@ import { useCartContext } from "../../../context/cartContext";
 
 import { createOrder } from "../api/orderApi";
 import { getProfileApi } from "../../profile/api/profileApi";
-import { checkoutSchema } from "../validations/checkoutValidation";
+import { checkoutSchema, PROVINCES } from "../validations/checkoutValidation";
 import OrderItemsList from "../components/OrderItemsList";
 
 const DELIVERY_FEE = 199;
@@ -308,10 +308,24 @@ export default function CheckoutPage() {
                     required
                     error={errors.province?.message}
                   >
-                    <Input
-                      placeholder="Province"
+                    <select
+                      defaultValue=""
                       {...register("province")}
-                    />
+                      className={`w-full rounded-lg border px-4 py-2.5 text-sm text-gray-800 outline-none transition focus:border-green-600 focus:ring-2 focus:ring-green-200 ${
+                        errors.province
+                          ? "border-red-300"
+                          : "border-gray-300"
+                      }`}
+                    >
+                      <option value="" disabled>
+                        Select province
+                      </option>
+                      {PROVINCES.map((province) => (
+                        <option key={province} value={province}>
+                          {province}
+                        </option>
+                      ))}
+                    </select>
                   </FormField>
 
                   <FormField
